@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AzharEd — Azhar Publishers Teacher Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="content_data.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#eef1f6;color:#1a1a2e}
+:root{--navy:#0f3460;--navy2:#1a4a8a;--red:#e94560;--gold:#F0A500;--green:#00a884;--border:#e6e9f0}
+
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;background:linear-gradient(135deg,#0f3460 0%,#16213e 60%,#1a1a2e 100%)}
+.auth-left,.auth-right{flex:1;display:flex;align-items:center;justify-content:center;padding:48px}
+.auth-brand{color:#fff;max-width:460px}
+.auth-brand .mark{font-size:44px;font-weight:900;line-height:1;margin-bottom:18px}
+.auth-brand .mark span{color:var(--red)}
+.auth-brand h1{font-size:30px;font-weight:800;line-height:1.2;margin-bottom:14px}
+.auth-brand p{font-size:15px;opacity:.72;line-height:1.7;margin-bottom:26px}
+.auth-feat{display:flex;align-items:center;gap:12px;margin-bottom:13px;color:rgba(255,255,255,.85);font-size:14px}
+.auth-feat .fi{width:34px;height:34px;background:rgba(233,69,96,.22);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.auth-card{background:#fff;border-radius:20px;padding:38px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.32)}
+.auth-card h2{font-size:22px;font-weight:900;color:var(--navy);text-align:center}
+.auth-card h2 span{color:var(--red)}
+.auth-card .sub{color:#8a90a0;font-size:13px;text-align:center;margin:4px 0 22px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:700;color:#555;margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.field input{width:100%;padding:11px 14px;border:2px solid #e8e8e8;border-radius:10px;font-size:14px;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--navy)}
+.btn-primary{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--navy2)}
+.demo{margin-top:16px;background:#f6f8fd;border-radius:10px;padding:12px}
+.demo p{font-size:10.5px;font-weight:700;color:#8a90a0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e0e4ee;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;margin:3px 4px 0 0;transition:all .15s}
+.chip:hover{border-color:var(--navy);color:var(--navy)}
+.chip .dot{width:7px;height:7px;border-radius:50%}
+.err{background:#fff0f3;border:1px solid #ffc0cb;border-radius:8px;padding:9px 13px;color:#c0392b;font-size:13px;margin-bottom:13px}
+.logo-bar{background:#fff;border-radius:14px;padding:12px 18px;display:inline-flex;align-items:center;gap:16px;margin-bottom:24px;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+.logo-bar img{height:34px;width:auto;display:block}
+.logo-bar .divider{width:1px;height:32px;background:#e2e5ee}
+.spec{margin-top:22px;display:flex;flex-direction:column;gap:12px}
+.spec-group{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px}
+.sg-title{font-size:13px;font-weight:800;color:#fff;margin-bottom:5px}
+.sg-title span{font-weight:600;color:rgba(255,255,255,.5)}
+.sg-books{font-size:12.5px;color:rgba(255,255,255,.8);line-height:1.6}
+.spec-foot{font-size:12px;color:rgba(255,255,255,.62);font-weight:600;margin-top:2px}
+.sb-logo img{height:24px;background:#fff;border-radius:5px;padding:4px 7px;display:block;margin-bottom:9px}
+
+/* SHELL */
+.shell{display:flex;height:100vh;overflow:hidden}
+.sb{width:236px;min-width:236px;background:var(--navy);display:flex;flex-direction:column;height:100vh;overflow-y:auto}
+.sb-logo{padding:20px 18px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo .mark{font-size:22px;font-weight:900;color:#fff}
+.sb-logo .mark span{color:var(--red)}
+.sb-logo p{font-size:10px;color:rgba(255,255,255,.4);margin-top:3px;letter-spacing:.3px}
+.sb-nav{flex:1;padding:8px 0}
+.sb-sec{padding:12px 18px 4px;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.32)}
+.sb-item{display:flex;align-items:center;gap:11px;padding:10px 18px;cursor:pointer;font-size:13.5px;color:rgba(255,255,255,.72);border-left:3px solid transparent;transition:all .15s}
+.sb-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.sb-item.active{background:rgba(255,255,255,.1);border-left-color:var(--red);color:#fff;font-weight:600}
+.sb-item .si{font-size:16px;width:20px;text-align:center}
+.sb-foot{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-user{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-user .name{font-size:13px;font-weight:600;color:#fff}
+.sb-user .role{font-size:11px;color:rgba(255,255,255,.45);text-transform:capitalize}
+.sb-logout{font-size:12px;color:var(--red);cursor:pointer}
+.sb-logout:hover{opacity:.8}
+
+/* CONTENT */
+.content-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:#fff;padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e9ecf3;flex-shrink:0}
+.topbar h1{font-size:17px;font-weight:800;color:var(--navy)}
+.role-badge{background:#e8f0fe;color:var(--navy);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;text-transform:capitalize}
+.main{flex:1;overflow-y:auto;padding:26px 28px 60px}
+.page-head{margin-bottom:22px}
+.page-head h2{font-size:22px;font-weight:900;color:var(--navy)}
+.page-head p{color:#8a90a0;font-size:13.5px;margin-top:4px}
+
+/* STATS */
+.stats{display:grid;gap:15px;grid-template-columns:repeat(4,1fr);margin-bottom:24px}
+.stat{background:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.stat .ic{font-size:22px;margin-bottom:8px}
+.stat .v{font-size:26px;font-weight:900;color:var(--navy)}
+.stat .l{font-size:12px;color:#8a90a0;margin-top:2px}
+
+/* CARD */
+.card{background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 2px 10px rgba(0,0,0,.05);margin-bottom:18px}
+.card h3{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:12px}
+
+/* FILTER */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+.filter-bar .lbl{font-size:11px;font-weight:700;color:#8a90a0;text-transform:uppercase;letter-spacing:.5px;margin-right:2px}
+.fchip{padding:6px 14px;border-radius:20px;border:1.5px solid #dde1ec;background:#fff;color:#555;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.fchip.active,.fchip:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.fchip.gold.active{background:var(--gold);border-color:var(--gold);color:#1a1a2e}
+
+/* BOOK GRID */
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px}
+.book-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:transform .18s,box-shadow .18s;cursor:pointer;border:1px solid #edf0f6}
+.book-card:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(0,0,0,.16)}
+.book-cover{height:212px;display:flex;flex-direction:column;align-items:center;color:#fff;position:relative;padding:12px 14px 10px;text-align:center;border-bottom:4px solid rgba(0,0,0,.18)}
+.bc-top{width:100%;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.book-cover .bl{background:rgba(255,255,255,.95);color:#0f1f3d;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.bc-age{font-size:9.5px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.3px}
+.book-cover .bi{font-size:40px;margin:8px 0 6px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.25))}
+.bc-title{font-size:15.5px;font-weight:900;line-height:1.22;text-shadow:0 1px 4px rgba(0,0,0,.28);padding:0 4px}
+.bc-level{font-size:12px;font-weight:600;color:rgba(255,255,255,.92);margin-top:5px;background:rgba(0,0,0,.16);padding:2px 12px;border-radius:20px}
+.bc-pub{margin-top:auto;font-size:8.5px;letter-spacing:1.4px;text-transform:uppercase;color:rgba(255,255,255,.72);font-weight:700;padding-top:8px}
+.book-info{padding:11px 13px 13px}
+.book-info .m{font-size:11px;color:#8a90a0;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.book-info .t{font-size:13.5px;font-weight:800;color:#0f1f3d;line-height:1.3;margin-bottom:3px}
+.book-info .tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.book-cover-img{position:relative;aspect-ratio:3/4;background:#eef1f7;overflow:hidden;border-bottom:4px solid rgba(0,0,0,.1)}
+.book-cover-img img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.book-cover-img .bl{position:absolute;top:9px;left:9px;background:rgba(255,255,255,.95);color:#0f1f3d;font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.modal-cover{height:98px;width:auto;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.32);display:block}
+/* SCHOOL MANAGEMENT */
+.sms-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px;border-bottom:1px solid #e9ecf3}
+.sms-tab{padding:9px 15px;font-size:13px;font-weight:700;color:#8a90a0;cursor:pointer;border-radius:9px 9px 0 0;border-bottom:3px solid transparent;transition:all .15s}
+.sms-tab:hover{color:var(--navy)}
+.sms-tab.active{color:var(--navy);border-bottom-color:var(--red);background:#f7f9ff}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:#fff;border-radius:14px;padding:15px 18px;box-shadow:0 2px 10px rgba(0,0,0,.05);border-left:4px solid var(--navy)}
+.kpi .ic{font-size:19px}
+.kpi .v{font-size:23px;font-weight:900;color:var(--navy);margin-top:5px;line-height:1.1}
+.kpi .l{font-size:12px;color:#8a90a0;margin-top:3px}
+.kpi.green{border-left-color:#00a884}.kpi.gold{border-left-color:#F0A500}.kpi.red{border-left-color:#e94560}
+.pill{display:inline-block;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:800}
+.pill.paid,.pill.present{background:#e3f4ea;color:#1e7e45}
+.pill.pending,.pill.absent{background:#fbe4e7;color:#b32638}
+.pill.partial,.pill.leave{background:#fdf3dd;color:#9a6b00}
+.att-btns{display:inline-flex;gap:4px}
+.att-b{width:26px;height:26px;border-radius:7px;font-size:11px;font-weight:800;border:1px solid #dde1ec;background:#fff;cursor:pointer;color:#8a90a0}
+.att-b.on-present{background:#00a884;color:#fff;border-color:#00a884}
+.att-b.on-absent{background:#e94560;color:#fff;border-color:#e94560}
+.att-b.on-leave{background:#F0A500;color:#1a1a2e;border-color:#F0A500}
+.bars{display:flex;align-items:flex-end;gap:16px;height:160px;padding:8px 4px 0}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:7px;height:100%}
+.bar{width:64%;min-height:4px;background:linear-gradient(180deg,#2f6fed,#0f3460);border-radius:6px 6px 0 0;transition:height .3s}
+.bar-lbl{font-size:11px;color:#8a90a0;font-weight:700}
+.mini-btn{padding:5px 11px;border-radius:7px;font-size:11px;font-weight:800;border:none;cursor:pointer;background:var(--navy);color:#fff}
+.mini-btn:hover{background:var(--navy2)}
+.card-flex{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.card-flex h3{margin-bottom:0}
+.hint{font-size:12px;color:#8a90a0;margin-top:10px}
+.notice-item{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-bottom:1px solid #eef1f7}
+.notice-item:last-child{border-bottom:none}
+.notice-item .nd{font-size:12.5px;color:#8a90a0;margin-top:3px}
+.notice-item .nt{font-size:11px;color:#aab2c4;white-space:nowrap;font-weight:700}
+.del-btn{width:24px;height:24px;border-radius:6px;border:1px solid #f0d4da;background:#fff5f7;color:#e94560;font-size:12px;font-weight:800;cursor:pointer;line-height:1}
+.del-btn:hover{background:#e94560;color:#fff;border-color:#e94560}
+.tt-sel{padding:7px 12px;border:1.5px solid #dde1ec;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;background:#fff;color:var(--navy);cursor:pointer}
+.tt-table td{padding:4px}
+.tt-table td:first-child{padding:9px 12px}
+.tt-inp{width:100%;min-width:78px;border:1px solid transparent;background:transparent;text-align:center;font-size:12.5px;font-weight:600;font-family:inherit;padding:6px 4px;outline:none;border-radius:6px;color:#2a3550}
+.tt-inp:hover{border-color:#e6e9f0}
+.tt-inp:focus{background:#eef3ff;border-color:var(--navy)}
+.btn-sm{padding:8px 14px;font-size:12px}
+.quick-add{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.quick-add input{flex:1;min-width:180px;max-width:340px;padding:8px 13px;border:1.5px solid #dde1ec;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+.quick-add input:focus{border-color:var(--navy)}
+/* MOBILE */
+.hamburger{display:none;background:none;border:none;font-size:22px;color:var(--navy);cursor:pointer;padding:2px 8px 2px 0;line-height:1}
+.topbar-left{display:flex;align-items:center;gap:6px;min-width:0}
+.topbar-left h1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-backdrop{display:none}
+@media (max-width:860px){
+  .hamburger{display:block}
+  .sb{position:fixed;top:0;left:0;height:100vh;z-index:1200;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 44px rgba(0,0,0,.35)}
+  .sb.open{transform:translateX(0)}
+  .sb-backdrop.show{display:block;position:fixed;inset:0;background:rgba(10,20,40,.5);z-index:1100}
+  .content-area{width:100%}
+  .main{padding:18px 14px 60px}
+  .topbar{padding:0 14px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .card{overflow-x:auto}
+  .gtable{min-width:540px}
+  .form-row{grid-template-columns:1fr !important}
+  .act-grid{grid-template-columns:1fr}
+  .rc-info{grid-template-columns:1fr}
+  .auth-wrap{flex-direction:column;min-height:auto}
+  .auth-left{padding:30px 24px 6px}
+  .auth-right{padding:20px 24px 40px}
+  .auth-brand h1{font-size:24px}
+  .report-sheet{padding:22px 18px}
+}
+@media (max-width:480px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .book-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  .sms-tab{padding:8px 11px;font-size:12px}
+  .auth-card{padding:26px 20px}
+  .logo-bar{gap:12px;padding:10px 14px}
+  .logo-bar img{height:28px}
+  .page-head h2{font-size:19px}
+}
+.mini{font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px;background:#eef2fb;color:var(--navy2)}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(15,25,50,.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.modal{background:#fff;border-radius:20px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 32px 64px rgba(0,0,0,.3)}
+.modal-top{padding:0;position:relative}
+.modal-hero{height:130px;display:flex;align-items:center;gap:16px;padding:0 26px;color:#fff}
+.modal-hero .bi{font-size:46px}
+.modal-hero h3{font-size:20px;font-weight:900}
+.modal-hero p{font-size:13px;opacity:.9;margin-top:3px}
+.modal-x{position:absolute;top:14px;right:16px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.modal-body{padding:22px 26px 26px}
+.act-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.act{display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:12px;border:2px solid #e8ecf5;cursor:pointer;transition:all .15s;background:#fff;text-align:left}
+.act:hover{border-color:var(--navy);background:#f7f9ff}
+.act.disabled{opacity:.45;cursor:not-allowed}
+.act .ai{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.act .at{font-size:13px;font-weight:800;color:var(--navy)}
+.act .ad{font-size:11px;color:#8a90a0;margin-top:1px}
+.act-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.act2{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:13px;border:1px solid #e8ecf5;border-left:4px solid #ccc;background:#fff;cursor:pointer;text-align:left;transition:all .16s;width:100%}
+.act2:hover{box-shadow:0 8px 20px rgba(0,0,0,.1);transform:translateY(-1px)}
+.act2 .a2i{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0}
+.act2 .a2b{flex:1}
+.act2 .a2t{font-size:14.5px;font-weight:800;color:var(--navy)}
+.act2 .a2d{font-size:12px;color:#8a90a0;margin-top:2px;line-height:1.4}
+.act2 .a2go{font-size:12px;font-weight:800;color:var(--navy);white-space:nowrap;opacity:.7}
+.act2:hover .a2go{opacity:1}
+.act2.flip{border-left-color:#2f6fed}.act2.flip .a2i{background:#e8f0fe}
+.act2.inter{border-left-color:#00a884}.act2.inter .a2i{background:#e3faf1}
+.act2.teach{border-left-color:#F0A500}.act2.teach .a2i{background:#fff4de}
+.act2.disabled{opacity:.42;cursor:not-allowed}
+.act2.disabled:hover{box-shadow:none;transform:none}
+.papers-h{font-size:12px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.paper-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid #eef1f7;border-radius:9px;margin-bottom:7px;cursor:pointer;transition:all .13s}
+.paper-row:hover{border-color:var(--navy);background:#f7f9ff}
+.paper-row .pl{font-size:13px;font-weight:600;color:#2a3550;display:flex;align-items:center;gap:9px}
+.paper-row .po{font-size:11px;font-weight:700;color:var(--navy)}
+
+/* TABLE (gradebook) */
+.gtable{width:100%;border-collapse:collapse;font-size:13px}
+.gtable th,.gtable td{padding:9px 12px;border:1px solid #e9ecf3;text-align:center}
+.gtable th{background:var(--navy);color:#fff;font-weight:700;font-size:12px}
+.gtable td:first-child,.gtable th:first-child{text-align:left}
+.gtable input{width:56px;padding:5px;border:1px solid #dde1ec;border-radius:6px;text-align:center;font-size:13px}
+.gtable tr:nth-child(even){background:#f9fafd}
+.grade-pill{font-weight:800;padding:2px 9px;border-radius:20px;font-size:12px}
+
+/* misc */
+.note{background:#fff8e6;border:1px solid #ffe2a8;border-radius:10px;padding:12px 15px;font-size:12.5px;color:#7a5c00;margin-bottom:16px;line-height:1.5}
+.soon{background:#eef2fb;color:var(--navy2);font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.btn{padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:none}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-outline{background:#fff;border:2px solid var(--navy);color:var(--navy)}
+.train-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.train-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.train-thumb{height:120px;background:linear-gradient(135deg,var(--navy),var(--navy2));display:flex;align-items:center;justify-content:center;font-size:34px;color:rgba(255,255,255,.9);position:relative}
+.train-thumb .soon2{position:absolute;bottom:8px;right:8px}
+.train-b{padding:13px 14px}
+.train-b .t{font-size:13px;font-weight:800;color:var(--navy)}
+.train-b .d{font-size:11.5px;color:#8a90a0;margin-top:3px}
+
+/* REPORT CARD */
+.rc-toolbar{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.report-sheet{background:#fff;max-width:800px;margin:0 auto;border:1px solid #d8dce6;border-radius:8px;padding:34px 40px;box-shadow:0 3px 16px rgba(0,0,0,.07)}
+.rc-head{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid var(--navy);padding-bottom:12px}
+.rc-head .sub{font-size:12.5px;color:#8a90a0;margin-top:2px;padding-left:4px}
+.rc-badge{font-size:18px;font-weight:900;color:var(--navy);white-space:nowrap}
+.rc-title{text-align:center;font-size:14px;font-weight:800;letter-spacing:1.5px;color:var(--red);margin:12px 0 18px;text-transform:uppercase}
+.rc-info{display:grid;grid-template-columns:1fr 1fr;gap:8px 30px;margin-bottom:18px}
+.rc-field{display:flex;align-items:center;gap:8px;font-size:13px}
+.rc-field label{font-weight:700;color:#556;min-width:80px}
+.rc-inp{border:none;border-bottom:1px dashed #c4cad8;padding:3px 5px;font-size:13px;flex:1;outline:none;font-family:inherit;background:transparent;color:#1a1a2e}
+.rc-inp:focus{border-bottom-color:var(--navy)}
+.rc-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:6px}
+.rc-table th,.rc-table td{border:1px solid #d8dce6;padding:7px 10px}
+.rc-table th{background:var(--navy);color:#fff;font-weight:700;text-align:left}
+.rc-table td.c,.rc-table th.c{text-align:center}
+.rc-total td{font-weight:800;background:#eef2fb}
+.rc-key{font-size:11px;color:#8a90a0;margin:6px 0 18px;line-height:1.5}
+.rc-sel{border:1px solid #d8dce6;border-radius:6px;padding:4px 8px;font-size:12.5px;font-family:inherit;background:#fff}
+.rc-remarks{width:100%;min-height:72px;border:1px solid #d8dce6;border-radius:6px;padding:10px;font-size:13px;font-family:inherit;resize:vertical;outline:none}
+.rc-sign{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:40px}
+.rc-sign .s{text-align:center;border-top:1px solid #333;padding-top:6px;font-size:12px;font-weight:700;color:#556}
+@media print{
+  .sb,.topbar,.rc-toolbar,.page-head{display:none!important}
+  .shell,.content-area,.main{display:block!important;height:auto!important;overflow:visible!important;padding:0!important}
+  body{background:#fff}
+  .report-sheet{box-shadow:none;border:none;max-width:none;padding:0}
+  .rc-inp{border-bottom-color:transparent!important}
+  .rc-sel,.rc-remarks{border-color:transparent!important}
+  @page{margin:14mm}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useMemo} = React;
+const C = window.AZHAR_CONTENT || {books:[]};
+const BOOKS = C.books;
+const LOGO_AZHAR = "assets/azhar_logo.png";
+const LOGO_BF = "assets/bookfactory_logo.png";
+
+const USERS = [
+  {id:1,email:"teacher@azhar.edu",password:"teacher123",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School"},
+  {id:2,email:"admin@azhar.edu",password:"admin123",name:"Mr. Khalid",role:"admin",school:"Azhar Model School"},
+];
+
+const SERIES_COLOR = {GoldCrest:["#0f3460","#1a4a8a"], Panda:["#b23048","#e94560"]};
+const seriesGrad = s => `linear-gradient(135deg,${(SERIES_COLOR[s]||["#0f3460","#1a4a8a"]).join(",")})`;
+const openFile = p => { if(p) window.open(encodeURI(p),"_blank"); };
+const initials = n => n.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+
+/* ---------- AUTH ---------- */
+function Auth({onLogin}){
+  const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState("");
+  const submit=()=>{ const u=USERS.find(x=>x.email===email.toLowerCase().trim()&&x.password===pw);
+    if(u) onLogin(u); else setErr("Invalid email or password."); };
+  const quick=u=>{setEmail(u.email);setPw(u.password);setErr("");onLogin(u);};
+  return (
+   <div className="auth-wrap">
+    <div className="auth-left">
+      <div className="auth-brand">
+        <div className="logo-bar">
+          <img src={LOGO_AZHAR} alt="Azhar Publishers"/>
+          <div className="divider"></div>
+          <img src={LOGO_BF} alt="Book Factory"/>
+        </div>
+        <div className="mark">Azhar<span>Ed</span></div>
+        <h1>The teaching platform for Azhar Publishers schools</h1>
+        <p>Your GoldCrest &amp; Panda early-years books — flipbooks, interactive lessons, teaching slides and exam papers — in one place for every teacher.</p>
+        <div className="spec">
+          <div className="spec-group">
+            <div className="sg-title">📗 GoldCrest Series <span>· Playgroup–Prep</span></div>
+            <div className="sg-books">GoldCrest English Book · GoldCrest Counting Book · GoldCrest Urdu Qaida</div>
+          </div>
+          <div className="spec-group">
+            <div className="sg-title">📘 Panda Series <span>· Playgroup–Prep</span></div>
+            <div className="sg-books">Panda English Book · Panda Counting Book · Panda Urdu Qaida · Panda Table Book · Panda General Knowledge Book</div>
+          </div>
+          <div className="spec-foot">20 interactive books · 140 exam papers · teacher training · gradebook &amp; report cards</div>
+        </div>
+      </div>
+    </div>
+    <div className="auth-right">
+      <div className="auth-card">
+        <h2>Azhar<span>Ed</span></h2>
+        <div className="sub">Teacher &amp; School Portal</div>
+        {err && <div className="err">{err}</div>}
+        <div className="field"><label>Email</label><input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="you@azhar.edu"/></div>
+        <div className="field"><label>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="••••••••"/></div>
+        <button className="btn-primary" onClick={submit}>Sign In</button>
+        <div className="demo">
+          <p>Demo accounts — click to enter</p>
+          {USERS.map(u=><span key={u.id} className="chip" onClick={()=>quick(u)}>
+            <span className="dot" style={{background:u.role==='admin'?'#e94560':'#00a884'}}></span>{u.role}: {u.email}</span>)}
+        </div>
+      </div>
+    </div>
+   </div>
+  );
+}
+
+/* ---------- DASHBOARD ---------- */
+function Dashboard({user,go}){
+  const totalPapers = BOOKS.reduce((a,b)=>a+b.paperCount,0);
+  const series = [...new Set(BOOKS.map(b=>b.series))];
+  return (
+   <div>
+    <div className="page-head"><h2>Welcome, {user.name.split(" ").slice(-1)} 👋</h2>
+      <p>{user.school} · Everything you need to teach with Azhar Publishers books.</p></div>
+    <div className="stats">
+      <div className="stat"><div className="ic">📚</div><div className="v">{BOOKS.length}</div><div className="l">Interactive books</div></div>
+      <div className="stat"><div className="ic">📝</div><div className="v">{totalPapers}</div><div className="l">Exam papers</div></div>
+      <div className="stat"><div className="ic">🏫</div><div className="v">{series.length}</div><div className="l">Series (Panda · GoldCrest)</div></div>
+      <div className="stat"><div className="ic">🎯</div><div className="v">3</div><div className="l">Levels: PG · Nursery · Prep</div></div>
+    </div>
+    <div className="card">
+      <h3>Jump back in</h3>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+        <button className="btn btn-navy" onClick={()=>go('library')}>📚 Open Book Library</button>
+        <button className="btn btn-outline" onClick={()=>go('training')}>🎓 Teacher Training</button>
+        <button className="btn btn-outline" onClick={()=>go('gradebook')}>📊 Class Gradebook</button>
+      </div>
+    </div>
+    <div className="card">
+      <h3>Your libraries</h3>
+      <div className="filter-bar">
+        {series.map(s=>{const cnt=BOOKS.filter(b=>b.series===s).length;
+          return <span key={s} className="fchip active" style={{background:SERIES_COLOR[s][0],borderColor:SERIES_COLOR[s][0],cursor:'pointer'}} onClick={()=>go('library')}>{s} · {cnt} books</span>;})}
+      </div>
+    </div>
+   </div>
+  );
+}
+
+/* ---------- LIBRARY ---------- */
+function Library(){
+  const [series,setSeries]=useState("All");
+  const [level,setLevel]=useState("All");
+  const [subject,setSubject]=useState("All");
+  const [sel,setSel]=useState(null);
+  const subjects=useMemo(()=>["All",...new Set(BOOKS.map(b=>b.subject))],[]);
+  const filtered=BOOKS.filter(b=>(series==="All"||b.series===series)&&(level==="All"||b.level===level)&&(subject==="All"||b.subject===subject));
+  return (
+   <div>
+    <div className="page-head"><h2>📚 Book Library</h2>
+      <p>Flipbooks, interactive lessons, teaching slides and exam papers for every book.</p></div>
+    <div className="filter-bar"><span className="lbl">Series</span>
+      {["All","GoldCrest","Panda"].map(s=><span key={s} className={"fchip"+(series===s?" active":"")} onClick={()=>setSeries(s)}>{s}</span>)}</div>
+    <div className="filter-bar"><span className="lbl">Level</span>
+      {["All","Playgroup","Nursery","Prep"].map(l=><span key={l} className={"fchip"+(level===l?" active":"")} onClick={()=>setLevel(l)}>{l}</span>)}</div>
+    <div className="filter-bar" style={{marginBottom:18}}><span className="lbl">Subject</span>
+      {subjects.map(s=><span key={s} className={"fchip"+(subject===s?" active":"")} onClick={()=>setSubject(s)}>{s}</span>)}</div>
+    <p style={{color:'#8a90a0',fontSize:13,marginBottom:14}}>{filtered.length} book{filtered.length!==1?'s':''}</p>
+    <div className="book-grid">
+      {filtered.map(b=>(
+       <div key={b.id} className="book-card" onClick={()=>setSel(b)}>
+         {b.coverImg
+           ? <div className="book-cover-img"><img src={encodeURI(b.coverImg)} alt={b.title} loading="lazy"/><span className="bl">{b.series}</span></div>
+           : <div className="book-cover" style={{background:seriesGrad(b.series)}}>
+               <div className="bc-top"><span className="bl">{b.series} Series</span><span className="bc-age">{b.age||'Early Years'}</span></div>
+               <div className="bi">{b.icon}</div>
+               <div className="bc-title">{b.title}</div>
+               <div className="bc-level">{b.level}</div>
+               <div className="bc-pub">Azhar Publishers</div>
+             </div>}
+         <div className="book-info">
+           <div className="t">{b.title}</div>
+           <div className="m">{b.subject} · {b.level}</div>
+           <div className="tags">
+             {b.flipbook&&<span className="mini">📖 Flipbook</span>}
+             {b.interactive&&<span className="mini">▶ Interactive</span>}
+             <span className="mini">📝 {b.paperCount} papers</span>
+           </div>
+         </div>
+       </div>
+      ))}
+    </div>
+    {sel && <BookModal book={sel} onClose={()=>setSel(null)}/>}
+   </div>
+  );
+}
+
+function BookModal({book,onClose}){
+  return (
+   <div className="overlay" onClick={onClose}>
+    <div className="modal" onClick={e=>e.stopPropagation()}>
+      <div className="modal-top">
+        <div className="modal-hero" style={{background:seriesGrad(book.series)}}>
+          {book.coverImg ? <img className="modal-cover" src={encodeURI(book.coverImg)} alt={book.title}/> : <div className="bi">{book.icon}</div>}
+          <div><h3>{book.title}</h3><p>{book.series} Series · {book.level} · {book.age||'Early Years'}</p></div>
+        </div>
+        <button className="modal-x" onClick={onClose}>✕</button>
+      </div>
+      <div className="modal-body">
+        <div className="act-list">
+          <button className={"act2 flip"+(book.flipbook?"":" disabled")} onClick={()=>openFile(book.flipbook)}>
+            <div className="a2i">📖</div>
+            <div className="a2b"><div className="a2t">Digital Flipbook</div><div className="a2d">Turn through every page of {book.title} on screen</div></div>
+            <div className="a2go">Open ↗</div></button>
+          <button className={"act2 inter"+(book.interactive?"":" disabled")} onClick={()=>openFile(book.interactive)}>
+            <div className="a2i">🎯</div>
+            <div className="a2b"><div className="a2t">Interactive Lesson</div><div className="a2d">Tap-and-play {book.subject.toLowerCase()} activities for the classroom board</div></div>
+            <div className="a2go">Open ↗</div></button>
+          <button className={"act2 teach"+((book.deckPdf||book.deck)?"":" disabled")} onClick={()=>openFile(book.deckPdf||book.deck)}>
+            <div className="a2i">🖥️</div>
+            <div className="a2b"><div className="a2t">Teaching Slides</div><div className="a2d">Projectable walkthrough to teach this book, {book.level} level</div></div>
+            <div className="a2go">Open ↗</div></button>
+        </div>
+        <div className="papers-h">Exam Papers · {book.papers.length}</div>
+        {book.papers.map((p,i)=>(
+          <div key={i} className="paper-row" onClick={()=>openFile(p.path)}>
+            <div className="pl"><span>📄</span>{p.label}</div><div className="po">Open ↗</div>
+          </div>
+        ))}
+        {book.papers.length===0 && <p style={{color:'#8a90a0',fontSize:13}}>No exam papers linked for this book yet.</p>}
+      </div>
+    </div>
+   </div>
+  );
+}
+
+/* ---------- TEACHER TRAINING ---------- */
+function Training(){
+  const topics=[
+    ["🍎","Classroom management for early years","Setting up routines for Playgroup–Prep"],
+    ["🔤","Teaching phonics with GoldCrest English","Sounds, blending and reading readiness"],
+    ["🔢","Counting & number sense (Panda / GoldCrest)","Hands-on methods for numeracy"],
+    ["✍️","Pre-writing & handwriting strokes","Building fine-motor control"],
+    ["📝","Conducting monthly & term exams","Using the paper bank and marking fairly"],
+    ["ﺍ","Teaching Urdu Qaida","Letter recognition and pronunciation"],
+  ];
+  return (
+   <div>
+    <div className="page-head"><h2>🎓 Teacher Training</h2>
+      <p>Recorded training sessions, mapped to the books your teachers use.</p></div>
+    <div className="note">📌 <b>Ready for your recordings.</b> Drop your recorded teacher-training sessions into the platform and they will appear here, each linked to the relevant book and level. The topics below show the intended structure.</div>
+    <div className="train-grid">
+      {topics.map((t,i)=>(
+       <div key={i} className="train-card">
+         <div className="train-thumb">{t[0]}<span className="soon soon2">Add video</span></div>
+         <div className="train-b"><div className="t">{t[1]}</div><div className="d">{t[2]}</div></div>
+       </div>
+      ))}
+    </div>
+   </div>
+  );
+}
+
+/* ---------- GRADEBOOK (demo) ---------- */
+function Gradebook(){
+  const subs=["English","Urdu","Counting"];
+  const [rows,setRows]=useState([
+    {name:"Ahmed Ali",m:[0,0,0]},{name:"Fatima Noor",m:[0,0,0]},
+    {name:"Hassan Raza",m:[0,0,0]},{name:"Zoya Khan",m:[0,0,0]},
+  ]);
+  const set=(ri,ci,v)=>{const n=[...rows];n[ri]={...n[ri],m:n[ri].m.map((x,i)=>i===ci?Math.max(0,Math.min(100,+v||0)):x)};setRows(n);};
+  const total=r=>r.m.reduce((a,b)=>a+b,0);
+  const pct=r=>Math.round(total(r)/(subs.length*100)*100);
+  const grade=p=>p>=80?["A","#00a884"]:p>=65?["B","#0f3460"]:p>=50?["C","#F0A500"]:p>0?["D","#e94560"]:["—","#aaa"];
+  return (
+   <div>
+    <div className="page-head"><h2>📊 Class Gradebook <span className="soon">Preview</span></h2>
+      <p>Nursery A · 1st Term. Enter marks to see totals and grades update live.</p></div>
+    <div className="note">This is a working preview. In the deployed platform your developer connects it to a database so marks, terms and report cards save per school and print automatically.</div>
+    <div className="card" style={{overflowX:'auto'}}>
+      <table className="gtable">
+        <thead><tr><th>Student</th>{subs.map(s=><th key={s}>{s} /100</th>)}<th>Total</th><th>%</th><th>Grade</th></tr></thead>
+        <tbody>
+          {rows.map((r,ri)=>{const p=pct(r),[g,gc]=grade(p);return(
+            <tr key={ri}><td>{r.name}</td>
+              {r.m.map((v,ci)=><td key={ci}><input type="number" value={v||""} onChange={e=>set(ri,ci,e.target.value)}/></td>)}
+              <td><b>{total(r)}</b></td><td>{p}%</td>
+              <td><span className="grade-pill" style={{background:gc+'22',color:gc}}>{g}</span></td>
+            </tr>);})}
+        </tbody>
+      </table>
+    </div>
+   </div>
+  );
+}
+
+/* ---------- ADMIN ---------- */
+function Admin(){
+  const [teachers,setTeachers]=useState([
+    {name:"Mrs. Aisha Khan",email:"teacher@azhar.edu",cls:"Nursery A"},
+    {name:"Ms. Sana Tariq",email:"sana@azhar.edu",cls:"Prep B"},
+  ]);
+  const [f,setF]=useState({name:"",email:"",cls:""});
+  const add=()=>{if(!f.name||!f.email)return;setTeachers([...teachers,f]);setF({name:"",email:"",cls:""});};
+  return (
+   <div>
+    <div className="page-head"><h2>⚙️ Admin</h2><p>Manage teachers and classes for your school.</p></div>
+    <div className="card">
+      <h3>Add teacher</h3>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr auto',gap:10,alignItems:'end'}}>
+        <div className="field" style={{margin:0}}><label>Name</label><input value={f.name} onChange={e=>setF({...f,name:e.target.value})}/></div>
+        <div className="field" style={{margin:0}}><label>Email</label><input value={f.email} onChange={e=>setF({...f,email:e.target.value})}/></div>
+        <div className="field" style={{margin:0}}><label>Class</label><input value={f.cls} onChange={e=>setF({...f,cls:e.target.value})}/></div>
+        <button className="btn btn-navy" onClick={add}>Add</button>
+      </div>
+    </div>
+    <div className="card">
+      <h3>Teachers</h3>
+      <table className="gtable"><thead><tr><th>Name</th><th>Email</th><th>Class</th></tr></thead>
+        <tbody>{teachers.map((t,i)=><tr key={i}><td>{t.name}</td><td>{t.email}</td><td>{t.cls}</td></tr>)}</tbody></table>
+    </div>
+   </div>
+  );
+}
+
+/* ---------- PROFILE ---------- */
+function Profile({user}){
+  return (
+   <div>
+    <div className="page-head"><h2>👤 My Profile</h2></div>
+    <div className="card" style={{maxWidth:460}}>
+      <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:16}}>
+        <div className="avatar" style={{width:54,height:54,fontSize:18,background:user.role==='admin'?'#e94560':'#00a884'}}>{initials(user.name)}</div>
+        <div><div style={{fontWeight:800,fontSize:17,color:'#0f3460'}}>{user.name}</div>
+          <div style={{color:'#8a90a0',fontSize:13,textTransform:'capitalize'}}>{user.role} · {user.school}</div></div>
+      </div>
+      <div className="field"><label>Email</label><input defaultValue={user.email} readOnly/></div>
+      <div className="field"><label>School</label><input defaultValue={user.school} readOnly/></div>
+    </div>
+   </div>
+  );
+}
+
+/* ---------- REPORT CARD ---------- */
+function ReportCard(){
+  const [info,setInfo]=useState({school:"Azhar Model School",student:"Ahmed Ali",father:"Mr. Ali Raza",cls:"Nursery A",roll:"12",term:"First Term",session:"2026–27",present:"58",total:"60"});
+  const [subs,setSubs]=useState([
+    {name:"English",total:100,got:82},
+    {name:"Urdu",total:100,got:75},
+    {name:"Counting / Maths",total:100,got:88},
+    {name:"General Knowledge",total:50,got:41},
+    {name:"Rhymes & Drawing",total:50,got:45},
+  ]);
+  const [skills,setSkills]=useState([
+    ["Listens attentively","Very Good"],
+    ["Follows instructions","Good"],
+    ["Fine-motor / pencil control","Very Good"],
+    ["Social skills & sharing","Excellent"],
+    ["Class participation","Good"],
+    ["Letter / number recognition","Very Good"],
+  ]);
+  const [remarks,setRemarks]=useState("A cheerful and hardworking child. Ahmed is making steady progress and takes part enthusiastically in class activities. A little more Urdu writing practice at home will help.");
+  const ratings=["Excellent","Very Good","Good","Satisfactory","Needs Support"];
+  const upd=(k,v)=>setInfo(p=>({...p,[k]:v}));
+  const setSub=(i,k,v)=>setSubs(p=>p.map((s,idx)=>idx===i?{...s,[k]:k==='name'?v:(+v||0)}:s));
+  const setSkill=(i,v)=>setSkills(p=>p.map((s,idx)=>idx===i?[s[0],v]:s));
+  const grade=p=>p>=80?"A":p>=65?"B":p>=50?"C":p>0?"D":"—";
+  const totGot=subs.reduce((a,s)=>a+(+s.got||0),0), totMax=subs.reduce((a,s)=>a+(+s.total||0),0);
+  const pct=totMax?Math.round(totGot/totMax*100):0;
+  return (
+   <div>
+    <div className="page-head"><h2>🧾 Report Cards</h2><p>Early-years template (marks + skills). Fill it in, then print or save as PDF.</p></div>
+    <div className="rc-toolbar">
+      <button className="btn btn-navy" onClick={()=>window.print()}>🖨️ Print / Save as PDF</button>
+      <span style={{fontSize:12,color:'#8a90a0'}}>Every field is editable — your entries print onto the card.</span>
+    </div>
+    <div className="report-sheet">
+      <div className="rc-head">
+        <div style={{flex:1}}>
+          <input className="rc-inp" style={{fontSize:20,fontWeight:900,color:'var(--navy)',borderBottom:'none',width:'100%'}} value={info.school} onChange={e=>upd('school',e.target.value)}/>
+          <div className="sub">Progress Report Card · Session {info.session}</div>
+        </div>
+        <div className="rc-badge">Azhar<span style={{color:'var(--red)'}}>Ed</span></div>
+      </div>
+      <div className="rc-title">Student Progress Report — {info.term}</div>
+      <div className="rc-info">
+        <div className="rc-field"><label>Student</label><input className="rc-inp" value={info.student} onChange={e=>upd('student',e.target.value)}/></div>
+        <div className="rc-field"><label>Father</label><input className="rc-inp" value={info.father} onChange={e=>upd('father',e.target.value)}/></div>
+        <div className="rc-field"><label>Class</label><input className="rc-inp" value={info.cls} onChange={e=>upd('cls',e.target.value)}/></div>
+        <div className="rc-field"><label>Roll No</label><input className="rc-inp" value={info.roll} onChange={e=>upd('roll',e.target.value)}/></div>
+        <div className="rc-field"><label>Term</label><input className="rc-inp" value={info.term} onChange={e=>upd('term',e.target.value)}/></div>
+        <div className="rc-field"><label>Attendance</label>
+          <input className="rc-inp" style={{maxWidth:44,flex:'none'}} value={info.present} onChange={e=>upd('present',e.target.value)}/>
+          <span style={{color:'#8a90a0'}}>of</span>
+          <input className="rc-inp" style={{maxWidth:44,flex:'none'}} value={info.total} onChange={e=>upd('total',e.target.value)}/>
+          <span style={{fontSize:11,color:'#8a90a0'}}>days</span></div>
+      </div>
+      <table className="rc-table">
+        <thead><tr><th>Subject</th><th className="c">Max Marks</th><th className="c">Obtained</th><th className="c">Grade</th></tr></thead>
+        <tbody>
+          {subs.map((s,i)=>(<tr key={i}>
+            <td><input className="rc-inp" value={s.name} onChange={e=>setSub(i,'name',e.target.value)}/></td>
+            <td className="c"><input className="rc-inp" style={{width:52,textAlign:'center',flex:'none'}} type="number" value={s.total} onChange={e=>setSub(i,'total',e.target.value)}/></td>
+            <td className="c"><input className="rc-inp" style={{width:52,textAlign:'center',flex:'none'}} type="number" value={s.got} onChange={e=>setSub(i,'got',e.target.value)}/></td>
+            <td className="c"><b>{grade(s.total?s.got/s.total*100:0)}</b></td>
+          </tr>))}
+          <tr className="rc-total"><td>Total</td><td className="c">{totMax}</td><td className="c">{totGot}</td><td className="c">{pct}% · {grade(pct)}</td></tr>
+        </tbody>
+      </table>
+      <div className="rc-key">Grading key: A = 80–100% (Outstanding) · B = 65–79% (Good) · C = 50–64% (Satisfactory) · D = below 50% (Needs improvement)</div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--navy)',margin:'4px 0 8px'}}>Skills &amp; Personal Development</div>
+      <table className="rc-table">
+        <thead><tr><th>Area</th><th className="c" style={{width:210}}>Rating</th></tr></thead>
+        <tbody>{skills.map((s,i)=>(<tr key={i}><td>{s[0]}</td>
+          <td className="c"><select className="rc-sel" value={s[1]} onChange={e=>setSkill(i,e.target.value)}>{ratings.map(r=><option key={r}>{r}</option>)}</select></td></tr>))}</tbody>
+      </table>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--navy)',margin:'16px 0 8px'}}>Class Teacher’s Remarks</div>
+      <textarea className="rc-remarks" value={remarks} onChange={e=>setRemarks(e.target.value)}/>
+      <div className="rc-sign">
+        <div className="s">Class Teacher</div><div className="s">Principal</div><div className="s">Parent / Guardian</div>
+      </div>
+    </div>
+   </div>
+  );
+}
+
+/* ---------- SCHOOL MANAGEMENT ---------- */
+const SMS_STUDENTS = [
+  {id:1,name:"Ahmed Ali",cls:"Nursery",sec:"A",roll:1,guardian:"Ali Raza",phone:"0300-1234501",fee:4500,paid:4500},
+  {id:2,name:"Fatima Noor",cls:"Nursery",sec:"A",roll:2,guardian:"Noor Ahmed",phone:"0300-1234502",fee:4500,paid:0},
+  {id:3,name:"Hassan Raza",cls:"Prep",sec:"A",roll:1,guardian:"Raza Khan",phone:"0300-1234503",fee:5000,paid:5000},
+  {id:4,name:"Zoya Khan",cls:"Prep",sec:"B",roll:2,guardian:"Imran Khan",phone:"0300-1234504",fee:5000,paid:2500},
+  {id:5,name:"Bilal Aslam",cls:"Playgroup",sec:"A",roll:1,guardian:"Aslam Butt",phone:"0300-1234505",fee:4000,paid:4000},
+  {id:6,name:"Ayesha Tariq",cls:"Playgroup",sec:"A",roll:2,guardian:"Tariq Mehmood",phone:"0300-1234506",fee:4000,paid:0},
+  {id:7,name:"Usman Ghani",cls:"One",sec:"A",roll:1,guardian:"Ghani Sheikh",phone:"0300-1234507",fee:5500,paid:5500},
+  {id:8,name:"Maryam Iqbal",cls:"One",sec:"A",roll:2,guardian:"Iqbal Ahmed",phone:"0300-1234508",fee:5500,paid:5500},
+  {id:9,name:"Hamza Sheikh",cls:"Two",sec:"A",roll:1,guardian:"Sheikh Riaz",phone:"0300-1234509",fee:6000,paid:3000},
+  {id:10,name:"Sara Malik",cls:"Two",sec:"A",roll:2,guardian:"Malik Zubair",phone:"0300-1234510",fee:6000,paid:0},
+  {id:11,name:"Ali Hamza",cls:"Prep",sec:"A",roll:3,guardian:"Hamza Gul",phone:"0300-1234511",fee:5000,paid:5000},
+  {id:12,name:"Hina Shah",cls:"Nursery",sec:"B",roll:3,guardian:"Shah Nawaz",phone:"0300-1234512",fee:4500,paid:4500},
+];
+const SMS_PAYMENTS = [
+  {id:1,student:"Ahmed Ali",cls:"Nursery",amount:4500,method:"Cash",date:"5 Jul 2026"},
+  {id:2,student:"Hassan Raza",cls:"Prep",amount:5000,method:"Bank Transfer",date:"4 Jul 2026"},
+  {id:3,student:"Zoya Khan",cls:"Prep",amount:2500,method:"JazzCash",date:"4 Jul 2026"},
+];
+const SMS_STAFF = [
+  {id:1,name:"Mrs. Aisha Khan",role:"Teacher",subject:"English",phone:"0300-1112201",salary:45000,today:"Present",present:22,total:24},
+  {id:2,name:"Ms. Sana Tariq",role:"Teacher",subject:"Urdu",phone:"0300-1112202",salary:42000,today:"Present",present:23,total:24},
+  {id:3,name:"Mr. Bilal Ahmed",role:"Teacher",subject:"Maths",phone:"0300-1112203",salary:44000,today:"Leave",present:20,total:24},
+  {id:4,name:"Ms. Nadia Aslam",role:"Teacher",subject:"Counting",phone:"0300-1112204",salary:40000,today:"Present",present:24,total:24},
+  {id:5,name:"Mr. Khalid Mehmood",role:"Admin",subject:"—",phone:"0300-1112205",salary:55000,today:"Present",present:24,total:24},
+  {id:6,name:"Mr. Rashid Ali",role:"Support",subject:"—",phone:"0300-1112206",salary:25000,today:"Absent",present:19,total:24},
+];
+const SMS_NOTICES = [
+  {id:1,date:"6 Jul 2026",title:"Parent–Teacher Meeting",body:"PTM for all classes this Friday, 10 July at 9:00 AM."},
+  {id:2,date:"3 Jul 2026",title:"Fee Due Reminder",body:"July fees are due by the 10th. Please clear outstanding dues."},
+  {id:3,date:"1 Jul 2026",title:"New Term Begins",body:"First term 2026–27 has started. Welcome back!"},
+];
+const FEE_HISTORY = [["Feb",312],["Mar",298],["Apr",335],["May",321],["Jun",348]];
+const TT_CLASSES = ["Playgroup","Nursery","Prep","One","Two","Three","Four","Five"];
+const TT_SECTIONS = ["A","B","C","D"];
+const TT_TIMES = ["8:30","9:15","10:00","11:15","12:00"];
+const TT_DAYS = ["Mon","Tue","Wed","Thu","Fri"];
+const EY_SUBJECTS = ["English","Urdu","Counting","G. Knowledge","Rhymes","Art","Story","Free Play"];
+const PR_SUBJECTS = ["English","Urdu","Maths","Science","Social St.","Islamiat","Computer","Art","P.E."];
+function genTimetable(cls){
+  const early=["Playgroup","Nursery","Prep"].includes(cls);
+  const pool=early?EY_SUBJECTS:PR_SUBJECTS;
+  const grid=[];
+  for(let d=0;d<TT_DAYS.length;d++){
+    const row=[];
+    for(let p=0;p<TT_TIMES.length;p++) row.push(pool[(d*3+p*2+d)%pool.length]);
+    grid.push(row);
+  }
+  return grid;
+}
+const SMS_TIMETABLES = (()=>{const o={};TT_CLASSES.forEach(c=>TT_SECTIONS.forEach(s=>{o[c+"-"+s]=genTimetable(c);}));return o;})();
+const rupee = n => "Rs " + Number(n).toLocaleString("en-PK");
+
+function AdminSMS(){
+  const [tab,setTab]=useState("overview");
+  const [students,setStudents]=useState(SMS_STUDENTS);
+  const [staff,setStaff]=useState(SMS_STAFF);
+  const [notices,setNotices]=useState(SMS_NOTICES);
+  const [nf,setNf]=useState({title:"",body:""});
+  const [sf,setSf]=useState({name:"",cls:"Playgroup",guardian:"",fee:4000});
+  const [clsFilter,setClsFilter]=useState("All");
+
+  const [payments,setPayments]=useState(SMS_PAYMENTS);
+  const [payFor,setPayFor]=useState(null);
+  const [payAmt,setPayAmt]=useState(0);
+  const [payMethod,setPayMethod]=useState("Cash");
+
+  const dueOf=s=>s.fee-s.paid;
+  const statusOf=s=>s.paid>=s.fee?"Paid":s.paid>0?"Partial":"Pending";
+  const collected=students.reduce((a,s)=>a+s.paid,0);
+  const outstanding=students.reduce((a,s)=>a+dueOf(s),0);
+  const presentToday=staff.filter(s=>s.today==="Present").length;
+  const classes=["All",...Array.from(new Set(students.map(s=>s.cls)))];
+  const pillCls=st=>({Paid:"paid",Pending:"pending",Partial:"partial",Present:"present",Absent:"absent",Leave:"leave"}[st]||"pending");
+
+  const openPay=s=>{setPayFor(s);setPayAmt(dueOf(s));setPayMethod("Cash");};
+  const confirmPay=()=>{
+    const amt=Math.max(0,Math.min(Number(payAmt)||0,dueOf(payFor)));
+    if(amt<=0){setPayFor(null);return;}
+    setStudents(p=>p.map(s=>s.id===payFor.id?{...s,paid:s.paid+amt}:s));
+    setPayments(p=>[{id:Date.now(),student:payFor.name,cls:payFor.cls,amount:amt,method:payMethod,date:"Today"},...p]);
+    setPayFor(null);
+  };
+  const [stf,setStf]=useState({name:"",role:"Teacher",subject:"",phone:"",salary:40000});
+  const addStaff=()=>{if(!stf.name)return;setStaff(p=>[...p,{id:Date.now(),name:stf.name,role:stf.role,subject:stf.subject||"—",phone:stf.phone,salary:+stf.salary||0,today:"Present",present:0,total:24}]);setStf({name:"",role:"Teacher",subject:"",phone:"",salary:40000});};
+  const removeStudent=id=>setStudents(p=>p.filter(s=>s.id!==id));
+  const removeStaff=id=>setStaff(p=>p.filter(s=>s.id!==id));
+  const removeNotice=id=>setNotices(p=>p.filter(n=>n.id!==id));
+  const [attView,setAttView]=useState("students");
+  const [attCls,setAttCls]=useState("All");
+  const [stuAtt,setStuAtt]=useState(()=>Object.fromEntries(SMS_STUDENTS.map(s=>[s.id,"Present"])));
+  const markStuAtt=(id,st)=>setStuAtt(p=>({...p,[id]:st}));
+  const [ttClass,setTtClass]=useState("Nursery");
+  const [ttSec,setTtSec]=useState("A");
+  const [timetables,setTimetables]=useState(SMS_TIMETABLES);
+  const ttKey=ttClass+"-"+ttSec;
+  const updateCell=(d,p,v)=>setTimetables(prev=>{const grid=prev[ttKey].map(r=>[...r]);grid[d][p]=v;return {...prev,[ttKey]:grid};});
+  const [qStu,setQStu]=useState("");
+  const [qStuCls,setQStuCls]=useState("Playgroup");
+  const [qStaff,setQStaff]=useState("");
+  const [qStaffSubj,setQStaffSubj]=useState("");
+  const quickAddStudent=()=>{if(!qStu.trim())return;const cls=qStuCls;const cnt=students.filter(s=>s.cls===cls).length+1;setStudents(p=>[...p,{id:Date.now(),name:qStu.trim(),cls,sec:"A",roll:cnt,guardian:"",phone:"",fee:4000,paid:0}]);setQStu("");};
+  const quickAddStaff=()=>{if(!qStaff.trim())return;setStaff(p=>[...p,{id:Date.now(),name:qStaff.trim(),role:"Teacher",subject:qStaffSubj.trim()||"—",phone:"",salary:40000,today:"Present",present:0,total:24}]);setQStaff("");setQStaffSubj("");};
+  const printReceipt=(p)=>{
+    const w=window.open("","_blank","width=440,height=680");
+    if(!w) return;
+    const amt=Number(p.amount).toLocaleString("en-PK");
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Receipt AZ-`+String(p.id).slice(-6)+`</title>
+    <style>body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;color:#1a1a2e;padding:30px;max-width:390px;margin:0 auto}
+    .h{text-align:center;border-bottom:3px solid #0f3460;padding-bottom:14px;margin-bottom:18px}
+    .h h1{font-size:21px;color:#0f3460;margin:0}.h .s{color:#e94560;font-weight:800;font-size:13px;margin-top:4px}.h p{margin:6px 0 0;font-size:11px;color:#999}
+    .row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px dashed #dde1ec}
+    .row span{color:#667}.amt{background:#e3f4ea;border-radius:10px;padding:14px;text-align:center;margin:18px 0}
+    .amt .l{font-size:12px;color:#1e7e45;font-weight:700}.amt .v{font-size:26px;font-weight:900;color:#1e7e45;margin-top:4px}
+    .sign{display:flex;justify-content:space-between;margin-top:34px;font-size:11px;color:#889}
+    .sign div{border-top:1px solid #333;padding-top:6px;width:45%;text-align:center}
+    .f{text-align:center;font-size:11px;color:#aaa;margin-top:22px}
+    .btn{display:block;width:100%;padding:11px;background:#0f3460;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;margin-top:18px;cursor:pointer}
+    @media print{.btn{display:none}}</style></head><body>
+    <div class="h"><h1>Azhar Model School</h1><div class="s">FEE PAYMENT RECEIPT</div><p>Powered by AzharEd · Book Factory</p></div>
+    <div class="row"><span>Receipt No.</span><b>AZ-`+String(p.id).slice(-6)+`</b></div>
+    <div class="row"><span>Date</span><b>`+p.date+`</b></div>
+    <div class="row"><span>Student</span><b>`+p.student+`</b></div>
+    <div class="row"><span>Class</span><b>`+p.cls+`</b></div>
+    <div class="row"><span>Payment Method</span><b>`+p.method+`</b></div>
+    <div class="amt"><div class="l">Amount Received</div><div class="v">Rs `+amt+`</div></div>
+    <div class="sign"><div>Received By</div><div>Parent / Guardian</div></div>
+    <div class="f">Please retain this receipt for your records.</div>
+    <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+    </body></html>`);
+    w.document.close();
+  };
+  const markAtt=(id,st)=>setStaff(p=>p.map(s=>s.id===id?{...s,today:st}:s));
+  const addNotice=()=>{if(!nf.title)return;setNotices(p=>[{id:Date.now(),date:"Today",title:nf.title,body:nf.body},...p]);setNf({title:"",body:""});};
+  const addStudent=()=>{if(!sf.name)return;const cnt=students.filter(s=>s.cls===sf.cls).length+1;setStudents(p=>[...p,{id:Date.now(),name:sf.name,cls:sf.cls,sec:"A",roll:cnt,guardian:sf.guardian,phone:"",fee:+sf.fee||0,paid:0}]);setSf({name:"",cls:"Playgroup",guardian:"",fee:4000});};
+
+  const shown=students.filter(s=>clsFilter==="All"||s.cls===clsFilter);
+  const stuShown=students.filter(s=>attCls==="All"||s.cls===attCls);
+  const chart=[...FEE_HISTORY,["Jul",Math.round(collected/1000)]];
+  const barMax=Math.max(...chart.map(x=>x[1]),1);
+  const tabs=[["overview","📊 Overview"],["students","🎒 Students"],["staff","👩‍🏫 Staff"],["fees","💰 Fees"],["attendance","🗓️ Student Attendance"],["staffatt","🧑‍🏫 Teacher Attendance"],["timetable","📅 Timetable"],["notices","📢 Notices"]];
+
+  return (
+   <div>
+    <div className="page-head"><h2>🏫 School Management</h2><p>Azhar Model School · fees, attendance, students &amp; staff — all in one place.</p></div>
+    <div className="sms-tabs">{tabs.map(([id,l])=><div key={id} className={"sms-tab"+(tab===id?" active":"")} onClick={()=>setTab(id)}>{l}</div>)}</div>
+
+    {tab==="overview" && <div>
+      <div className="kpi-grid">
+        <div className="kpi"><div className="ic">🎒</div><div className="v">{students.length}</div><div className="l">Students enrolled</div></div>
+        <div className="kpi"><div className="ic">👩‍🏫</div><div className="v">{staff.length}</div><div className="l">Staff members</div></div>
+        <div className="kpi green"><div className="ic">💰</div><div className="v">{rupee(collected)}</div><div className="l">Fees collected (Jul)</div></div>
+        <div className="kpi red"><div className="ic">⚠️</div><div className="v">{rupee(outstanding)}</div><div className="l">Outstanding dues</div></div>
+        <div className="kpi gold"><div className="ic">✅</div><div className="v">{presentToday}/{staff.length}</div><div className="l">Staff present today</div></div>
+        <div className="kpi"><div className="ic">📢</div><div className="v">{notices.length}</div><div className="l">Active notices</div></div>
+      </div>
+      <div className="card">
+        <h3>Fee collection — last 6 months (Rs &rsquo;000)</h3>
+        <div className="bars">{chart.map(([m,v],i)=>(
+          <div className="bar-col" key={i}><div className="bar" style={{height:(v/barMax*100)+"%"}} title={"Rs "+v+"k"}></div><div className="bar-lbl">{m}</div></div>))}
+        </div>
+      </div>
+      <div className="card"><h3>Recent notices</h3>
+        {notices.slice(0,3).map(n=><div key={n.id} className="notice-item"><div><b>{n.title}</b><div className="nd">{n.body}</div></div><span className="nt">{n.date}</span></div>)}
+      </div>
+    </div>}
+
+    {tab==="students" && <div>
+      <div className="card"><h3>Enroll a student</h3>
+        <div className="form-row" style={{display:"grid",gridTemplateColumns:"1.4fr 1fr 1.4fr .9fr auto",gap:10,alignItems:"end"}}>
+          <div className="field" style={{margin:0}}><label>Name</label><input value={sf.name} onChange={e=>setSf({...sf,name:e.target.value})}/></div>
+          <div className="field" style={{margin:0}}><label>Class</label><select value={sf.cls} onChange={e=>setSf({...sf,cls:e.target.value})}>{TT_CLASSES.map(c=><option key={c} value={c}>{c}</option>)}</select></div>
+          <div className="field" style={{margin:0}}><label>Guardian</label><input value={sf.guardian} onChange={e=>setSf({...sf,guardian:e.target.value})}/></div>
+          <div className="field" style={{margin:0}}><label>Monthly Fee</label><input type="number" value={sf.fee} onChange={e=>setSf({...sf,fee:e.target.value})}/></div>
+          <button className="btn btn-navy" onClick={addStudent}>Enroll</button>
+        </div>
+      </div>
+      <div className="card">
+        <div className="card-flex"><h3>Students · {shown.length}</h3>
+          <div className="filter-bar" style={{margin:0}}>{classes.map(c=><span key={c} className={"fchip"+(clsFilter===c?" active":"")} onClick={()=>setClsFilter(c)}>{c}</span>)}</div>
+        </div>
+        <table className="gtable"><thead><tr><th>Name</th><th>Class</th><th>Roll</th><th>Guardian</th><th>Monthly Fee</th><th>Fee Status</th><th></th></tr></thead>
+          <tbody>{shown.map(s=><tr key={s.id}><td>{s.name}</td><td>{s.cls} {s.sec}</td><td>{s.roll}</td><td>{s.guardian}</td><td>{rupee(s.fee)}</td><td><span className={"pill "+pillCls(statusOf(s))}>{statusOf(s)}</span></td><td><button className="del-btn" onClick={()=>removeStudent(s.id)} title="Remove student">✕</button></td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>}
+
+    {tab==="staff" && <div>
+      <div className="card"><h3>Add staff member</h3>
+        <div className="form-row" style={{display:"grid",gridTemplateColumns:"1.4fr 1fr 1fr 1fr .9fr auto",gap:10,alignItems:"end"}}>
+          <div className="field" style={{margin:0}}><label>Name</label><input value={stf.name} onChange={e=>setStf({...stf,name:e.target.value})}/></div>
+          <div className="field" style={{margin:0}}><label>Role</label><select value={stf.role} onChange={e=>setStf({...stf,role:e.target.value})}>{["Teacher","Admin","Support"].map(r=><option key={r}>{r}</option>)}</select></div>
+          <div className="field" style={{margin:0}}><label>Subject</label><input value={stf.subject} onChange={e=>setStf({...stf,subject:e.target.value})}/></div>
+          <div className="field" style={{margin:0}}><label>Phone</label><input value={stf.phone} onChange={e=>setStf({...stf,phone:e.target.value})}/></div>
+          <div className="field" style={{margin:0}}><label>Salary</label><input type="number" value={stf.salary} onChange={e=>setStf({...stf,salary:e.target.value})}/></div>
+          <button className="btn btn-navy" onClick={addStaff}>Add</button>
+        </div>
+      </div>
+      <div className="card"><h3>Staff &amp; teachers · {staff.length}</h3>
+        <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Phone</th><th>Salary</th><th>Today</th><th></th></tr></thead>
+          <tbody>{staff.map(s=><tr key={s.id}><td>{s.name}</td><td>{s.role}</td><td>{s.subject}</td><td>{s.phone}</td><td>{rupee(s.salary)}</td><td><span className={"pill "+pillCls(s.today)}>{s.today}</span></td><td><button className="del-btn" onClick={()=>removeStaff(s.id)} title="Remove staff">✕</button></td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>}
+
+    {tab==="fees" && <div>
+      <div className="kpi-grid">
+        <div className="kpi green"><div className="ic">💰</div><div className="v">{rupee(collected)}</div><div className="l">Collected this month</div></div>
+        <div className="kpi red"><div className="ic">⚠️</div><div className="v">{rupee(outstanding)}</div><div className="l">Outstanding</div></div>
+        <div className="kpi gold"><div className="ic">👥</div><div className="v">{students.filter(s=>statusOf(s)!=="Paid").length}</div><div className="l">Students with dues</div></div>
+      </div>
+      <div className="card"><h3>Fee register</h3>
+        <table className="gtable"><thead><tr><th>Student</th><th>Class</th><th>Monthly Fee</th><th>Paid</th><th>Due</th><th>Status</th><th></th></tr></thead>
+          <tbody>{students.map(s=><tr key={s.id}><td>{s.name}</td><td>{s.cls}</td><td>{rupee(s.fee)}</td><td>{rupee(s.paid)}</td><td>{rupee(dueOf(s))}</td><td><span className={"pill "+pillCls(statusOf(s))}>{statusOf(s)}</span></td><td>{statusOf(s)!=="Paid" && <button className="mini-btn" onClick={()=>openPay(s)}>Record payment</button>}</td></tr>)}</tbody>
+        </table>
+      </div>
+      <div className="card"><h3>Recent payments · {payments.length}</h3>
+        <table className="gtable"><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Method</th><th>Amount</th><th></th></tr></thead>
+          <tbody>{payments.map(p=><tr key={p.id}><td>{p.date}</td><td>{p.student}</td><td>{p.cls}</td><td>{p.method}</td><td><b style={{color:'#1e7e45'}}>{rupee(p.amount)}</b></td><td><button className="mini-btn" style={{background:'#fff',color:'var(--navy)',border:'1px solid #dde1ec'}} onClick={()=>printReceipt(p)}>🧾 Receipt</button></td></tr>)}</tbody>
+        </table>
+      </div>
+    </div>}
+
+    {tab==="attendance" && <div>
+      <div className="kpi-grid">
+        <div className="kpi green"><div className="ic">✅</div><div className="v">{stuShown.filter(s=>(stuAtt[s.id]||"Present")==="Present").length}</div><div className="l">Present</div></div>
+        <div className="kpi red"><div className="ic">❌</div><div className="v">{stuShown.filter(s=>(stuAtt[s.id]||"Present")==="Absent").length}</div><div className="l">Absent</div></div>
+        <div className="kpi gold"><div className="ic">🌴</div><div className="v">{stuShown.filter(s=>(stuAtt[s.id]||"Present")==="Leave").length}</div><div className="l">On leave</div></div>
+      </div>
+      <div className="card">
+        <div className="card-flex"><h3>Student attendance — today</h3>
+          <div className="filter-bar" style={{margin:0}}>{classes.map(c=><span key={c} className={"fchip"+(attCls===c?" active":"")} onClick={()=>setAttCls(c)}>{c}</span>)}</div>
+        </div>
+        <div className="quick-add">
+          <input placeholder="New student name…" value={qStu} onChange={e=>setQStu(e.target.value)} onKeyDown={e=>e.key==='Enter'&&quickAddStudent()}/>
+          <select className="tt-sel" value={qStuCls} onChange={e=>setQStuCls(e.target.value)}>{TT_CLASSES.map(c=><option key={c} value={c}>{c}</option>)}</select>
+          <button className="btn btn-navy btn-sm" onClick={quickAddStudent}>+ Add student</button>
+        </div>
+        <table className="gtable"><thead><tr><th>Name</th><th>Class</th><th>Roll</th><th>Mark</th></tr></thead>
+          <tbody>{stuShown.map(s=>{const st=stuAtt[s.id]||"Present";return <tr key={s.id}><td>{s.name}</td><td>{s.cls} {s.sec}</td><td>{s.roll}</td>
+            <td><span className="att-btns">{["Present","Absent","Leave"].map(x=><button key={x} className={"att-b"+(st===x?" on-"+x.toLowerCase():"")} onClick={()=>markStuAtt(s.id,x)}>{x[0]}</button>)}</span></td></tr>;})}</tbody>
+        </table>
+        <p className="hint">Tap P / A / L to mark each student. Filter by class above.</p>
+      </div>
+    </div>}
+
+    {tab==="staffatt" && <div>
+      <div className="kpi-grid">
+        <div className="kpi green"><div className="ic">✅</div><div className="v">{presentToday}</div><div className="l">Present today</div></div>
+        <div className="kpi red"><div className="ic">❌</div><div className="v">{staff.filter(s=>s.today==="Absent").length}</div><div className="l">Absent</div></div>
+        <div className="kpi gold"><div className="ic">🌴</div><div className="v">{staff.filter(s=>s.today==="Leave").length}</div><div className="l">On leave</div></div>
+      </div>
+      <div className="card"><h3>Teacher &amp; staff attendance — today</h3>
+        <div className="quick-add">
+          <input placeholder="New teacher name…" value={qStaff} onChange={e=>setQStaff(e.target.value)} onKeyDown={e=>e.key==='Enter'&&quickAddStaff()}/>
+          <input placeholder="Subject…" value={qStaffSubj} onChange={e=>setQStaffSubj(e.target.value)} onKeyDown={e=>e.key==='Enter'&&quickAddStaff()} style={{maxWidth:160}}/>
+          <button className="btn btn-navy btn-sm" onClick={quickAddStaff}>+ Add teacher</button>
+        </div>
+        <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Mark</th><th>This month</th></tr></thead>
+          <tbody>{staff.map(s=><tr key={s.id}><td>{s.name}</td><td>{s.role}</td><td>{s.subject}</td>
+            <td><span className="att-btns">{["Present","Absent","Leave"].map(st=><button key={st} className={"att-b"+(s.today===st?" on-"+st.toLowerCase():"")} onClick={()=>markAtt(s.id,st)}>{st[0]}</button>)}</span></td>
+            <td>{s.total?Math.round(s.present/s.total*100):0}% <span style={{color:'#aab2c4'}}>({s.present}/{s.total})</span></td></tr>)}</tbody>
+        </table>
+        <p className="hint">Tap P / A / L to mark today&rsquo;s attendance.</p>
+      </div>
+    </div>}
+
+    {tab==="timetable" && <div className="card">
+      <div className="card-flex"><h3>Class timetables</h3>
+        <div style={{display:'flex',gap:10,alignItems:'center'}}>
+          <select className="tt-sel" value={ttClass} onChange={e=>setTtClass(e.target.value)}>{TT_CLASSES.map(c=><option key={c} value={c}>{c}</option>)}</select>
+          <select className="tt-sel" value={ttSec} onChange={e=>setTtSec(e.target.value)}>{TT_SECTIONS.map(s=><option key={s} value={s}>Section {s}</option>)}</select>
+        </div>
+      </div>
+      <p className="hint" style={{marginTop:0,marginBottom:14}}>Showing <b>{ttClass} · Section {ttSec}</b> — Playgroup to Grade 5, sections A–D. Click any cell to edit the subject.</p>
+      <table className="gtable tt-table"><thead><tr><th>Day</th>{TT_TIMES.map(t=><th key={t}>{t}</th>)}</tr></thead>
+        <tbody>{TT_DAYS.map((day,d)=><tr key={day}><td><b>{day}</b></td>{TT_TIMES.map((t,p)=><td key={p}><input className="tt-inp" value={timetables[ttKey][d][p]} onChange={e=>updateCell(d,p,e.target.value)}/></td>)}</tr>)}</tbody>
+      </table>
+    </div>}
+
+    {tab==="notices" && <div>
+      <div className="card"><h3>Post a notice</h3>
+        <div className="field" style={{marginBottom:8}}><label>Title</label><input value={nf.title} onChange={e=>setNf({...nf,title:e.target.value})}/></div>
+        <div className="field"><label>Message</label><input value={nf.body} onChange={e=>setNf({...nf,body:e.target.value})}/></div>
+        <button className="btn btn-navy" onClick={addNotice}>Publish notice</button>
+      </div>
+      <div className="card"><h3>All notices · {notices.length}</h3>
+        {notices.map(n=><div key={n.id} className="notice-item"><div><b>{n.title}</b><div className="nd">{n.body}</div></div><div style={{display:'flex',alignItems:'center',gap:10}}><span className="nt">{n.date}</span><button className="del-btn" onClick={()=>removeNotice(n.id)} title="Remove notice">✕</button></div></div>)}
+      </div>
+    </div>}
+
+    {payFor && <div className="overlay" onClick={()=>setPayFor(null)}>
+      <div className="modal" style={{maxWidth:430}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-top">
+          <div className="modal-hero" style={{background:"linear-gradient(135deg,#0f3460,#1a4a8a)",height:100}}>
+            <div><h3>Record Fee Payment</h3><p>{payFor.name} · {payFor.cls} {payFor.sec}</p></div>
+          </div>
+          <button className="modal-x" onClick={()=>setPayFor(null)}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:13,marginBottom:16,color:'#556'}}>
+            <span>Monthly fee: <b>{rupee(payFor.fee)}</b></span>
+            <span>Outstanding: <b style={{color:'#b32638'}}>{rupee(dueOf(payFor))}</b></span>
+          </div>
+          <div className="field"><label>Amount received (Rs)</label><input type="number" autoFocus value={payAmt} onChange={e=>setPayAmt(e.target.value)}/></div>
+          <div className="field"><label>Payment method</label>
+            <select value={payMethod} onChange={e=>setPayMethod(e.target.value)}>{["Cash","Bank Transfer","JazzCash","EasyPaisa","Cheque"].map(m=><option key={m}>{m}</option>)}</select>
+          </div>
+          <button className="btn-primary" onClick={confirmPay}>Save payment</button>
+          <p className="hint" style={{textAlign:'center'}}>Amount is capped at the outstanding balance.</p>
+        </div>
+      </div>
+    </div>}
+   </div>
+  );
+}
+
+/* ---------- APP ---------- */
+function App(){
+  const [user,setUser]=useState(null);
+  const [page,setPage]=useState("dashboard");
+  const [navOpen,setNavOpen]=useState(false);
+  if(!user) return <Auth onLogin={u=>{setUser(u);setPage("dashboard");}}/>;
+  const nav=[
+    {section:"Main"},
+    {id:"dashboard",label:"Dashboard",icon:"🏠"},
+    {id:"library",label:"Book Library",icon:"📚"},
+    {section:"Teaching"},
+    {id:"training",label:"Teacher Training",icon:"🎓"},
+    {id:"gradebook",label:"Class Gradebook",icon:"📊"},
+    {id:"reportcards",label:"Report Cards",icon:"🧾"},
+    ...(user.role==='admin'?[{section:"Administration"},{id:"admin",label:"School Management",icon:"🏫"}]:[]),
+    {section:"Account"},
+    {id:"profile",label:"My Profile",icon:"👤"},
+  ];
+  const titles={dashboard:"Dashboard",library:"Book Library",training:"Teacher Training",gradebook:"Class Gradebook",reportcards:"Report Cards",admin:"School Management",profile:"My Profile"};
+  const render=()=>({dashboard:<Dashboard user={user} go={setPage}/>,library:<Library/>,training:<Training/>,
+    gradebook:<Gradebook/>,reportcards:<ReportCard/>,admin:<AdminSMS/>,profile:<Profile user={user}/>}[page]||<Dashboard user={user} go={setPage}/>);
+  return (
+   <div className="shell">
+    <div className={"sb-backdrop"+(navOpen?" show":"")} onClick={()=>setNavOpen(false)}></div>
+    <div className={"sb"+(navOpen?" open":"")}>
+      <div className="sb-logo"><img src={LOGO_AZHAR} alt="Azhar Publishers"/><div className="mark">Azhar<span>Ed</span></div><p>Teacher Platform · Book Factory</p></div>
+      <nav className="sb-nav">
+        {nav.map((it,i)=> it.section
+          ? <div key={i} className="sb-sec">{it.section}</div>
+          : <div key={it.id} className={"sb-item"+(page===it.id?" active":"")} onClick={()=>{setPage(it.id);setNavOpen(false);}}><span className="si">{it.icon}</span>{it.label}</div>)}
+      </nav>
+      <div className="sb-foot">
+        <div className="sb-user">
+          <div className="avatar" style={{background:user.role==='admin'?'#e94560':'#00a884'}}>{initials(user.name)}</div>
+          <div><div className="name">{user.name}</div><div className="role">{user.role}</div></div>
+        </div>
+        <div className="sb-logout" onClick={()=>setUser(null)}>↩ Sign out</div>
+      </div>
+    </div>
+    <div className="content-area">
+      <div className="topbar"><div className="topbar-left"><button className="hamburger" onClick={()=>setNavOpen(o=>!o)} aria-label="Menu">☰</button><h1>{titles[page]}</h1></div><span className="role-badge">{user.role}</span></div>
+      <div className="main">{render()}</div>
+    </div>
+   </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+/* AzharEd PRO test suite (jsdom) — full AzharEd suite + MAKTAB imports.
+   Setup (once):  cd /tmp/build && npm init -y && npm i esbuild react@18.2.0 react-dom@18.2.0 jsdom
+   Compile:       extract <script type="text/babel"> from index.html -> /tmp/app.jsx
+                  esbuild /tmp/app.jsx --loader:.jsx=jsx --outfile=/tmp/app.compiled.js
+   Run:           cd /tmp/build && node <path to this file> */
+const fs = require("fs");
+const path = require("path");
+const { JSDOM } = require("jsdom");
+const DEPLOY = path.join(__dirname, "..");
+
+const dom = new JSDOM(`<!DOCTYPE html><html><body><div id="root"></div></body></html>`,
+  { url: "https://azhared.test/", pretendToBeVisual: true });
+global.window = dom.window; global.document = dom.window.document;
+global.localStorage = dom.window.localStorage; global.navigator = dom.window.navigator;
+global.confirm = () => true;
+let openedDocs = [], openedUrls = [];
+window.open = (u) => { openedUrls.push(u || ""); const doc = { html: "", write(s){ this.html += s; }, close(){} }; openedDocs.push(doc); return { document: doc }; };
+
+global.React = require("react"); global.ReactDOM = require("react-dom/client");
+const { act } = require("react-dom/test-utils");
+global.IS_REACT_ACT_ENVIRONMENT = true;
+
+eval(fs.readFileSync(path.join(DEPLOY, "../AzharEd_Deploy/content_data.js"), "utf8"));
+window.AZHAR_CONTENT = global.window.AZHAR_CONTENT;
+eval(fs.readFileSync(path.join(DEPLOY, "../AzharEd_Deploy/question_bank.js"), "utf8"));
+window.AZHAR_QBANK = global.window.AZHAR_QBANK;
+act(() => { eval(fs.readFileSync("/tmp/pro.compiled.js", "utf8")); });
+
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const clickEl = el => act(() => { el.dispatchEvent(new window.MouseEvent("click", { bubbles: true })); });
+const typeIn = (el, val) => act(() => {
+  const st = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+  st.call(el, val); el.dispatchEvent(new window.Event("input", { bubbles: true }));
+});
+const selectVal = (el, val) => act(() => {
+  const st = Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, "value").set;
+  st.call(el, val); el.dispatchEvent(new window.Event("change", { bubbles: true }));
+});
+const results = [];
+const check = (n, c) => { results.push((c ? "PASS" : "FAIL") + "  " + n); if (!c) process.exitCode = 1; };
+const navTo = l => clickEl($$(".sb-item").find(i => i.textContent.includes(l)));
+const smsTab = l => clickEl($$(".sms-tab").find(x => x.textContent.includes(l)));
+
+/* ---- auth + dashboard ---- */
+check("auth screen renders", document.body.textContent.includes("Teacher & School Portal"));
+clickEl($$(".chip").find(c => c.textContent.includes("admin")));
+check("dashboard after login", document.body.textContent.includes("Welcome,"));
+check("dashboard has ring", $$(".ringwrap svg").length >= 1);
+check("session saved", (localStorage.getItem("azhared2:session") || "").includes("admin"));
+
+/* ---- library ---- */
+navTo("Book Library");
+check("library renders all books", $$(".book-card").length === window.AZHAR_CONTENT.books.length);
+clickEl($$(".book-card")[0]);
+check("book modal opens", !!$(".modal"));
+clickEl($$(".act2").find(a => a.textContent.includes("Digital Flipbook")));
+check("flipbook opened", openedUrls.length + openedDocs.length >= 1);
+clickEl($(".modal .star-btn")); clickEl($(".modal-x"));
+check("favourite + viewed saved", JSON.parse(localStorage.getItem("azhared2:favs")).length === 1 && !!localStorage.getItem("azhared2:viewed"));
+
+/* ---- paper generator (book-tailored) ---- */
+navTo("Paper Generator");
+check("papergen renders with howto", document.body.textContent.includes("How this page works"));
+const chip = (label) => $$(".fchip").find(c => c.textContent.trim().startsWith(label));
+clickEl(chip("Nursery"));
+check("book chips for early years", $$(".fchip").some(c => c.textContent.includes("Counting Book")));
+clickEl($$(".fchip").find(c => c.textContent.includes("Panda Counting Book")));
+check("page range shows", document.body.textContent.includes("questions available in this range"));
+clickEl($$("button").find(b => b.textContent.includes("Generate paper")));
+check("paper generated from book", $$(".mini").some(m => m.textContent.startsWith("p. ")));
+clickEl($$("button").find(b => b.textContent.includes("Print for students")));
+check("student paper printed (no answers)", openedDocs[openedDocs.length - 1].html.includes("Total Marks") && !openedDocs[openedDocs.length - 1].html.includes("Answer Key"));
+clickEl($$("button").find(b => b.textContent.includes("Print with answers")));
+check("teacher paper printed (with key)", openedDocs[openedDocs.length - 1].html.includes("Answer Key"));
+clickEl(chip("Three"));
+check("class 3 uses subject bank", document.body.textContent.includes("general subject bank"));
+clickEl($$(".fchip").find(c => c.textContent.trim() === "Maths"));
+clickEl($$("button").find(b => b.textContent.includes("Generate paper")));
+check("maths paper generated", (document.body.textContent.match(/= ____/g) || []).length >= 3);
+clickEl($$("button").find(b => b.textContent.trim() === "Show"));
+const addInp = $$("input").find(i => i.placeholder && i.placeholder.includes("Type a question"));
+typeIn(addInp, "Custom Q: solve 5 word problems.");
+clickEl($$("button").find(b => b.textContent === "Add"));
+check("custom question saved", (localStorage.getItem("azhared2:qbank2") || "").includes("Custom Q"));
+
+/* ---- lesson planner ---- */
+navTo("Lesson Planner");
+check("planner renders with howto", document.body.textContent.includes("Lesson Planner") && document.body.textContent.includes("How this page works"));
+check("planner week chips", $$(".fchip").filter(c => /^\d+$/.test(c.textContent.trim())).length >= 14);
+const planInp = $$(".gtable .tt-inp")[0];
+typeIn(planInp, "Counting book p. 12-15");
+check("plan saved", (localStorage.getItem("azhared2:planner") || "").includes("p. 12-15"));
+check("planner progress text", document.body.textContent.includes("subjects planned"));
+clickEl($$("button").find(b => b.textContent.includes("Print this week")));
+check("week printed", openedDocs[openedDocs.length - 1].html.includes("Weekly Lesson Plan"));
+
+/* ---- gradebook + bulk report cards ---- */
+navTo("Class Gradebook");
+sels = $$(".rc-toolbar select");
+selectVal(sels[0], "Nursery");
+clickEl($$("button").find(b => b.textContent.includes("Import class students")));
+check("students imported", $$(".gtable tbody tr").length >= 2);
+navTo("Report Cards");
+check("bulk print select present", $$("select").some(s => s.textContent.includes("Print whole class")));
+const bulkSel = $$("select").find(s => s.textContent.includes("Print whole class"));
+selectVal(bulkSel, [...bulkSel.options].find(o => o.value).value);
+check("bulk cards printed", openedDocs[openedDocs.length - 1].html.split("Progress Report Card").length >= 3);
+
+/* ---- SMS: reports tab ---- */
+navTo("School Management");
+smsTab("Student Attendance");
+clickEl($$(".att-b")[1]); // mark one absent today
+smsTab("Reports");
+check("reports tab renders", document.body.textContent.includes("Monthly reports"));
+check("report KPIs", document.body.textContent.includes("Days attendance marked"));
+clickEl($$("button").find(b => b.textContent.includes("Student attendance register")));
+check("attendance register printed", openedDocs[openedDocs.length - 1].html.includes("Attendance Register"));
+clickEl($$("button").find(b => b.textContent.includes("Fee report")));
+check("fee report printed", openedDocs[openedDocs.length - 1].html.includes("Defaulter List"));
+
+/* ---- timetable dropdowns ---- */
+smsTab("Timetable");
+check("timetable dropdown cells", $$(".tt-cell").length === 25);
+
+/* ---- homework diary ---- */
+navTo("Homework Diary");
+check("diary renders", document.body.textContent.includes("Homework Diary"));
+const dInp = $$(".gtable .tt-inp")[0];
+typeIn(dInp, "Trace numbers 1-5");
+check("diary saves per class+day", (localStorage.getItem("azhared2:diary") || "").includes("Trace numbers 1-5"));
+clickEl($$("button").find(b => b.textContent.includes("Print")));
+check("diary prints", openedDocs[openedDocs.length - 1].html.includes("Homework Diary"));
+check("diary WhatsApp button", $$("button").some(b => b.textContent.includes("Send to WhatsApp")));
+
+/* ---- certificates ---- */
+navTo("Certificates");
+check("certs page renders", document.body.textContent.includes("Which award?"));
+clickEl($$(".fchip").find(c => c.textContent.includes("Best Handwriting")));
+check("cert preview updates", document.body.textContent.includes("beautiful, careful writing"));
+clickEl($$("button").find(b => b.textContent.includes("Print certificate")));
+check("certificate prints", openedDocs[openedDocs.length - 1].html.includes("CERTIFICATE") && openedDocs[openedDocs.length - 1].html.includes("proudly presented to"));
+
+/* ---- fee vouchers ---- */
+navTo("School Management");
+smsTab("Fees");
+clickEl($$("button").find(b => b.textContent.includes("Print fee vouchers")));
+check("fee vouchers print", openedDocs[openedDocs.length - 1].html.includes("FEE VOUCHER") && openedDocs[openedDocs.length - 1].html.includes("Amount payable"));
+clickEl($$("button").find(b => b.title === "Print this student's fee voucher"));
+check("single student voucher prints", openedDocs[openedDocs.length - 1].html.includes("FEE VOUCHER") && (openedDocs[openedDocs.length - 1].html.match(/class="v"/g) || []).length === 1);
+
+/* ---- MAKTAB imports: library hero + focus mode ---- */
+navTo("Book Library");
+check("library hero renders", !!$(".lib-hero") && !!$(".lh-title"));
+check("hero has featured cover", !!$(".lh-cov img"));
+clickEl($$("button").find(b => b.textContent.includes("Teach this now")));
+check("hero opens Focus Mode", !!$(".fx2"));
+check("focus has 4 tiles + timer ring", $$(".fxa2").length === 4 && !!$(".tring2 svg"));
+clickEl($$(".tchip2").find(b => b.textContent === "30 min"));
+check("timer set to 30", $(".tt2").textContent.includes("30:0"));
+clickEl($$(".tchip2").find(b => b.textContent.includes("Start lesson")));
+check("timer starts", $$(".tchip2").some(b => b.textContent.includes("Pause")));
+const qzBtn = $$(".fxa2").find(b => b.textContent.includes("Quick quiz"));
+if (qzBtn && !qzBtn.disabled) {
+  clickEl(qzBtn);
+  check("big quiz opens", !!$(".qz2") && $$(".qzo2").length >= 2);
+  clickEl($$(".qzo2")[0]);
+  check("quiz answer feedback", $$(".qzo2.yes,.qzo2.no").length >= 1);
+  clickEl($(".qz2-x"));
+} else check("quiz available", false);
+clickEl($(".fx2-exit"));
+check("focus exits", !$(".fx2"));
+clickEl($$(".book-card")[0]);
+check("book modal has Focus Mode entry", $$(".act2").some(a => a.textContent.includes("Focus Mode")));
+clickEl($$(".act2").find(a => a.textContent.includes("Focus Mode")));
+check("modal launches focus", !!$(".fx2"));
+clickEl($(".fx2-exit"));
+
+/* ---- Urdu toggle ---- */
+const langBtn = $$("button").find(b => b.title === "اردو / English");
+check("lang toggle present", !!langBtn);
+clickEl(langBtn);
+check("urdu applied", $$(".sb-item").some(i => i.textContent.includes("کتب خانہ")) && document.documentElement.lang === "ur");
+clickEl($$("button").find(b => b.title === "اردو / English"));
+check("english restored", $$(".sb-item").some(i => i.textContent.includes("Book Library")));
+
+/* ---- settings ---- */
+navTo("Profile & Settings");
+check("storage meter", document.body.textContent.includes("KB used"));
+check("no bar charts anywhere", $$(".bars").length === 0 && $$(".storage-bar").length === 0);
+
+/* ---- PWA files ---- */
+
+console.log(results.join("\n"));
+console.log("\nTotal:", results.length, "| Fails:", results.filter(r => r.startsWith("FAIL")).length);

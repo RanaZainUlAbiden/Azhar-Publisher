@@ -1,0 +1,92 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>2nd Term Sheet Exam</title><style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 12pt; }
+.page { width: 210mm; height: 297mm; padding: 6mm; page-break-after: always; position: relative; }
+.page:last-child { page-break-after: auto; }
+.frame { border: 4px solid #000; padding: 5mm 6mm; height: 285mm; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.pgnum { position: absolute; top: -7mm; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px; font-weight: 700; font-size: 12pt; }
+.header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 3mm; margin-bottom: 3mm; }
+.subject-label { font-weight: 700; font-size: 11pt; color: #c00; }
+.brand-center { text-align: center; line-height: 1.05; }
+.brand-center .azhar { font-family: Georgia, serif; font-weight: 700; font-size: 15pt; color: #1a3a8f; letter-spacing: 1px; }
+.brand-center .series { font-size: 9pt; color: #555; }
+.time { font-weight: 700; font-size: 10.5pt; }
+.title { text-align: center; font-size: 20pt; font-weight: 700; margin: 1mm 0 3mm; color: #1a3a8f; letter-spacing: 1px; }
+.student-row { display: flex; gap: 4mm; margin-bottom: 3mm; font-size: 10.5pt; font-weight: 700; }
+.student-row > div { flex: 1; border-bottom: 1.5px solid #000; padding: 1mm 0; }
+.student-row > div span { color: #555; font-weight: 400; }
+.marks-table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 10pt; }
+.marks-table th, .marks-table td { border: 1.5px solid #000; padding: 1mm; text-align: center; }
+.marks-table th { background: #1a3a8f; color: #fff; }
+.qhead { background: #fef0d5; border: 1.5px solid #000; padding: 1.2mm 4mm; font-weight: 700; font-size: 11pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+.qhead .marks-box { border: 1.5px solid #000; padding: 0.4mm 4mm; font-size: 10pt; background: #fff; min-width: 13mm; text-align: center; }
+.footer { margin-top: auto; text-align: center; font-size: 8.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 1mm; }
+
+/* trace letters */
+.trace-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2mm; margin: 3mm 0; width: 100%; }
+.trace-cell, .trace-blank { aspect-ratio: 1; border: 1.5px solid #d6d6d6; background: #fafafa; }
+.trace-blank { border: 1.5px solid #d96098; background: #fff; }
+.trace-cell svg { width: 100%; height: 100%; display: block; }
+
+/* match capital-small */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 3mm; background: #fff; }
+.match-grid .col { display: flex; flex-direction: column; gap: 3mm; }
+.match-cell { font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; width: 16mm; height: 14mm; border: 2.5px solid #1a3a8f; border-radius: 4mm; display: flex; align-items: center; justify-content: center; background: #fff; align-self: center; }
+
+/* picture grid */
+.pic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 2mm 0; }
+.pic-cell { border: 1.5px solid #d96098; background: #fff; padding: 2mm; text-align: center; overflow: hidden; }
+.pic-cell img { width: 100%; height: 22mm; object-fit: contain; }
+.pic-cell .lbl { font-size: 10pt; font-weight: 700; color: #1a3a8f; margin-top: 1mm; }
+.pic-cell .blank-circle { width: 7mm; height: 7mm; border: 2px solid #1a3a8f; border-radius: 50%; margin: 1mm auto 0; }
+
+/* fill-blank box */
+.fill-row { border: 1.5px solid #d96098; padding: 3mm 4mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 14pt; line-height: 2; background: #fff; }
+
+/* word grid */
+.word-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 2mm 0; }
+.word-cell { border: 1.5px solid #d96098; background: #fff; padding: 3mm; display: flex; flex-direction: column; align-items: center; gap: 2mm; }
+.word-cell img { height: 18mm; width: auto; max-width: 28mm; }
+.word-cell .word { font-family: Georgia, serif; font-size: 14pt; font-weight: 700; color: #1a3a8f; letter-spacing: 2px; }
+
+/* sentence row */
+.sent-row { border: 1.5px solid #d96098; background: #fff; padding: 2.5mm 3mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; min-height: 12mm; line-height: 1.6; }
+
+/* read-write block (lines for student answers) */
+.write-lines { border: 1.5px solid #d96098; padding: 3mm 4mm; margin: 2mm 0; background: #fff; }
+.write-lines .line { border-bottom: 1.5px dashed #999; height: 9mm; margin-bottom: 1mm; }
+
+/* circle grid for vowels/consonants */
+.circle-row { border: 1.5px solid #d96098; background: #fff; padding: 3mm 4mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 16pt; letter-spacing: 5px; }
+
+/* days/greetings panel */
+.list-box { border: 1.5px solid #d96098; background: #fff; padding: 3mm 4mm; margin: 2mm 0; }
+.list-box .item { font-family: Georgia, serif; font-size: 13pt; padding: 1.5mm 0; border-bottom: 1px dashed #ccc; }
+.list-box .item:last-child { border-bottom: none; }
+
+.sound-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sound-grid .col { display: flex; flex-direction: column; gap: 2mm; }
+.sound-grid .col .head { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 12pt; }
+.sound-grid .col .word { font-family: Georgia, serif; font-size: 13pt; padding: 1mm 0; text-align: center; letter-spacing: 1px; }
+.word-bank { border: 2px dashed #1a3a8f; background: #f3f6ff; padding: 3mm 4mm; margin: 2mm 0; text-align: center; font-family: Georgia, serif; font-size: 13pt; letter-spacing: 2px; }
+.sent-fill { border: 1.5px solid #d96098; background: #fff; padding: 2.5mm 3mm; margin: 1.5mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 1.4; }
+.read-box { border: 2px solid #1a3a8f; background: #fffbe6; padding: 4mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 1.7; }
+.q-list-box { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; font-family: Georgia, serif; font-size: 12.5pt; line-height: 1.9; }
+</style></head><body><div class="page"><div class="frame"><div class="pgnum">1</div><div class="header-row">
+<div class="subject-label">English Prep</div>
+<div class="brand-center"><div class="azhar">AZHAR PUBLISHERS</div><div class="series">Early Years Assessment Series</div></div>
+<div class="time">Time: 2 Hours</div>
+</div>
+<div class="title">2nd Term Sheet Exam</div>
+<div class="student-row">
+<div><span>Name:</span> ____________________</div>
+<div><span>Roll No:</span> __________</div>
+<div><span>Date:</span> __________</div>
+</div>
+<table class="marks-table">
+<tr><th>Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>Total</th></tr>
+<tr><td><b>Total Marks</b></td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>40</b></td></tr>
+<tr><td><b>Obtained Marks</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table><div class="qhead"><span>Q. No. 1: Read these short vowel words.</span><span class="marks-box">5</span></div><div class="word-bank">cab &nbsp;&nbsp; quick &nbsp;&nbsp; jug &nbsp;&nbsp; ran &nbsp;&nbsp; kid &nbsp;&nbsp; brush &nbsp;&nbsp; glass &nbsp;&nbsp; but</div><div class="qhead"><span>Q. No. 2: Read these long vowel words.</span><span class="marks-box">5</span></div><div class="word-bank">race &nbsp;&nbsp; kite &nbsp;&nbsp; union &nbsp;&nbsp; train &nbsp;&nbsp; white &nbsp;&nbsp; unique &nbsp;&nbsp; page &nbsp;&nbsp; pie</div><div class="footer">English Prep — 2nd Term Sheet Exam — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">2</div><div class="qhead"><span>Q. No. 3: Sort the words by their sound.</span><span class="marks-box">5</span></div><div class="word-bank">cab &nbsp;&nbsp; race &nbsp;&nbsp; kid &nbsp;&nbsp; kite &nbsp;&nbsp; jug &nbsp;&nbsp; union &nbsp;&nbsp; quick &nbsp;&nbsp; train</div><div class="sound-grid"><div class="col"><div class="head">Short vowel</div><div class="word">______________</div><div class="word">______________</div><div class="word">______________</div><div class="word">______________</div></div><div class="col"><div class="head">Long vowel</div><div class="word">______________</div><div class="word">______________</div><div class="word">______________</div><div class="word">______________</div></div></div><div class="qhead"><span>Q. No. 4: Write the beginning sound of each word.</span><span class="marks-box">5</span></div><div class="word-grid"><div class="word-cell"><div class="word">__pple (apple)</div></div><div class="word-cell"><div class="word">__oon (moon)</div></div><div class="word-cell"><div class="word">__rum (drum)</div></div><div class="word-cell"><div class="word">__ate (gate)</div></div><div class="word-cell"><div class="word">__nk (ink)</div></div><div class="word-cell"><div class="word">__ock (lock)</div></div></div><div class="qhead"><span>Q. No. 5: Match each greeting to the right time.</span><span class="marks-box">5</span></div><div class="q-list-box">1) Good morning → morning / night<br>2) Good evening → afternoon / evening<br>3) Good bye → meeting / leaving<br>4) Hello → meeting / leaving<br>5) Good afternoon → morning / afternoon</div><div class="footer">English Prep — 2nd Term Sheet Exam — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">3</div><div class="qhead"><span>Q. No. 6: Read these sentences and copy them.</span><span class="marks-box">5</span></div><div class="read-box">The cab is on the page.<br>The kid likes the kite.<br>The jug is in the union.</div><div class="write-lines"><div class="line"></div><div class="line"></div><div class="line"></div></div><div class="qhead"><span>Q. No. 7: Write any 4 vowel words of your choice.</span><span class="marks-box">5</span></div><div class="write-lines"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div><div class="qhead"><span>Q. No. 8: Choose the right word for each.</span><span class="marks-box">5</span></div><div class="q-list-box">1) Begins with vowel ‘a’ → apple / banana<br>2) Long ‘i’ word → kite / bin<br>3) Short ‘u’ word → jug / unicorn<br>4) Long ‘a’ word → train / cab<br>5) Greeting in morning → Good morning / Good bye</div><div class="footer">English Prep — 2nd Term Sheet Exam — © Azhar Publishers</div></div></div></body></html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Prep Annual</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 13pt; }
+  .page { width: 210mm; height: 297mm; padding: 6mm; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: auto; }
+  .frame { border: 4px solid #000; padding: 6mm 7mm; min-height: 285mm; height: 285mm; position: relative; display: flex; flex-direction: column; }
+  .pgnum { position: absolute; top: -7mm; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px; font-weight: 700; font-size: 12pt; }
+  .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 4mm; margin-bottom: 4mm; }
+  .subject-label { font-weight: 700; font-size: 12pt; color: #c00; }
+  .brand-center { text-align: center; line-height: 1.05; }
+  .brand-center .azhar { font-family: Georgia, serif; font-weight: 700; font-size: 16pt; color: #1a3a8f; letter-spacing: 1px; }
+  .brand-center .series { font-size: 9pt; color: #555; }
+  .time { font-weight: 700; font-size: 11pt; }
+  .title { text-align: center; font-size: 22pt; font-weight: 700; margin: 2mm 0 4mm; color: #1a3a8f; letter-spacing: 1px; }
+  .student-row { display: flex; gap: 5mm; margin-bottom: 4mm; font-size: 11pt; font-weight: 700; }
+  .student-row > div { flex: 1; border-bottom: 1.5px solid #000; padding: 1.5mm 0; }
+  .student-row > div span { color: #555; font-weight: 400; }
+  .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 10pt; }
+  .marks-table th, .marks-table td { border: 1.5px solid #000; padding: 1.2mm; text-align: center; }
+  .marks-table th { background: #1a3a8f; color: #fff; }
+  .qhead { background: #fef0d5; border: 1.5px solid #000; padding: 1.5mm 4mm; font-weight: 700; font-size: 12pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+  .qhead .marks-box { border: 1.5px solid #000; padding: 0.5mm 4mm; font-size: 11pt; background: #fff; min-width: 13mm; text-align: center; }
+  .footer { margin-top: auto; text-align: center; font-size: 8.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 2mm; }
+
+  .big-numeral-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; }
+  .big-numeral-cell { aspect-ratio: 1; border: 2px solid #d96098; background: #fff; display: flex; align-items: center; justify-content: center; }
+  .big-numeral-cell .num { font-family: Georgia, serif; font-size: 50pt; font-weight: 700; color: #1a3a8f; }
+  .find-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2mm; margin: 2mm 0; }
+  .find-cell { aspect-ratio: 1; border: 2px solid #d96098; background: #fff; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 26pt; font-weight: 700; color: #1a3a8f; }
+  .concept-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 3mm 0; }
+  .concept-cell { border: 2px solid #d96098; padding: 4mm; text-align: center; background: #fff; min-height: 65mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3mm; }
+  .concept-cell img { height: 28mm; width: auto; }
+  .concept-cell .label { font-size: 14pt; font-weight: 700; color: #1a3a8f; }
+  .concept-cell .blank-circle { width: 12mm; height: 12mm; border: 2px solid #1a3a8f; border-radius: 50%; }
+
+  .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; padding: 4mm; border: 2px solid #d96098; background: #fff; }
+  .add-cell { font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; text-align: center; padding: 2mm 3mm; border: 1.5px solid #d96098; background: #fffaf3; border-radius: 3mm; }
+  .add-cell .ans-line { display: inline-block; border-bottom: 2px solid #1a3a8f; width: 18mm; height: 1px; vertical-align: middle; margin-left: 3mm; }
+  .ordinal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; margin: 2mm 0; }
+  .ordinal-cell { border: 2px solid #d96098; padding: 3mm; text-align: center; background: #fff; }
+  .ordinal-cell .pos { font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; margin-bottom: 2mm; }
+  .ordinal-cell img { height: 14mm; }
+  .compare-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; }
+  .compare-cell { border: 2px solid #d96098; padding: 3mm; background: #fff; text-align: center; font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; }
+  .tally-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 2mm 0; }
+  .tally-cell { border: 2px solid #d96098; padding: 4mm; background: #fff; text-align: center; font-family: Georgia, serif; font-size: 16pt; font-weight: 700; color: #1a3a8f; }
+  .tally-cell .marks { font-size: 22pt; letter-spacing: 1mm; margin-bottom: 2mm; }
+  .tally-cell .ans { display: inline-block; width: 16mm; height: 6mm; border-bottom: 2px solid #1a3a8f; margin-left: 3mm; }
+
+  .trace-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; margin: 2mm 0; }
+  .trace-cell { aspect-ratio: 1; border: 1.5px solid #d6d6d6; background: #fafafa; }
+  .trace-cell svg { width: 100%; height: 100%; display: block; }
+  .trace-blank { aspect-ratio: 1; border: 1.5px solid #d96098; background: #fff; }
+
+  .obj-table { width: 100%; border-collapse: collapse; margin: 2mm 0; border: 1.5px solid #d96098; }
+  .obj-table tr { border-bottom: 1.5px solid #d96098; }
+  .obj-table tr:last-child { border-bottom: none; }
+  .obj-table td.objects { padding: 4mm; vertical-align: middle; height: 25mm; }
+  .obj-table td.objects .icon-row { display: flex; gap: 6mm; align-items: center; flex-wrap: wrap; }
+  .obj-table td.objects img { height: 16mm; width: auto; }
+  .obj-table td.answer { width: 26mm; text-align: center; border-left: 1.5px solid #d96098; }
+
+/* === overflow fix === */
+.color-row { overflow: hidden; }
+.color-row .objs { flex-wrap: nowrap; overflow: hidden; flex: 1; }
+.color-row .objs img { max-width: 14mm; flex-shrink: 1; }
+.match-quantity { overflow: hidden; }
+.match-quantity img { max-width: 14mm; flex-shrink: 1; }
+.obj-table td.objects { overflow: hidden; }
+.obj-table td.objects .icon-row { flex-wrap: nowrap; overflow: hidden; }
+.obj-table td.objects img { max-width: 16mm; flex-shrink: 1; }
+</style>
+</head><body><div class="page"><div class="frame"><div class="pgnum">1</div><div class="header-row">
+<div class="subject-label">Counting Prep</div>
+<div class="brand-center"><div class="azhar">AZHAR PUBLISHERS</div><div class="series">Early Years Assessment Series</div></div>
+<div class="time">Time: 2 Hours</div>
+</div>
+<div class="title">Annual Paper</div>
+<div class="student-row">
+<div><span>Name:</span> ____________________</div>
+<div><span>Roll No:</span> __________</div>
+<div><span>Date:</span> __________</div>
+</div>
+<table class="marks-table">
+<tr><th>Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>Total</th></tr>
+<tr><td><b>Total Marks</b></td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>40</b></td></tr>
+<tr><td><b>Obtained Marks</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+<div class="qhead"><span>Q. No. 1: Trace and write the numbers 11 to 20.</span><span class="marks-box">5</span></div>
+<div class="trace-row"><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M20.2 26.2L26.3 23.1M26.3 23.1L35.4 14.0M35.4 14.0L35.4 78.0M44.6 26.2L50.7 23.1M50.7 23.1L59.8 14.0M59.8 14.0L59.8 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.5 26.2L12.6 23.1M12.6 23.1L21.7 14.0M21.7 14.0L21.7 78.0M33.9 29.2L33.9 26.2M33.9 26.2L37.0 20.1M37.0 20.1L40.0 17.0M40.0 17.0L46.1 14.0M46.1 14.0L58.3 14.0M58.3 14.0L64.4 17.0M64.4 17.0L67.4 20.1M67.4 20.1L70.5 26.2M70.5 26.2L70.5 32.3M70.5 32.3L67.4 38.4M67.4 38.4L61.3 47.5M61.3 47.5L30.9 78.0M30.9 78.0L73.5 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.5 26.2L12.6 23.1M12.6 23.1L21.7 14.0M21.7 14.0L21.7 78.0M37.0 14.0L70.5 14.0M70.5 14.0L52.2 38.4M52.2 38.4L61.3 38.4M61.3 38.4L67.4 41.4M67.4 41.4L70.5 44.5M70.5 44.5L73.5 53.6M73.5 53.6L73.5 59.7M73.5 59.7L70.5 68.9M70.5 68.9L64.4 75.0M64.4 75.0L55.2 78.0M55.2 78.0L46.1 78.0M46.1 78.0L37.0 75.0M37.0 75.0L33.9 71.9M33.9 71.9L30.9 65.8" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M5.0 26.2L11.0 23.1M11.0 23.1L20.2 14.0M20.2 14.0L20.2 78.0M59.8 14.0L29.3 56.7M29.3 56.7L75.0 56.7M59.8 14.0L59.8 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.5 26.2L12.6 23.1M12.6 23.1L21.7 14.0M21.7 14.0L21.7 78.0M67.4 14.0L37.0 14.0M37.0 14.0L33.9 41.4M33.9 41.4L37.0 38.4M37.0 38.4L46.1 35.3M46.1 35.3L55.2 35.3M55.2 35.3L64.4 38.4M64.4 38.4L70.5 44.5M70.5 44.5L73.5 53.6M73.5 53.6L73.5 59.7M73.5 59.7L70.5 68.9M70.5 68.9L64.4 75.0M64.4 75.0L55.2 78.0M55.2 78.0L46.1 78.0M46.1 78.0L37.0 75.0M37.0 75.0L33.9 71.9M33.9 71.9L30.9 65.8" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div></div>
+<div class="trace-row"><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M8.0 26.2L14.1 23.1M14.1 23.1L23.2 14.0M23.2 14.0L23.2 78.0M69.0 23.1L65.9 17.0M65.9 17.0L56.8 14.0M56.8 14.0L50.7 14.0M50.7 14.0L41.5 17.0M41.5 17.0L35.4 26.2M35.4 26.2L32.4 41.4M32.4 41.4L32.4 56.7M32.4 56.7L35.4 68.9M35.4 68.9L41.5 75.0M41.5 75.0L50.7 78.0M50.7 78.0L53.7 78.0M53.7 78.0L62.9 75.0M62.9 75.0L69.0 68.9M69.0 68.9L72.0 59.7M72.0 59.7L72.0 56.7M72.0 56.7L69.0 47.5M69.0 47.5L62.9 41.4M62.9 41.4L53.7 38.4M53.7 38.4L50.7 38.4M50.7 38.4L41.5 41.4M41.5 41.4L35.4 47.5M35.4 47.5L32.4 56.7" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.5 26.2L12.6 23.1M12.6 23.1L21.7 14.0M21.7 14.0L21.7 78.0M73.5 14.0L43.0 78.0M30.9 14.0L73.5 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.5 26.2L12.6 23.1M12.6 23.1L21.7 14.0M21.7 14.0L21.7 78.0M46.1 14.0L37.0 17.0M37.0 17.0L33.9 23.1M33.9 23.1L33.9 29.2M33.9 29.2L37.0 35.3M37.0 35.3L43.0 38.4M43.0 38.4L55.2 41.4M55.2 41.4L64.4 44.5M64.4 44.5L70.5 50.6M70.5 50.6L73.5 56.7M73.5 56.7L73.5 65.8M73.5 65.8L70.5 71.9M70.5 71.9L67.4 75.0M67.4 75.0L58.3 78.0M58.3 78.0L46.1 78.0M46.1 78.0L37.0 75.0M37.0 75.0L33.9 71.9M33.9 71.9L30.9 65.8M30.9 65.8L30.9 56.7M30.9 56.7L33.9 50.6M33.9 50.6L40.0 44.5M40.0 44.5L49.1 41.4M49.1 41.4L61.3 38.4M61.3 38.4L67.4 35.3M67.4 35.3L70.5 29.2M70.5 29.2L70.5 23.1M70.5 23.1L67.4 17.0M67.4 17.0L58.3 14.0M58.3 14.0L46.1 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M8.0 26.2L14.1 23.1M14.1 23.1L23.2 14.0M23.2 14.0L23.2 78.0M72.0 35.3L69.0 44.5M69.0 44.5L62.9 50.6M62.9 50.6L53.7 53.6M53.7 53.6L50.7 53.6M50.7 53.6L41.5 50.6M41.5 50.6L35.4 44.5M35.4 44.5L32.4 35.3M32.4 35.3L32.4 32.3M32.4 32.3L35.4 23.1M35.4 23.1L41.5 17.0M41.5 17.0L50.7 14.0M50.7 14.0L53.7 14.0M53.7 14.0L62.9 17.0M62.9 17.0L69.0 23.1M69.0 23.1L72.0 35.3M72.0 35.3L72.0 50.6M72.0 50.6L69.0 65.8M69.0 65.8L62.9 75.0M62.9 75.0L53.7 78.0M53.7 78.0L47.6 78.0M47.6 78.0L38.5 75.0M38.5 75.0L35.4 68.9" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M4.5 29.2L4.5 26.2M4.5 26.2L6.9 20.1M6.9 20.1L9.4 17.0M9.4 17.0L14.3 14.0M14.3 14.0L24.1 14.0M24.1 14.0L29.0 17.0M29.0 17.0L31.4 20.1M31.4 20.1L33.9 26.2M33.9 26.2L33.9 32.3M33.9 32.3L31.4 38.4M31.4 38.4L26.5 47.5M26.5 47.5L2.0 78.0M2.0 78.0L36.3 78.0M58.4 14.0L51.0 17.0M51.0 17.0L46.1 26.2M46.1 26.2L43.7 41.4M43.7 41.4L43.7 50.6M43.7 50.6L46.1 65.8M46.1 65.8L51.0 75.0M51.0 75.0L58.4 78.0M58.4 78.0L63.3 78.0M63.3 78.0L70.6 75.0M70.6 75.0L75.5 65.8M75.5 65.8L78.0 50.6M78.0 50.6L78.0 41.4M78.0 41.4L75.5 26.2M75.5 26.2L70.6 17.0M70.6 17.0L63.3 14.0M63.3 14.0L58.4 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div></div>
+<div class="qhead"><span>Q. No. 2: Add and write the answer.</span><span class="marks-box">5</span></div>
+<div class="add-grid">
+<div class="add-cell">3+4 = <span class="ans-line"></span></div><div class="add-cell">5+2 = <span class="ans-line"></span></div>
+<div class="add-cell">6+3 = <span class="ans-line"></span></div><div class="add-cell">4+5 = <span class="ans-line"></span></div>
+<div class="add-cell">7+2 = <span class="ans-line"></span></div><div class="add-cell">2+8 = <span class="ans-line"></span></div>
+</div>
+<div class="footer">Counting Prep — Annual Paper — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">2</div><div class="qhead"><span>Q. No. 3: Subtract and write the answer.</span><span class="marks-box">5</span></div>
+<div class="add-grid">
+<div class="add-cell">10-3 = <span class="ans-line"></span></div><div class="add-cell">8-2 = <span class="ans-line"></span></div>
+<div class="add-cell">9-4 = <span class="ans-line"></span></div><div class="add-cell">7-3 = <span class="ans-line"></span></div>
+<div class="add-cell">6-1 = <span class="ans-line"></span></div><div class="add-cell">5-2 = <span class="ans-line"></span></div>
+</div>
+<div class="qhead"><span>Q. No. 4: Identify the ordinal position.</span><span class="marks-box">5</span></div>
+<div class="ordinal-grid">
+<div class="ordinal-cell"><div class="pos">1st</div><img src="_goldcrest_icons/duck.png"></div>
+<div class="ordinal-cell"><div class="pos">3rd</div><img src="_goldcrest_icons/lion.png"></div>
+<div class="ordinal-cell"><div class="pos">5th</div><img src="_goldcrest_icons/cat.png"></div>
+</div>
+<div class="footer">Counting Prep — Annual Paper — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">3</div><div class="qhead"><span>Q. No. 5: Write &gt;, &lt;, or = in the blank.</span><span class="marks-box">5</span></div>
+<div class="compare-grid">
+<div class="compare-cell">7 ___ 9</div><div class="compare-cell">12 ___ 8</div><div class="compare-cell">15 ___ 15</div><div class="compare-cell">6 ___ 14</div><div class="compare-cell">20 ___ 10</div>
+</div>
+<div class="qhead"><span>Q. No. 6: Count tally marks and write the number.</span><span class="marks-box">5</span></div>
+<div class="tally-grid">
+<div class="tally-cell"><div class="marks">||||</div><span class="ans"></span></div>
+<div class="tally-cell"><div class="marks">|||||||</div><span class="ans"></span></div>
+<div class="tally-cell"><div class="marks">||||||||||</div><span class="ans"></span></div>
+</div>
+<div class="footer">Counting Prep — Annual Paper — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">4</div><div class="qhead"><span>Q. No. 7: Count and write the missing numbers.</span><span class="marks-box">5</span></div>
+<div style="font-size: 18pt; padding: 5mm; border: 2px solid #d96098; background: #fff;">
+<div style="margin: 4mm 0;">11, 12, ____, 14, ____, 16, ____, 18</div>
+<div style="margin: 4mm 0;">20, 19, ____, 17, ____, 15</div>
+<div style="margin: 4mm 0;">5, ____, 15, ____, 25, ____</div>
+</div>
+<div class="qhead"><span>Q. No. 8: Circle the bigger number in each pair.</span><span class="marks-box">5</span></div>
+<div class="compare-grid">
+<div class="compare-cell">13 &nbsp; 7</div><div class="compare-cell">9 &nbsp; 18</div><div class="compare-cell">25 &nbsp; 15</div><div class="compare-cell">11 &nbsp; 16</div><div class="compare-cell">30 &nbsp; 19</div>
+</div>
+<div class="footer">Counting Prep — Annual Paper — © Azhar Publishers</div></div></div></body></html>

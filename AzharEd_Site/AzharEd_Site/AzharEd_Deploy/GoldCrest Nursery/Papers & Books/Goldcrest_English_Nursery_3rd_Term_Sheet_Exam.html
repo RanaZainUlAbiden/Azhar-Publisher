@@ -1,0 +1,116 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>3rd Term Sheet Exam</title><style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 12pt; }
+.page { width: 210mm; height: 297mm; padding: 6mm; page-break-after: always; position: relative; }
+.page:last-child { page-break-after: auto; }
+.frame { border: 4px solid #000; padding: 5mm 6mm; height: 285mm; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.pgnum { position: absolute; top: -7mm; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px; font-weight: 700; font-size: 12pt; }
+.header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 3mm; margin-bottom: 3mm; }
+.subject-label { font-weight: 700; font-size: 11pt; color: #c00; }
+.brand-center { text-align: center; line-height: 1.05; }
+.brand-center .azhar { font-family: Georgia, serif; font-weight: 700; font-size: 15pt; color: #1a3a8f; letter-spacing: 1px; }
+.brand-center .series { font-size: 9pt; color: #555; }
+.time { font-weight: 700; font-size: 10.5pt; }
+.title { text-align: center; font-size: 20pt; font-weight: 700; margin: 1mm 0 3mm; color: #1a3a8f; letter-spacing: 1px; }
+.student-row { display: flex; gap: 4mm; margin-bottom: 3mm; font-size: 10.5pt; font-weight: 700; }
+.student-row > div { flex: 1; border-bottom: 1.5px solid #000; padding: 1mm 0; }
+.student-row > div span { color: #555; font-weight: 400; }
+.marks-table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 10pt; }
+.marks-table th, .marks-table td { border: 1.5px solid #000; padding: 1mm; text-align: center; }
+.marks-table th { background: #1a3a8f; color: #fff; }
+.qhead { background: #fef0d5; border: 1.5px solid #000; padding: 1.2mm 4mm; font-weight: 700; font-size: 11pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+.qhead .marks-box { border: 1.5px solid #000; padding: 0.4mm 4mm; font-size: 10pt; background: #fff; min-width: 13mm; text-align: center; }
+.footer { margin-top: auto; text-align: center; font-size: 8.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 1mm; }
+
+/* trace letters */
+.trace-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2mm; margin: 3mm 0; width: 100%; }
+.trace-cell, .trace-blank { aspect-ratio: 1; border: 1.5px solid #d6d6d6; background: #fafafa; }
+.trace-blank { border: 1.5px solid #d96098; background: #fff; }
+.trace-cell svg { width: 100%; height: 100%; display: block; }
+
+/* match capital-small */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 3mm; background: #fff; }
+.match-grid .col { display: flex; flex-direction: column; gap: 3mm; }
+.match-cell { font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; width: 16mm; height: 14mm; border: 2.5px solid #1a3a8f; border-radius: 4mm; display: flex; align-items: center; justify-content: center; background: #fff; align-self: center; }
+
+/* picture grid */
+.pic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 2mm 0; }
+.pic-cell { border: 1.5px solid #d96098; background: #fff; padding: 2mm; text-align: center; overflow: hidden; }
+.pic-cell img { width: 100%; height: 22mm; object-fit: contain; }
+.pic-cell .lbl { font-size: 10pt; font-weight: 700; color: #1a3a8f; margin-top: 1mm; }
+.pic-cell .blank-circle { width: 7mm; height: 7mm; border: 2px solid #1a3a8f; border-radius: 50%; margin: 1mm auto 0; }
+
+/* fill-blank box */
+.fill-row { border: 1.5px solid #d96098; padding: 3mm 4mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 14pt; line-height: 2; background: #fff; }
+
+/* word grid */
+.word-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 2mm 0; }
+.word-cell { border: 1.5px solid #d96098; background: #fff; padding: 3mm; display: flex; flex-direction: column; align-items: center; gap: 2mm; }
+.word-cell img { height: 18mm; width: auto; max-width: 28mm; }
+.word-cell .word { font-family: Georgia, serif; font-size: 14pt; font-weight: 700; color: #1a3a8f; letter-spacing: 2px; }
+
+/* sentence row */
+.sent-row { border: 1.5px solid #d96098; background: #fff; padding: 2.5mm 3mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; min-height: 12mm; line-height: 1.6; }
+
+/* read-write block (lines for student answers) */
+.write-lines { border: 1.5px solid #d96098; padding: 3mm 4mm; margin: 2mm 0; background: #fff; }
+.write-lines .line { border-bottom: 1.5px dashed #999; height: 9mm; margin-bottom: 1mm; }
+
+/* circle grid for vowels/consonants */
+.circle-row { border: 1.5px solid #d96098; background: #fff; padding: 3mm 4mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 16pt; letter-spacing: 5px; }
+
+/* days/greetings panel */
+.list-box { border: 1.5px solid #d96098; background: #fff; padding: 3mm 4mm; margin: 2mm 0; }
+.list-box .item { font-family: Georgia, serif; font-size: 13pt; padding: 1.5mm 0; border-bottom: 1px dashed #ccc; }
+.list-box .item:last-child { border-bottom: none; }
+
+.sound-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sound-grid .col { display: flex; flex-direction: column; gap: 2mm; }
+.sound-grid .col .head { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 12pt; }
+.sound-grid .col .word { font-family: Georgia, serif; font-size: 13pt; padding: 1mm 0; text-align: center; letter-spacing: 1px; }
+.word-bank { border: 2px dashed #1a3a8f; background: #f3f6ff; padding: 3mm 4mm; margin: 2mm 0; text-align: center; font-family: Georgia, serif; font-size: 13pt; letter-spacing: 2px; }
+.sent-fill { border: 1.5px solid #d96098; background: #fff; padding: 2.5mm 3mm; margin: 1.5mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 1.4; }
+.read-box { border: 2px solid #1a3a8f; background: #fffbe6; padding: 4mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 1.7; }
+.q-list-box { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; font-family: Georgia, serif; font-size: 12.5pt; line-height: 1.9; }
+
+.color-task { border: 2px solid #d96098; padding: 5mm; background: #fff; margin: 2mm 0; display: flex; gap: 5mm; flex-wrap: wrap; justify-content: center; align-items: center; }
+.color-task img { height: 28mm; width: auto; max-width: 38mm; }
+.circle-pic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 2mm 0; }
+.circle-pic-cell { border: 2px solid #d96098; background: #fff; padding: 3mm; text-align: center; min-height: 38mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2mm; }
+.circle-pic-cell img { height: 22mm; width: auto; max-width: 32mm; }
+.match-letter-pic { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.match-letter-pic .col { display: flex; flex-direction: column; gap: 4mm; align-items: center; }
+.match-letter-pic .letter { font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; width: 16mm; height: 14mm; border: 2.5px solid #1a3a8f; border-radius: 4mm; display: flex; align-items: center; justify-content: center; background: #fff; }
+.match-letter-pic .pic { width: 22mm; height: 22mm; display: flex; align-items: center; justify-content: center; background: #fff; border: 1.5px solid #d96098; padding: 1mm; }
+.match-letter-pic .pic img { max-width: 100%; max-height: 100%; }
+.sound-word-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sound-word-grid .head { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 11pt; }
+.sound-word-grid .cell { font-family: Georgia, serif; font-size: 14pt; padding: 3mm 0; text-align: center; border-bottom: 1px dashed #ccc; }
+.sound-word-grid .cell:last-child { border-bottom: none; }
+.beg-cons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 2mm 0; }
+.beg-cons-cell { border: 2px solid #d96098; background: #fff; padding: 3mm; display: flex; flex-direction: column; align-items: center; gap: 2mm; }
+.beg-cons-cell img { height: 18mm; width: auto; max-width: 30mm; }
+.beg-cons-cell .blank { font-family: Georgia, serif; font-size: 16pt; font-weight: 700; color: #1a3a8f; letter-spacing: 2px; }
+.day-name-list { border: 2px solid #d96098; background: #fff; padding: 4mm 5mm; margin: 2mm 0; }
+.day-name-list .row { font-family: Georgia, serif; font-size: 13pt; padding: 2mm 0; border-bottom: 1px dashed #ccc; }
+.day-name-list .row:last-child { border-bottom: none; }
+.vowel-row { border: 2px solid #d96098; background: #fff; padding: 5mm 6mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 18pt; letter-spacing: 8px; text-align: center; color: #1a3a8f; font-weight: 700; }
+.cons-row { border: 2px solid #d96098; background: #fff; padding: 5mm 6mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 16pt; letter-spacing: 6px; text-align: center; color: #1a3a8f; font-weight: 700; }
+</style></head><body><div class="page"><div class="frame"><div class="pgnum">1</div><div class="header-row">
+<div class="subject-label">English Nursery</div>
+<div class="brand-center"><div class="azhar">AZHAR PUBLISHERS</div><div class="series">Early Years Assessment Series</div></div>
+<div class="time">Time: 1.5 Hours</div>
+</div>
+<div class="title">3rd Term Sheet Exam</div>
+<div class="student-row">
+<div><span>Name:</span> ____________________</div>
+<div><span>Roll No:</span> __________</div>
+<div><span>Date:</span> __________</div>
+</div>
+<table class="marks-table">
+<tr><th>Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>Total</th></tr>
+<tr><td><b>Total Marks</b></td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>35</b></td></tr>
+<tr><td><b>Obtained Marks</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table><div class="qhead"><span>Q. No. 1: Read and trace the capital letters.</span><span class="marks-box">5</span></div><div class="trace-row"><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M18.7 14.0L18.7 78.0M18.7 14.0L46.1 14.0M46.1 14.0L55.2 17.0M55.2 17.0L58.3 20.1M58.3 20.1L61.3 26.2M61.3 26.2L61.3 35.3M61.3 35.3L58.3 41.4M58.3 41.4L55.2 44.5M55.2 44.5L46.1 47.5M46.1 47.5L18.7 47.5" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M33.9 14.0L27.8 17.0M27.8 17.0L21.7 23.1M21.7 23.1L18.7 29.2M18.7 29.2L15.6 38.4M15.6 38.4L15.6 53.6M15.6 53.6L18.7 62.8M18.7 62.8L21.7 68.9M21.7 68.9L27.8 75.0M27.8 75.0L33.9 78.0M33.9 78.0L46.1 78.0M46.1 78.0L52.2 75.0M52.2 75.0L58.3 68.9M58.3 68.9L61.3 62.8M61.3 62.8L64.4 53.6M64.4 53.6L64.4 38.4M64.4 38.4L61.3 29.2M61.3 29.2L58.3 23.1M58.3 23.1L52.2 17.0M52.2 17.0L46.1 14.0M46.1 14.0L33.9 14.0M43.0 65.8L61.3 84.1" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M18.7 14.0L18.7 78.0M18.7 14.0L46.1 14.0M46.1 14.0L55.2 17.0M55.2 17.0L58.3 20.1M58.3 20.1L61.3 26.2M61.3 26.2L61.3 32.3M61.3 32.3L58.3 38.4M58.3 38.4L55.2 41.4M55.2 41.4L46.1 44.5M46.1 44.5L18.7 44.5M40.0 44.5L61.3 78.0" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M61.3 23.1L55.2 17.0M55.2 17.0L46.1 14.0M46.1 14.0L33.9 14.0M33.9 14.0L24.8 17.0M24.8 17.0L18.7 23.1M18.7 23.1L18.7 29.2M18.7 29.2L21.7 35.3M21.7 35.3L24.8 38.4M24.8 38.4L30.9 41.4M30.9 41.4L49.1 47.5M49.1 47.5L55.2 50.6M55.2 50.6L58.3 53.6M58.3 53.6L61.3 59.7M61.3 59.7L61.3 68.9M61.3 68.9L55.2 75.0M55.2 75.0L46.1 78.0M46.1 78.0L33.9 78.0M33.9 78.0L24.8 75.0M24.8 75.0L18.7 68.9" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M40.0 14.0L40.0 78.0M18.7 14.0L61.3 14.0" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M15.6 14.0L40.0 78.0M64.4 14.0L40.0 78.0" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M61.3 14.0L18.7 78.0M18.7 14.0L61.3 14.0M18.7 78.0L61.3 78.0" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div></div><div class="qhead"><span>Q. No. 2: Read and trace the small letters.</span><span class="marks-box">5</span></div><div class="trace-row"><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M21.7 35.3L21.7 99.3M21.7 44.5L27.8 38.4M27.8 38.4L33.9 35.3M33.9 35.3L43.0 35.3M43.0 35.3L49.1 38.4M49.1 38.4L55.2 44.5M55.2 44.5L58.3 53.6M58.3 53.6L58.3 59.7M58.3 59.7L55.2 68.9M55.2 68.9L49.1 75.0M49.1 75.0L43.0 78.0M43.0 78.0L33.9 78.0M33.9 78.0L27.8 75.0M27.8 75.0L21.7 68.9" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M58.3 35.3L58.3 99.3M58.3 44.5L52.2 38.4M52.2 38.4L46.1 35.3M46.1 35.3L37.0 35.3M37.0 35.3L30.9 38.4M30.9 38.4L24.8 44.5M24.8 44.5L21.7 53.6M21.7 53.6L21.7 59.7M21.7 59.7L24.8 68.9M24.8 68.9L30.9 75.0M30.9 75.0L37.0 78.0M37.0 78.0L46.1 78.0M46.1 78.0L52.2 75.0M52.2 75.0L58.3 68.9" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M27.8 35.3L27.8 78.0M27.8 53.6L30.9 44.5M30.9 44.5L37.0 38.4M37.0 38.4L43.0 35.3M43.0 35.3L52.2 35.3" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M56.8 44.5L53.7 38.4M53.7 38.4L44.6 35.3M44.6 35.3L35.4 35.3M35.4 35.3L26.3 38.4M26.3 38.4L23.2 44.5M23.2 44.5L26.3 50.6M26.3 50.6L32.4 53.6M32.4 53.6L47.6 56.7M47.6 56.7L53.7 59.7M53.7 59.7L56.8 65.8M56.8 65.8L56.8 68.9M56.8 68.9L53.7 75.0M53.7 75.0L44.6 78.0M44.6 78.0L35.4 78.0M35.4 78.0L26.3 75.0M26.3 75.0L23.2 68.9" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M37.0 14.0L37.0 65.8M37.0 65.8L40.0 75.0M40.0 75.0L46.1 78.0M46.1 78.0L52.2 78.0M27.8 35.3L49.1 35.3" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M21.7 35.3L40.0 78.0M58.3 35.3L40.0 78.0" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M56.8 35.3L23.2 78.0M23.2 35.3L56.8 35.3M23.2 78.0L56.8 78.0" fill="none" stroke="#888" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div></div><div class="qhead"><span>Q. No. 3: Circle all the vowels.</span><span class="marks-box">5</span></div><div class="vowel-row">B A C E D I F O G U H</div><div class="footer">English Nursery — 3rd Term Sheet Exam — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">2</div><div class="qhead"><span>Q. No. 4: Read the sound words and write the word. (U sound words)</span><span class="marks-box">5</span></div><div class="sound-word-grid"><div class="head">Sound</div><div class="head">Word</div><div class="head">Read aloud</div><div class="cell">S-u-n</div><div class="cell">______________</div><div class="cell">Sun</div><div class="cell">C-u-p</div><div class="cell">______________</div><div class="cell">Cup</div><div class="cell">B-u-s</div><div class="cell">______________</div><div class="cell">Bus</div><div class="cell">R-u-n</div><div class="cell">______________</div><div class="cell">Run</div><div class="cell">M-u-g</div><div class="cell">______________</div><div class="cell">Mug</div></div><div class="qhead"><span>Q. No. 5: Write the first letter for each picture.</span><span class="marks-box">5</span></div><div class="beg-cons-grid"><div class="beg-cons-cell"><img src="_eng_icons/piano.png"><div class="blank">___ iano</div></div><div class="beg-cons-cell"><img src="_eng_icons/quill.png"><div class="blank">___ uill</div></div><div class="beg-cons-cell"><img src="_eng_icons/rope.png"><div class="blank">___ ope</div></div><div class="beg-cons-cell"><img src="_eng_icons/sun.png"><div class="blank">___ un</div></div><div class="beg-cons-cell"><img src="_eng_icons/tomato.png"><div class="blank">___ omato</div></div><div class="beg-cons-cell"><img src="_eng_icons/vest.png"><div class="blank">___ est</div></div></div><div class="footer">English Nursery — 3rd Term Sheet Exam — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">3</div><div class="qhead"><span>Q. No. 6: Circle all the consonants.</span><span class="marks-box">5</span></div><div class="cons-row">A B C D E F G H I J K</div><div class="qhead"><span>Q. No. 7: Names always begin with a capital letter. Rewrite the days and names correctly.</span><span class="marks-box">5</span></div><div class="day-name-list"><div class="row">monday → ____________________</div><div class="row">friday → ____________________</div><div class="row">ahmad → ____________________</div><div class="row">sara → ____________________</div><div class="row">naseem → ____________________</div></div><div class="footer">English Nursery — 3rd Term Sheet Exam — © Azhar Publishers</div></div></div></body></html>

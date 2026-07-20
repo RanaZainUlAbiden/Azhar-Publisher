@@ -1,0 +1,109 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Prep 8</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 13pt; }
+  .page { width: 210mm; height: 297mm; padding: 6mm; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: auto; }
+  .frame { border: 4px solid #000; padding: 6mm 7mm; min-height: 285mm; height: 285mm; position: relative; display: flex; flex-direction: column; }
+  .pgnum { position: absolute; top: -7mm; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px; font-weight: 700; font-size: 12pt; }
+  .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 4mm; margin-bottom: 4mm; }
+  .subject-label { font-weight: 700; font-size: 12pt; color: #c00; }
+  .brand-center { text-align: center; line-height: 1.05; }
+  .brand-center .azhar { font-family: Georgia, serif; font-weight: 700; font-size: 16pt; color: #1a3a8f; letter-spacing: 1px; }
+  .brand-center .series { font-size: 9pt; color: #555; }
+  .time { font-weight: 700; font-size: 11pt; }
+  .title { text-align: center; font-size: 22pt; font-weight: 700; margin: 2mm 0 4mm; color: #1a3a8f; letter-spacing: 1px; }
+  .student-row { display: flex; gap: 5mm; margin-bottom: 4mm; font-size: 11pt; font-weight: 700; }
+  .student-row > div { flex: 1; border-bottom: 1.5px solid #000; padding: 1.5mm 0; }
+  .student-row > div span { color: #555; font-weight: 400; }
+  .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 10pt; }
+  .marks-table th, .marks-table td { border: 1.5px solid #000; padding: 1.2mm; text-align: center; }
+  .marks-table th { background: #1a3a8f; color: #fff; }
+  .qhead { background: #fef0d5; border: 1.5px solid #000; padding: 1.5mm 4mm; font-weight: 700; font-size: 12pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+  .qhead .marks-box { border: 1.5px solid #000; padding: 0.5mm 4mm; font-size: 11pt; background: #fff; min-width: 13mm; text-align: center; }
+  .footer { margin-top: auto; text-align: center; font-size: 8.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 2mm; }
+
+  .big-numeral-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; }
+  .big-numeral-cell { aspect-ratio: 1; border: 2px solid #d96098; background: #fff; display: flex; align-items: center; justify-content: center; }
+  .big-numeral-cell .num { font-family: Georgia, serif; font-size: 50pt; font-weight: 700; color: #1a3a8f; }
+  .find-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2mm; margin: 2mm 0; }
+  .find-cell { aspect-ratio: 1; border: 2px solid #d96098; background: #fff; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 26pt; font-weight: 700; color: #1a3a8f; }
+  .concept-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 3mm 0; }
+  .concept-cell { border: 2px solid #d96098; padding: 4mm; text-align: center; background: #fff; min-height: 65mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3mm; }
+  .concept-cell img { height: 28mm; width: auto; }
+  .concept-cell .label { font-size: 14pt; font-weight: 700; color: #1a3a8f; }
+  .concept-cell .blank-circle { width: 12mm; height: 12mm; border: 2px solid #1a3a8f; border-radius: 50%; }
+
+  .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; padding: 4mm; border: 2px solid #d96098; background: #fff; }
+  .add-cell { font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; text-align: center; padding: 2mm 3mm; border: 1.5px solid #d96098; background: #fffaf3; border-radius: 3mm; }
+  .add-cell .ans-line { display: inline-block; border-bottom: 2px solid #1a3a8f; width: 18mm; height: 1px; vertical-align: middle; margin-left: 3mm; }
+  .ordinal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; margin: 2mm 0; }
+  .ordinal-cell { border: 2px solid #d96098; padding: 3mm; text-align: center; background: #fff; }
+  .ordinal-cell .pos { font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; margin-bottom: 2mm; }
+  .ordinal-cell img { height: 14mm; }
+  .compare-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; }
+  .compare-cell { border: 2px solid #d96098; padding: 3mm; background: #fff; text-align: center; font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; }
+  .tally-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 2mm 0; }
+  .tally-cell { border: 2px solid #d96098; padding: 4mm; background: #fff; text-align: center; font-family: Georgia, serif; font-size: 16pt; font-weight: 700; color: #1a3a8f; }
+  .tally-cell .marks { font-size: 22pt; letter-spacing: 1mm; margin-bottom: 2mm; }
+  .tally-cell .ans { display: inline-block; width: 16mm; height: 6mm; border-bottom: 2px solid #1a3a8f; margin-left: 3mm; }
+
+  .trace-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; margin: 2mm 0; }
+  .trace-cell { aspect-ratio: 1; border: 1.5px solid #d6d6d6; background: #fafafa; }
+  .trace-cell svg { width: 100%; height: 100%; display: block; }
+  .trace-blank { aspect-ratio: 1; border: 1.5px solid #d96098; background: #fff; }
+
+  .obj-table { width: 100%; border-collapse: collapse; margin: 2mm 0; border: 1.5px solid #d96098; }
+  .obj-table tr { border-bottom: 1.5px solid #d96098; }
+  .obj-table tr:last-child { border-bottom: none; }
+  .obj-table td.objects { padding: 4mm; vertical-align: middle; height: 25mm; }
+  .obj-table td.objects .icon-row { display: flex; gap: 6mm; align-items: center; flex-wrap: wrap; }
+  .obj-table td.objects img { height: 16mm; width: auto; }
+  .obj-table td.answer { width: 26mm; text-align: center; border-left: 1.5px solid #d96098; }
+
+/* === overflow fix === */
+.color-row { overflow: hidden; }
+.color-row .objs { flex-wrap: nowrap; overflow: hidden; flex: 1; }
+.color-row .objs img { max-width: 14mm; flex-shrink: 1; }
+.match-quantity { overflow: hidden; }
+.match-quantity img { max-width: 14mm; flex-shrink: 1; }
+.obj-table td.objects { overflow: hidden; }
+.obj-table td.objects .icon-row { flex-wrap: nowrap; overflow: hidden; }
+.obj-table td.objects img { max-width: 16mm; flex-shrink: 1; }
+</style>
+</head><body><div class="page"><div class="frame"><div class="pgnum">1</div><div class="header-row">
+<div class="subject-label">Counting Prep</div>
+<div class="brand-center"><div class="azhar">AZHAR PUBLISHERS</div><div class="series">Early Years Assessment Series</div></div>
+<div class="time">Time: 1.5 Hours</div>
+</div>
+<div class="title">Monthly Test : 8</div>
+<div class="student-row">
+<div><span>Name:</span> ____________________</div>
+<div><span>Roll No:</span> __________</div>
+<div><span>Date:</span> __________</div>
+</div>
+<table class="marks-table">
+<tr><th>Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>Total</th></tr>
+<tr><td><b>Total Marks</b></td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>30</b></td></tr>
+<tr><td><b>Obtained Marks</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+<div class="qhead"><span>Q. No. 1: Trace and write the numbers 46-50.</span><span class="marks-box">5</span></div>
+<div class="trace-row"><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M26.5 14.0L2.0 56.7M2.0 56.7L38.8 56.7M26.5 14.0L26.5 78.0M75.5 23.1L73.1 17.0M73.1 17.0L65.7 14.0M65.7 14.0L60.8 14.0M60.8 14.0L53.5 17.0M53.5 17.0L48.6 26.2M48.6 26.2L46.1 41.4M46.1 41.4L46.1 56.7M46.1 56.7L48.6 68.9M48.6 68.9L53.5 75.0M53.5 75.0L60.8 78.0M60.8 78.0L63.3 78.0M63.3 78.0L70.6 75.0M70.6 75.0L75.5 68.9M75.5 68.9L78.0 59.7M78.0 59.7L78.0 56.7M78.0 56.7L75.5 47.5M75.5 47.5L70.6 41.4M70.6 41.4L63.3 38.4M63.3 38.4L60.8 38.4M60.8 38.4L53.5 41.4M53.5 41.4L48.6 47.5M48.6 47.5L46.1 56.7" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M25.8 14.0L2.0 56.7M2.0 56.7L37.6 56.7M25.8 14.0L25.8 78.0M78.0 14.0L54.2 78.0M44.8 14.0L78.0 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M25.8 14.0L2.0 56.7M2.0 56.7L37.6 56.7M25.8 14.0L25.8 78.0M56.6 14.0L49.5 17.0M49.5 17.0L47.1 23.1M47.1 23.1L47.1 29.2M47.1 29.2L49.5 35.3M49.5 35.3L54.2 38.4M54.2 38.4L63.8 41.4M63.8 41.4L70.9 44.5M70.9 44.5L75.6 50.6M75.6 50.6L78.0 56.7M78.0 56.7L78.0 65.8M78.0 65.8L75.6 71.9M75.6 71.9L73.2 75.0M73.2 75.0L66.1 78.0M66.1 78.0L56.6 78.0M56.6 78.0L49.5 75.0M49.5 75.0L47.1 71.9M47.1 71.9L44.8 65.8M44.8 65.8L44.8 56.7M44.8 56.7L47.1 50.6M47.1 50.6L51.9 44.5M51.9 44.5L59.0 41.4M59.0 41.4L68.5 38.4M68.5 38.4L73.2 35.3M73.2 35.3L75.6 29.2M75.6 29.2L75.6 23.1M75.6 23.1L73.2 17.0M73.2 17.0L66.1 14.0M66.1 14.0L56.6 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M26.5 14.0L2.0 56.7M2.0 56.7L38.8 56.7M26.5 14.0L26.5 78.0M78.0 35.3L75.5 44.5M75.5 44.5L70.6 50.6M70.6 50.6L63.3 53.6M63.3 53.6L60.8 53.6M60.8 53.6L53.5 50.6M53.5 50.6L48.6 44.5M48.6 44.5L46.1 35.3M46.1 35.3L46.1 32.3M46.1 32.3L48.6 23.1M48.6 23.1L53.5 17.0M53.5 17.0L60.8 14.0M60.8 14.0L63.3 14.0M63.3 14.0L70.6 17.0M70.6 17.0L75.5 23.1M75.5 23.1L78.0 35.3M78.0 35.3L78.0 50.6M78.0 50.6L75.5 65.8M75.5 65.8L70.6 75.0M70.6 75.0L63.3 78.0M63.3 78.0L58.4 78.0M58.4 78.0L51.0 75.0M51.0 75.0L48.6 68.9" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M31.4 14.0L6.9 14.0M6.9 14.0L4.5 41.4M4.5 41.4L6.9 38.4M6.9 38.4L14.3 35.3M14.3 35.3L21.6 35.3M21.6 35.3L29.0 38.4M29.0 38.4L33.9 44.5M33.9 44.5L36.3 53.6M36.3 53.6L36.3 59.7M36.3 59.7L33.9 68.9M33.9 68.9L29.0 75.0M29.0 75.0L21.6 78.0M21.6 78.0L14.3 78.0M14.3 78.0L6.9 75.0M6.9 75.0L4.5 71.9M4.5 71.9L2.0 65.8M58.4 14.0L51.0 17.0M51.0 17.0L46.1 26.2M46.1 26.2L43.7 41.4M43.7 41.4L43.7 50.6M43.7 50.6L46.1 65.8M46.1 65.8L51.0 75.0M51.0 75.0L58.4 78.0M58.4 78.0L63.3 78.0M63.3 78.0L70.6 75.0M70.6 75.0L75.5 65.8M75.5 65.8L78.0 50.6M78.0 50.6L78.0 41.4M78.0 41.4L75.5 26.2M75.5 26.2L70.6 17.0M70.6 17.0L63.3 14.0M63.3 14.0L58.4 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div></div>
+<div class="trace-row"><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M26.5 14.0L2.0 56.7M2.0 56.7L38.8 56.7M26.5 14.0L26.5 78.0M75.5 23.1L73.1 17.0M73.1 17.0L65.7 14.0M65.7 14.0L60.8 14.0M60.8 14.0L53.5 17.0M53.5 17.0L48.6 26.2M48.6 26.2L46.1 41.4M46.1 41.4L46.1 56.7M46.1 56.7L48.6 68.9M48.6 68.9L53.5 75.0M53.5 75.0L60.8 78.0M60.8 78.0L63.3 78.0M63.3 78.0L70.6 75.0M70.6 75.0L75.5 68.9M75.5 68.9L78.0 59.7M78.0 59.7L78.0 56.7M78.0 56.7L75.5 47.5M75.5 47.5L70.6 41.4M70.6 41.4L63.3 38.4M63.3 38.4L60.8 38.4M60.8 38.4L53.5 41.4M53.5 41.4L48.6 47.5M48.6 47.5L46.1 56.7" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M25.8 14.0L2.0 56.7M2.0 56.7L37.6 56.7M25.8 14.0L25.8 78.0M78.0 14.0L54.2 78.0M44.8 14.0L78.0 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M25.8 14.0L2.0 56.7M2.0 56.7L37.6 56.7M25.8 14.0L25.8 78.0M56.6 14.0L49.5 17.0M49.5 17.0L47.1 23.1M47.1 23.1L47.1 29.2M47.1 29.2L49.5 35.3M49.5 35.3L54.2 38.4M54.2 38.4L63.8 41.4M63.8 41.4L70.9 44.5M70.9 44.5L75.6 50.6M75.6 50.6L78.0 56.7M78.0 56.7L78.0 65.8M78.0 65.8L75.6 71.9M75.6 71.9L73.2 75.0M73.2 75.0L66.1 78.0M66.1 78.0L56.6 78.0M56.6 78.0L49.5 75.0M49.5 75.0L47.1 71.9M47.1 71.9L44.8 65.8M44.8 65.8L44.8 56.7M44.8 56.7L47.1 50.6M47.1 50.6L51.9 44.5M51.9 44.5L59.0 41.4M59.0 41.4L68.5 38.4M68.5 38.4L73.2 35.3M73.2 35.3L75.6 29.2M75.6 29.2L75.6 23.1M75.6 23.1L73.2 17.0M73.2 17.0L66.1 14.0M66.1 14.0L56.6 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M26.5 14.0L2.0 56.7M2.0 56.7L38.8 56.7M26.5 14.0L26.5 78.0M78.0 35.3L75.5 44.5M75.5 44.5L70.6 50.6M70.6 50.6L63.3 53.6M63.3 53.6L60.8 53.6M60.8 53.6L53.5 50.6M53.5 50.6L48.6 44.5M48.6 44.5L46.1 35.3M46.1 35.3L46.1 32.3M46.1 32.3L48.6 23.1M48.6 23.1L53.5 17.0M53.5 17.0L60.8 14.0M60.8 14.0L63.3 14.0M63.3 14.0L70.6 17.0M70.6 17.0L75.5 23.1M75.5 23.1L78.0 35.3M78.0 35.3L78.0 50.6M78.0 50.6L75.5 65.8M75.5 65.8L70.6 75.0M70.6 75.0L63.3 78.0M63.3 78.0L58.4 78.0M58.4 78.0L51.0 75.0M51.0 75.0L48.6 68.9" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M31.4 14.0L6.9 14.0M6.9 14.0L4.5 41.4M4.5 41.4L6.9 38.4M6.9 38.4L14.3 35.3M14.3 35.3L21.6 35.3M21.6 35.3L29.0 38.4M29.0 38.4L33.9 44.5M33.9 44.5L36.3 53.6M36.3 53.6L36.3 59.7M36.3 59.7L33.9 68.9M33.9 68.9L29.0 75.0M29.0 75.0L21.6 78.0M21.6 78.0L14.3 78.0M14.3 78.0L6.9 75.0M6.9 75.0L4.5 71.9M4.5 71.9L2.0 65.8M58.4 14.0L51.0 17.0M51.0 17.0L46.1 26.2M46.1 26.2L43.7 41.4M43.7 41.4L43.7 50.6M43.7 50.6L46.1 65.8M46.1 65.8L51.0 75.0M51.0 75.0L58.4 78.0M58.4 78.0L63.3 78.0M63.3 78.0L70.6 75.0M70.6 75.0L75.5 65.8M75.5 65.8L78.0 50.6M78.0 50.6L78.0 41.4M78.0 41.4L75.5 26.2M75.5 26.2L70.6 17.0M70.6 17.0L63.3 14.0M63.3 14.0L58.4 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div></div>
+<div class="qhead"><span>Q. No. 2: Read and circle the correct numbers.</span><span class="marks-box">5</span></div>
+<div class="big-numeral-row"><div class="big-numeral-cell"><div class="num">46</div></div><div class="big-numeral-cell"><div class="num">47</div></div><div class="big-numeral-cell"><div class="num">48</div></div><div class="big-numeral-cell"><div class="num">49</div></div><div class="big-numeral-cell"><div class="num">50</div></div></div>
+<div class="footer">Counting Prep — Monthly Test 8 — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">2</div><div class="qhead"><span>Q. No. 3: Subtract and write the answer.</span><span class="marks-box">5</span></div>
+<div class="add-grid"><div class="add-cell">18-9 = <span class="ans-line"></span></div><div class="add-cell">20-10 = <span class="ans-line"></span></div><div class="add-cell">16-8 = <span class="ans-line"></span></div><div class="add-cell">19-9 = <span class="ans-line"></span></div><div class="add-cell">15-7 = <span class="ans-line"></span></div><div class="add-cell">17-9 = <span class="ans-line"></span></div></div>
+<div class="qhead"><span>Q. No. 4: Identify the ordinal position of each animal.</span><span class="marks-box">5</span></div>
+<div class="ordinal-grid"><div class="ordinal-cell"><div class="pos">2nd</div><img src="_goldcrest_icons/duck.png"></div><div class="ordinal-cell"><div class="pos">4th</div><img src="_goldcrest_icons/cat.png"></div><div class="ordinal-cell"><div class="pos">7th</div><img src="_goldcrest_icons/lion.png"></div></div>
+<div class="footer">Counting Prep — Monthly Test 8 — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">3</div><div class="qhead"><span>Q. No. 5: Count the tally marks and write the number.</span><span class="marks-box">5</span></div>
+<div class="tally-grid"><div class="tally-cell"><div class="marks">|||||</div><span class="ans"></span></div><div class="tally-cell"><div class="marks">|||||||</div><span class="ans"></span></div><div class="tally-cell"><div class="marks">|||||||||</div><span class="ans"></span></div></div>
+<div class="qhead"><span>Q. No. 6: Count and write the missing numbers.</span><span class="marks-box">5</span></div>
+<div style="font-size: 18pt; padding: 5mm; border: 2px solid #d96098; background: #fff;">
+<div style="margin: 4mm 0;">46, 47, ____, 49, ____, 51</div>
+<div style="margin: 4mm 0;">51, 52, ____, 54</div>
+<div style="margin: 4mm 0;">50, 49, ____, 47</div>
+</div>
+<div class="footer">Counting Prep — Monthly Test 8 — © Azhar Publishers</div></div></div></body></html>

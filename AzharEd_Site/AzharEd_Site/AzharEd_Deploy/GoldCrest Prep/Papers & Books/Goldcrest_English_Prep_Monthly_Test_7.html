@@ -1,0 +1,224 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Monthly Test 7 (Blends pl, br + Nature Vocabulary)</title><style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 12pt; }
+.page { width: 210mm; height: 297mm; padding: 8mm 10mm; page-break-after: always; position: relative; }
+.page:last-child { page-break-after: auto; }
+.frame { border: 1.5px solid #1a3a8f; padding: 5mm 6mm; height: 281mm; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.cover-frame { border: 4px solid #1a3a8f; height: 281mm; padding: 14mm; display: flex; flex-direction: column; }
+
+/* ---- Co-branded header (every test page) ---- */
+.head { display: grid; grid-template-columns: 1fr 1.6fr 1fr; align-items: center; padding-bottom: 3mm; }
+.head .logo-l img, .head .logo-r img { height: 14mm; }
+.head .logo-l { text-align: left; }
+.head .logo-r { text-align: right; }
+.head .center { text-align: center; line-height: 1.1; }
+.head .center .b1 { font-weight: 700; font-size: 12pt; color: #c00; }
+.head .center .b2 { font-size: 10pt; color: #c00; }
+.head .center .b3 { font-size: 10pt; font-weight: 700; }
+.divider { border-top: 1.5px solid #000; margin: 2mm 0 3mm; }
+
+/* ---- Test title ---- */
+.title-blue { text-align: center; font-size: 18pt; font-weight: 700; color: #1a3a8f; margin: 1mm 0 4mm; }
+
+/* ---- Student row & marks table ---- */
+.student-row { font-size: 10.5pt; padding: 1mm 0 3mm; }
+.student-row span.label { font-weight: 400; }
+.student-row span.line { display: inline-block; border-bottom: 1px solid #000; min-width: 38mm; margin: 0 8mm 0 1mm; vertical-align: bottom; padding-bottom: 0.5mm; }
+.marks-table { width: 86%; margin: 0 auto 4mm; border-collapse: collapse; font-size: 10.5pt; }
+.marks-table th, .marks-table td { border: 1px solid #1a3a8f; padding: 1.2mm; text-align: center; }
+.marks-table th { background: #1a3a8f; color: #fff; font-weight: 700; }
+.marks-table .left { text-align: left; padding-left: 4mm; font-weight: 700; }
+
+/* ---- Question heading ---- */
+.qhead { background: #fef0d5; border: 1px solid #1a3a8f; padding: 1.5mm 4mm; font-weight: 700; font-size: 11pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+.qhead .marks-box { border: 1px solid #1a3a8f; padding: 0.4mm 4mm; font-size: 10pt; background: #fff; min-width: 13mm; text-align: center; font-weight: 700; }
+
+/* ---- Trace cells ---- */
+.trace-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2mm; margin: 3mm 0; width: 100%; }
+.trace-cell { aspect-ratio: 1; min-height: 22mm; border: 2px dashed #1a3a8f; background: #fff; display: flex; align-items: center; justify-content: center; padding: 1mm; }
+.trace-cell svg { width: 100%; height: 100%; display: block; }
+.trace-cell.with-mid { background-image: linear-gradient(to right, transparent 49%, #c00 49%, #c00 51%, transparent 51%); background-repeat: no-repeat; background-size: 2px 100%; background-position: center; }
+
+/* ---- Picture grid (tick / circle pictures) ---- */
+.pic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 2mm 0; }
+.pic-cell { border: 1.5px solid #d96098; background: #fff; padding: 2mm; text-align: center; min-height: 32mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 1mm; }
+.pic-cell img { width: 100%; max-height: 22mm; object-fit: contain; }
+.pic-cell .lbl { font-size: 10pt; }
+.pic-tick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-top: 1mm; }
+.pic-tick .circle { width: 6mm; height: 6mm; border: 1.5px solid #1a3a8f; border-radius: 50%; margin: 0 auto; }
+
+/* ---- Colour activity row (3 wide pictures) ---- */
+.colour-row { border: 1.5px solid #d96098; background: #fff; padding: 4mm; margin: 2mm 0; display: flex; justify-content: space-around; align-items: center; gap: 5mm; }
+.colour-row .item { display: flex; flex-direction: column; align-items: center; gap: 1mm; }
+.colour-row .item img { height: 20mm; max-width: 35mm; object-fit: contain; }
+.colour-row .item .lbl { font-size: 10pt; }
+
+/* ---- Match letters with pictures ---- */
+.match { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.match .col { display: flex; flex-direction: column; gap: 4mm; align-items: center; }
+.match .letter { font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; width: 16mm; height: 14mm; border: 1.5px solid #1a3a8f; border-radius: 3mm; display: flex; align-items: center; justify-content: center; background: #fff; }
+.match .pic { width: 38mm; height: 22mm; border: 1.5px solid #d96098; padding: 1mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1mm; }
+.match .pic img { max-height: 16mm; max-width: 100%; }
+.match .pic .lbl { font-size: 9pt; }
+
+/* ---- Word/letter sequence box ---- */
+.seq-row { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 14pt; line-height: 2.1; background: #fff; letter-spacing: 1px; }
+
+/* ---- Vowel / consonant row ---- */
+.letter-row { border: 1.5px solid #d96098; background: #fff; padding: 4mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 16pt; letter-spacing: 5px; text-align: center; color: #1a3a8f; font-weight: 700; }
+
+/* ---- Sound word grid ---- */
+.sound-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sound-grid .head-cell { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 11pt; }
+.sound-grid .cell { font-family: Georgia, serif; font-size: 13pt; padding: 2.5mm 0; text-align: center; border-bottom: 1px dashed #ccc; }
+.sound-grid .cell:nth-last-child(-n+3) { border-bottom: none; }
+
+/* ---- Beginning consonant grid ---- */
+.beg-cons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 2mm 0; }
+.beg-cons-cell { border: 1.5px solid #d96098; background: #fff; padding: 2mm; display: flex; flex-direction: column; align-items: center; gap: 1mm; min-height: 28mm; }
+.beg-cons-cell img { height: 16mm; width: auto; max-width: 30mm; }
+.beg-cons-cell .blank { font-family: Georgia, serif; font-size: 14pt; font-weight: 700; color: #1a3a8f; }
+
+/* ---- Day / name list ---- */
+.list-box { border: 1.5px solid #d96098; background: #fff; padding: 3mm 5mm; margin: 2mm 0; }
+.list-box .row { font-family: Georgia, serif; font-size: 12.5pt; padding: 1.5mm 0; border-bottom: 1px dashed #ccc; }
+.list-box .row:last-child { border-bottom: none; }
+
+/* ---- Word bank ---- */
+.word-bank { border: 2px dashed #1a3a8f; background: #f3f6ff; padding: 3mm 4mm; margin: 2mm 0; text-align: center; font-family: Georgia, serif; font-size: 12.5pt; letter-spacing: 1px; }
+
+/* ---- Sound sort table (Prep) ---- */
+.sort-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sort-grid .col { display: flex; flex-direction: column; gap: 1.5mm; }
+.sort-grid .col .head-cell { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 11pt; }
+.sort-grid .col .word { font-family: Georgia, serif; font-size: 12pt; padding: 1mm 0; text-align: center; }
+
+/* ---- Word grid (fill blank in word) ---- */
+.word-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 2mm 0; }
+.word-cell { border: 1.5px solid #d96098; background: #fff; padding: 4mm 3mm; text-align: center; min-height: 14mm; display: flex; align-items: center; justify-content: center; }
+.word-cell .word { font-family: Georgia, serif; font-size: 13pt; font-weight: 700; color: #1a3a8f; letter-spacing: 1px; }
+
+/* ---- Read-and-copy / write-lines ---- */
+.read-box { border: 1.5px solid #1a3a8f; background: #fffbe6; padding: 3mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 12.5pt; line-height: 1.7; }
+.write-lines { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; }
+.write-lines .line { border-bottom: 1.5px dashed #999; height: 8mm; margin-bottom: 1mm; }
+
+/* ---- Q-list-box ---- */
+.q-list-box { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; font-family: Georgia, serif; font-size: 12pt; line-height: 1.9; }
+.fill-row { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 2; background: #fff; letter-spacing: 1px; }
+
+/* ---- Footer ---- */
+.foot { margin-top: auto; text-align: center; font-style: italic; font-size: 9.5pt; color: #555; padding-top: 3mm; border-top: 0; }
+
+.numeral-trace-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2mm; margin: 3mm 0; }
+.numeral-cell { aspect-ratio: 1; min-height: 22mm; border: 2px dashed #d96098; background: #fff; display: flex; align-items: center; justify-content: center; }
+.numeral-cell svg { width: 90%; height: 90%; }
+.find-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.find-cell { aspect-ratio: 1; border: 2px solid #d96098; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; background: #fff; }
+
+/* SVG-icon count rows — each icon at fixed 11mm × 11mm, always fits */
+.svg-row { border: 1.5px solid #d96098; background: #fff; padding: 2mm 4mm; margin: 1.5mm 0; display: flex; align-items: center; gap: 3mm; min-height: 14mm; }
+.svg-row .icons { display: flex; gap: 3mm; flex: 1; align-items: center; flex-wrap: nowrap; overflow: hidden; }
+.svg-row .icons svg { width: 11mm; height: 11mm; flex-shrink: 0; }
+.svg-row .ans-box { width: 14mm; height: 10mm; border: 1.5px dashed #1a3a8f; flex: 0 0 14mm; }
+.svg-stack { display: flex; flex-direction: column; gap: 1.5mm; margin: 2mm 0; }
+
+.times-grid { display: grid; grid-template-columns: 1fr; gap: 1.5mm; margin: 2mm auto; max-width: 110mm; }
+.times-cell { border: 1.5px solid #d96098; padding: 2mm 4mm; font-family: Georgia, serif; font-size: 13pt; text-align: center; background: #fff; }
+.add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin: 2mm 0; }
+.add-cell { border: 1.5px solid #d96098; padding: 3mm 4mm; background: #fff; font-family: Georgia, serif; font-size: 13pt; display: flex; align-items: center; justify-content: center; gap: 3mm; min-height: 12mm; }
+.miss-row { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 2.1; background: #fff; letter-spacing: 1px; text-align: center; }
+.match-grid-num-word { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.match-grid-num-word .col { display: flex; flex-direction: column; gap: 3mm; align-items: center; }
+.match-grid-num-word .num-box { font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; width: 14mm; height: 12mm; border: 1.5px solid #1a3a8f; border-radius: 3mm; display: flex; align-items: center; justify-content: center; background: #fff; }
+.match-grid-num-word .word-box { font-family: Georgia, serif; font-size: 14pt; color: #1a3a8f; width: 32mm; height: 12mm; border: 1.5px dashed #1a3a8f; display: flex; align-items: center; justify-content: center; background: #fff; }
+.q-list-box { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; font-family: Georgia, serif; font-size: 12pt; line-height: 1.9; }
+
+.hl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.hl-cell { text-align: center; padding: 3mm; min-height: 32mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2mm; }
+.hl-cell svg { width: 22mm; height: 22mm; }
+.hl-cell .lbl { font-family: Georgia, serif; font-size: 13pt; font-weight: 700; color: #1a3a8f; }
+.hl-cell .blank-circle { width: 8mm; height: 8mm; border: 2px solid #1a3a8f; border-radius: 50%; }
+
+.domino-row { display: flex; gap: 5mm; justify-content: center; margin: 2mm 0; padding: 2mm; }
+.domino { width: 32mm; height: 16mm; border: 1.5px solid #1a3a8f; display: grid; grid-template-columns: 1fr 1fr; padding: 1mm; background: #fff; }
+.domino .h { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1mm; padding: 1mm; border-right: 1px solid #1a3a8f; }
+.domino .h:last-child { border-right: none; }
+.domino .d { width: 2.5mm; height: 2.5mm; background: #000; border-radius: 50%; }
+.balloon-row { display: flex; gap: 5mm; justify-content: center; padding: 4mm; flex-wrap: wrap; }
+.balloon-num { width: 16mm; height: 18mm; border: 1.5px solid #1a3a8f; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; font-family: Georgia, serif; font-size: 16pt; font-weight: 700; color: #1a3a8f; }
+
+.ord-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.ord-cell { display: flex; flex-direction: column; align-items: center; gap: 1mm; padding: 1mm; }
+.ord-cell svg { width: 14mm; height: 14mm; }
+.ord-cell .pos-blank { font-family: Georgia, serif; font-size: 11pt; font-weight: 700; color: #1a3a8f; padding-top: 1mm; border-top: 1.5px dashed #1a3a8f; min-width: 14mm; text-align: center; }
+
+.cover-svg { display: block; margin: 6mm auto; }
+.cover-svg svg { width: 50mm; height: 50mm; }
+
+/* English-specific layouts */
+.trace-letter-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2mm; margin: 3mm 0; }
+.trace-letter-cell { aspect-ratio: 1; min-height: 22mm; border: 2px dashed #1a3a8f; background: #fff; display: flex; align-items: center; justify-content: center; padding: 1mm; }
+.trace-letter-cell svg { width: 100%; height: 100%; display: block; }
+
+/* Picture grid for Tick/Circle/Match */
+.pic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 2mm 0; }
+.pic-cell { border: 1.5px solid #d96098; background: #fff; padding: 2mm; text-align: center; min-height: 32mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 1mm; }
+.pic-cell svg { width: 18mm; height: 18mm; }
+.pic-cell .lbl { font-size: 11pt; font-weight: 700; color: #1a3a8f; margin-top: 1mm; }
+.pic-cell .answer-circle { width: 7mm; height: 7mm; border: 2px solid #1a3a8f; border-radius: 50%; margin-top: 1mm; }
+
+/* Match letter ↔ picture */
+.match-letter-pic { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.match-letter-pic .col { display: flex; flex-direction: column; gap: 4mm; align-items: center; }
+.match-letter-pic .letter-box { font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; width: 16mm; height: 14mm; border: 2px solid #1a3a8f; border-radius: 3mm; display: flex; align-items: center; justify-content: center; background: #fff; }
+.match-letter-pic .pic-box { width: 36mm; height: 22mm; border: 1.5px solid #d96098; padding: 1mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1mm; }
+.match-letter-pic .pic-box svg { width: 14mm; height: 14mm; }
+.match-letter-pic .pic-box .lbl { font-size: 10pt; }
+
+/* Colour-the-object row (3 across) */
+.colour-row { border: 1.5px solid #d96098; background: #fff; padding: 4mm; margin: 2mm 0; display: flex; justify-content: space-around; align-items: center; gap: 5mm; }
+.colour-row .item { display: flex; flex-direction: column; align-items: center; gap: 1mm; }
+.colour-row .item svg { width: 22mm; height: 22mm; }
+.colour-row .item .lbl { font-size: 10pt; }
+
+/* Letter-sequence box */
+.fill-row { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 14pt; line-height: 2.1; background: #fff; letter-spacing: 2px; }
+
+/* Vowel/consonant row */
+.letter-row { border: 1.5px solid #d96098; background: #fff; padding: 4mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 16pt; letter-spacing: 5px; text-align: center; color: #1a3a8f; font-weight: 700; }
+
+/* Sound word grid (Nursery: P-a-n → Pan) */
+.sound-word-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sound-word-grid .head-cell { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 11pt; }
+.sound-word-grid .cell { font-family: Georgia, serif; font-size: 13pt; padding: 2.5mm 0; text-align: center; border-bottom: 1px dashed #ccc; }
+.sound-word-grid .cell:nth-last-child(-n+3) { border-bottom: none; }
+
+/* Beginning consonant grid (Nursery: ___ettle, ___oon) */
+.beg-cons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 2mm 0; }
+.beg-cons-cell { border: 1.5px solid #d96098; background: #fff; padding: 2mm; display: flex; flex-direction: column; align-items: center; gap: 1mm; min-height: 28mm; }
+.beg-cons-cell svg { width: 14mm; height: 14mm; }
+.beg-cons-cell .blank { font-family: Georgia, serif; font-size: 14pt; font-weight: 700; color: #1a3a8f; }
+
+/* Day/name list */
+.list-box { border: 1.5px solid #d96098; background: #fff; padding: 3mm 5mm; margin: 2mm 0; }
+.list-box .row { font-family: Georgia, serif; font-size: 12.5pt; padding: 1.5mm 0; border-bottom: 1px dashed #ccc; }
+.list-box .row:last-child { border-bottom: none; }
+
+/* Word bank, sort grid, etc. for Prep */
+.word-bank { border: 2px dashed #1a3a8f; background: #f3f6ff; padding: 3mm 4mm; margin: 2mm 0; text-align: center; font-family: Georgia, serif; font-size: 12.5pt; letter-spacing: 1px; }
+.sort-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sort-grid .col { display: flex; flex-direction: column; gap: 1.5mm; }
+.sort-grid .col .head-cell { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 11pt; }
+.sort-grid .col .word { font-family: Georgia, serif; font-size: 12pt; padding: 1mm 0; text-align: center; }
+.read-box { border: 2px solid #1a3a8f; background: #fffbe6; padding: 3mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 12.5pt; line-height: 1.7; }
+.write-lines { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; }
+.write-lines .line { border-bottom: 1.5px dashed #999; height: 8mm; margin-bottom: 1mm; }
+.q-list-box { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; font-family: Georgia, serif; font-size: 12pt; line-height: 1.9; }
+
+.cover-svg { display: block; margin: 6mm auto; width: 50mm; height: 50mm; }
+</style></head><body><div class="page"><div class="frame"><div class="head"><div class="logo-l"><img src="_eng_icons/azhar_logo.png" alt="Azhar Publishers"></div><div class="center"><div class="b1">English Prep</div><div class="b2">Early Years Assessment Series</div></div><div class="logo-r"><img src="_eng_icons/bookfactory_logo.png" alt="Book Factory"></div></div><div class="divider"></div><div class="title-blue">Monthly Test 7 (Blends pl, br + Nature Vocabulary)</div><div class="student-row"><span class="label">Name:</span><span class="line"></span><span class="label">Roll No:</span><span class="line"></span><span class="label">Date:</span><span class="line"></span></div><table class="marks-table"><tr><th class="left">Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>Total</th></tr><tr><td class="left">Total Marks</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>30</b></td></tr><tr><td class="left">Obtained Marks</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table><div class="qhead"><span>Q. No. 1: Read these ‘pl’ and ‘br’ words.</span><span class="marks-box">5</span></div><div class="word-bank">Planet &nbsp;&nbsp; Place &nbsp;&nbsp; Plum &nbsp;&nbsp; Brush &nbsp;&nbsp; Bread &nbsp;&nbsp; Brown</div><div class="qhead"><span>Q. No. 2: Read these nature vocabulary words.</span><span class="marks-box">5</span></div><div class="word-bank">sun &nbsp;&nbsp; star &nbsp;&nbsp; moon &nbsp;&nbsp; sky &nbsp;&nbsp; land &nbsp;&nbsp; hill &nbsp;&nbsp; forest &nbsp;&nbsp; mountain</div><div class="foot">English Prep — Monthly Test 7 (Blends pl, br + Nature Vocabulary) — © Azhar Publishers / Book Factory</div></div></div>
+<div class="page"><div class="frame"><div class="head"><div class="logo-l"><img src="_eng_icons/azhar_logo.png" alt="Azhar Publishers"></div><div class="center"><div class="b1">English Prep</div><div class="b2">Early Years Assessment Series</div></div><div class="logo-r"><img src="_eng_icons/bookfactory_logo.png" alt="Book Factory"></div></div><div class="divider"></div><div class="title-blue">Monthly Test 7 (Blends pl, br + Nature Vocabulary)</div><div class="qhead"><span>Q. No. 3: Fill in the missing blend (pl or br).</span><span class="marks-box">5</span></div><div class="pic-grid"><div class="pic-cell" style="min-height:14mm"><div class="lbl">__um</div></div><div class="pic-cell" style="min-height:14mm"><div class="lbl">__own</div></div><div class="pic-cell" style="min-height:14mm"><div class="lbl">__ace</div></div><div class="pic-cell" style="min-height:14mm"><div class="lbl">__ush</div></div><div class="pic-cell" style="min-height:14mm"><div class="lbl">__anet</div></div><div class="pic-cell" style="min-height:14mm"><div class="lbl">__ead</div></div></div><div class="qhead"><span>Q. No. 4: Match each picture to the right nature word.</span><span class="marks-box">5</span></div><div class="word-bank">Word Bank: &nbsp; Sun &nbsp;•&nbsp; Star &nbsp;•&nbsp; Moon &nbsp;•&nbsp; Tree</div><div class="pic-grid"><div class="pic-cell"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFB700"/><g stroke="#FFB700" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/><line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/></g></svg><div class="lbl">______________</div></div><div class="pic-cell"><svg viewBox="0 0 24 24"><polygon points="12,2 15,9 22,10 17,15 18,22 12,18 6,22 7,15 2,10 9,9" fill="#FFD23A"/></svg><div class="lbl">______________</div></div><div class="pic-cell"><svg viewBox="0 0 24 24"><path d="M 16 4 Q 7 6 7 13 Q 7 20 16 21 Q 11 19 11 13 Q 11 7 16 4 Z" fill="#FFD23A"/></svg><div class="lbl">______________</div></div><div class="pic-cell"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="5" fill="#3FB159"/><rect x="11" y="13" width="2" height="8" fill="#5D4037"/></svg><div class="lbl">______________</div></div></div><div class="foot">English Prep — Monthly Test 7 (Blends pl, br + Nature Vocabulary) — © Azhar Publishers / Book Factory</div></div></div>
+<div class="page"><div class="frame"><div class="head"><div class="logo-l"><img src="_eng_icons/azhar_logo.png" alt="Azhar Publishers"></div><div class="center"><div class="b1">English Prep</div><div class="b2">Early Years Assessment Series</div></div><div class="logo-r"><img src="_eng_icons/bookfactory_logo.png" alt="Book Factory"></div></div><div class="divider"></div><div class="title-blue">Monthly Test 7 (Blends pl, br + Nature Vocabulary)</div><div class="qhead"><span>Q. No. 5: Underline the nature word in each row.</span><span class="marks-box">5</span></div><div class="q-list-box">1) bus &nbsp;&nbsp; star &nbsp;&nbsp; pen<br>2) cup &nbsp;&nbsp; river &nbsp;&nbsp; bag<br>3) hat &nbsp;&nbsp; sea &nbsp;&nbsp; map<br>4) toy &nbsp;&nbsp; forest &nbsp;&nbsp; ball<br>5) mug &nbsp;&nbsp; moon &nbsp;&nbsp; tin</div><div class="qhead"><span>Q. No. 6: Underline the ‘br’ word.</span><span class="marks-box">5</span></div><div class="q-list-box">1) bread &nbsp;&nbsp; block &nbsp;&nbsp; clock<br>2) brush &nbsp;&nbsp; place &nbsp;&nbsp; plum<br>3) brown &nbsp;&nbsp; clip &nbsp;&nbsp; planet<br>4) bird &nbsp;&nbsp; blue &nbsp;&nbsp; clip<br>5) brick &nbsp;&nbsp; cloud &nbsp;&nbsp; place</div><div class="foot">English Prep — Monthly Test 7 (Blends pl, br + Nature Vocabulary) — © Azhar Publishers / Book Factory</div></div></div></body></html>

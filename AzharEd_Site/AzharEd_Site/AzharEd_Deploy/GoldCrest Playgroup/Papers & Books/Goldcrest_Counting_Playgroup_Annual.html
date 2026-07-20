@@ -1,0 +1,122 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Playgroup Annual</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 13pt; }
+  .page { width: 210mm; height: 297mm; padding: 6mm; page-break-after: always; position: relative; }
+  .page:last-child { page-break-after: auto; }
+  .frame { border: 4px solid #000; padding: 6mm 7mm; min-height: 285mm; height: 285mm; position: relative; display: flex; flex-direction: column; }
+  .pgnum { position: absolute; top: -7mm; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px; font-weight: 700; font-size: 12pt; }
+  .header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 4mm; margin-bottom: 4mm; }
+  .subject-label { font-weight: 700; font-size: 12pt; color: #c00; }
+  .brand-center { text-align: center; line-height: 1.05; }
+  .brand-center .azhar { font-family: Georgia, serif; font-weight: 700; font-size: 16pt; color: #1a3a8f; letter-spacing: 1px; }
+  .brand-center .series { font-size: 9pt; color: #555; }
+  .time { font-weight: 700; font-size: 11pt; }
+  .title { text-align: center; font-size: 22pt; font-weight: 700; margin: 2mm 0 4mm; color: #1a3a8f; letter-spacing: 1px; }
+  .student-row { display: flex; gap: 5mm; margin-bottom: 4mm; font-size: 11pt; font-weight: 700; }
+  .student-row > div { flex: 1; border-bottom: 1.5px solid #000; padding: 1.5mm 0; }
+  .student-row > div span { color: #555; font-weight: 400; }
+  .marks-table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 10pt; }
+  .marks-table th, .marks-table td { border: 1.5px solid #000; padding: 1.2mm; text-align: center; }
+  .marks-table th { background: #1a3a8f; color: #fff; }
+  .qhead { background: #fef0d5; border: 1.5px solid #000; padding: 1.5mm 4mm; font-weight: 700; font-size: 12pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+  .qhead .marks-box { border: 1.5px solid #000; padding: 0.5mm 4mm; font-size: 11pt; background: #fff; min-width: 13mm; text-align: center; }
+  .footer { margin-top: auto; text-align: center; font-size: 8.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 2mm; }
+
+  .big-numeral-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; }
+  .big-numeral-cell { aspect-ratio: 1; border: 2px solid #d96098; background: #fff; display: flex; align-items: center; justify-content: center; }
+  .big-numeral-cell .num { font-family: Georgia, serif; font-size: 50pt; font-weight: 700; color: #1a3a8f; }
+  .find-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2mm; margin: 2mm 0; }
+  .find-cell { aspect-ratio: 1; border: 2px solid #d96098; background: #fff; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 26pt; font-weight: 700; color: #1a3a8f; }
+  .concept-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 3mm 0; }
+  .concept-cell { border: 2px solid #d96098; padding: 4mm; text-align: center; background: #fff; min-height: 65mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3mm; }
+  .concept-cell img { height: 28mm; width: auto; }
+  .concept-cell .label { font-size: 14pt; font-weight: 700; color: #1a3a8f; }
+  .concept-cell .blank-circle { width: 12mm; height: 12mm; border: 2px solid #1a3a8f; border-radius: 50%; }
+
+  .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; padding: 4mm; border: 2px solid #d96098; background: #fff; }
+  .add-cell { font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; text-align: center; padding: 2mm 3mm; border: 1.5px solid #d96098; background: #fffaf3; border-radius: 3mm; }
+  .add-cell .ans-line { display: inline-block; border-bottom: 2px solid #1a3a8f; width: 18mm; height: 1px; vertical-align: middle; margin-left: 3mm; }
+  .ordinal-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4mm; margin: 2mm 0; }
+  .ordinal-cell { border: 2px solid #d96098; padding: 3mm; text-align: center; background: #fff; }
+  .ordinal-cell .pos { font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; margin-bottom: 2mm; }
+  .ordinal-cell img { height: 14mm; }
+  .compare-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; margin: 2mm 0; }
+  .compare-cell { border: 2px solid #d96098; padding: 3mm; background: #fff; text-align: center; font-family: Georgia, serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; }
+  .tally-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin: 2mm 0; }
+  .tally-cell { border: 2px solid #d96098; padding: 4mm; background: #fff; text-align: center; font-family: Georgia, serif; font-size: 16pt; font-weight: 700; color: #1a3a8f; }
+  .tally-cell .marks { font-size: 22pt; letter-spacing: 1mm; margin-bottom: 2mm; }
+  .tally-cell .ans { display: inline-block; width: 16mm; height: 6mm; border-bottom: 2px solid #1a3a8f; margin-left: 3mm; }
+
+  .trace-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; margin: 2mm 0; }
+  .trace-cell { aspect-ratio: 1; border: 1.5px solid #d6d6d6; background: #fafafa; }
+  .trace-cell svg { width: 100%; height: 100%; display: block; }
+  .trace-blank { aspect-ratio: 1; border: 1.5px solid #d96098; background: #fff; }
+
+  .obj-table { width: 100%; border-collapse: collapse; margin: 2mm 0; border: 1.5px solid #d96098; }
+  .obj-table tr { border-bottom: 1.5px solid #d96098; }
+  .obj-table tr:last-child { border-bottom: none; }
+  .obj-table td.objects { padding: 4mm; vertical-align: middle; height: 25mm; }
+  .obj-table td.objects .icon-row { display: flex; gap: 6mm; align-items: center; flex-wrap: wrap; }
+  .obj-table td.objects img { height: 16mm; width: auto; }
+  .obj-table td.answer { width: 26mm; text-align: center; border-left: 1.5px solid #d96098; }
+
+/* === overflow fix === */
+.color-row { overflow: hidden; }
+.color-row .objs { flex-wrap: nowrap; overflow: hidden; flex: 1; }
+.color-row .objs img { max-width: 14mm; flex-shrink: 1; }
+.match-quantity { overflow: hidden; }
+.match-quantity img { max-width: 14mm; flex-shrink: 1; }
+.obj-table td.objects { overflow: hidden; }
+.obj-table td.objects .icon-row { flex-wrap: nowrap; overflow: hidden; }
+.obj-table td.objects img { max-width: 16mm; flex-shrink: 1; }
+</style>
+</head><body><div class="page"><div class="frame"><div class="pgnum">1</div><div class="header-row">
+<div class="subject-label">Counting Playgroup</div>
+<div class="brand-center"><div class="azhar">AZHAR PUBLISHERS</div><div class="series">Early Years Assessment Series</div></div>
+
+</div>
+<div class="title">Annual Paper</div>
+<div class="student-row">
+<div><span>Name:</span> ____________________</div>
+<div><span>Roll No:</span> __________</div>
+<div><span>Date:</span> __________</div>
+</div>
+<table class="marks-table">
+<tr><th>Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>Total</th></tr>
+<tr><td><b>Total Marks</b></td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>25</b></td></tr>
+<tr><td><b>Obtained Marks</b></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+<div class="qhead"><span>Q. No. 1: Trace and write the numbers 1 to 5.</span><span class="marks-box">5</span></div>
+<div class="trace-row">
+<div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M32.4 26.2L38.5 23.1M38.5 23.1L47.6 14.0M47.6 14.0L47.6 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M21.7 29.2L21.7 26.2M21.7 26.2L24.8 20.1M24.8 20.1L27.8 17.0M27.8 17.0L33.9 14.0M33.9 14.0L46.1 14.0M46.1 14.0L52.2 17.0M52.2 17.0L55.2 20.1M55.2 20.1L58.3 26.2M58.3 26.2L58.3 32.3M58.3 32.3L55.2 38.4M55.2 38.4L49.1 47.5M49.1 47.5L18.7 78.0M18.7 78.0L61.3 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M24.8 14.0L58.3 14.0M58.3 14.0L40.0 38.4M40.0 38.4L49.1 38.4M49.1 38.4L55.2 41.4M55.2 41.4L58.3 44.5M58.3 44.5L61.3 53.6M61.3 53.6L61.3 59.7M61.3 59.7L58.3 68.9M58.3 68.9L52.2 75.0M52.2 75.0L43.0 78.0M43.0 78.0L33.9 78.0M33.9 78.0L24.8 75.0M24.8 75.0L21.7 71.9M21.7 71.9L18.7 65.8" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M47.6 14.0L17.1 56.7M17.1 56.7L62.9 56.7M47.6 14.0L47.6 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M55.2 14.0L24.8 14.0M24.8 14.0L21.7 41.4M21.7 41.4L24.8 38.4M24.8 38.4L33.9 35.3M33.9 35.3L43.0 35.3M43.0 35.3L52.2 38.4M52.2 38.4L58.3 44.5M58.3 44.5L61.3 53.6M61.3 53.6L61.3 59.7M61.3 59.7L58.3 68.9M58.3 68.9L52.2 75.0M52.2 75.0L43.0 78.0M43.0 78.0L33.9 78.0M33.9 78.0L24.8 75.0M24.8 75.0L21.7 71.9M21.7 71.9L18.7 65.8" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div>
+</div>
+<div class="qhead"><span>Q. No. 2: Find and circle the number 5.</span><span class="marks-box">5</span></div>
+<div class="find-row"><div class="find-cell">3</div><div class="find-cell">5</div><div class="find-cell">1</div><div class="find-cell">5</div><div class="find-cell">2</div><div class="find-cell">5</div><div class="find-cell">4</div><div class="find-cell">5</div></div>
+<div class="footer">Counting Playgroup — Annual Paper — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">2</div><div class="qhead"><span>Q. No. 3: Count and write.</span><span class="marks-box">5</span></div>
+<table class="obj-table">
+<tr><td class="objects"><div class="icon-row"><img src="_goldcrest_icons/duck.png" alt="duck"><img src="_goldcrest_icons/duck.png" alt="duck"><img src="_goldcrest_icons/duck.png" alt="duck"></div></td><td class="answer"></td></tr>
+<tr><td class="objects"><div class="icon-row"><img src="_goldcrest_icons/cat.png" alt="cat"><img src="_goldcrest_icons/cat.png" alt="cat"><img src="_goldcrest_icons/cat.png" alt="cat"><img src="_goldcrest_icons/cat.png" alt="cat"></div></td><td class="answer"></td></tr>
+<tr><td class="objects"><div class="icon-row"><img src="_goldcrest_icons/lion.png" alt="lion"><img src="_goldcrest_icons/lion.png" alt="lion"><img src="_goldcrest_icons/lion.png" alt="lion"><img src="_goldcrest_icons/lion.png" alt="lion"><img src="_goldcrest_icons/lion.png" alt="lion"></div></td><td class="answer"></td></tr>
+</table>
+<div class="qhead"><span>Q. No. 4: Tick (✓) the box that has MORE.</span><span class="marks-box">5</span></div>
+<div class="concept-pair">
+<div class="concept-cell"><img src="_goldcrest_icons/bees_5.png"><div class="label">MORE</div><div class="blank-circle"></div></div>
+<div class="concept-cell"><img src="_goldcrest_icons/cat.png"><div class="label">less</div><div class="blank-circle"></div></div>
+</div>
+<div class="footer">Counting Playgroup — Annual Paper — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">3</div><div class="qhead"><span>Q. No. 5: Match the number to the correct picture.</span><span class="marks-box">5</span></div>
+<div class="big-numeral-row">
+<div class="big-numeral-cell"><div class="num">1</div></div>
+<div class="big-numeral-cell"><div class="num">2</div></div>
+<div class="big-numeral-cell"><div class="num">3</div></div>
+<div class="big-numeral-cell"><div class="num">4</div></div>
+<div class="big-numeral-cell"><div class="num">5</div></div>
+</div>
+<table class="obj-table" style="margin-top:6mm;">
+<tr><td class="objects"><div class="icon-row"><img src="_goldcrest_icons/cat.png" alt="cat"></div></td><td class="answer"></td></tr>
+<tr><td class="objects"><div class="icon-row"><img src="_goldcrest_icons/duck.png" alt="duck"><img src="_goldcrest_icons/duck.png" alt="duck"></div></td><td class="answer"></td></tr>
+<tr><td class="objects"><div class="icon-row"><img src="_goldcrest_icons/lion.png" alt="lion"><img src="_goldcrest_icons/lion.png" alt="lion"><img src="_goldcrest_icons/lion.png" alt="lion"></div></td><td class="answer"></td></tr>
+</table>
+<div class="footer">Counting Playgroup — Annual Paper — © Azhar Publishers</div></div></div></body></html>

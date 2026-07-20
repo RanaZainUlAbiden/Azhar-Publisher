@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MAKTAB — Azhar Publishers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Gulzar&display=swap" rel="stylesheet">
+<script src="../AzharEd_Deploy/content_data.js"></script>
+<script src="../AzharEd_Deploy/question_bank.js"></script>
+<style>
+/* ============================================================
+   MAKTAB مکتب — a cinematic reimagining.
+   Not a dashboard. Not a desk. A STAGE.
+   Built for the classroom projector: dark theatre, glowing
+   covers, one spotlight search, and a Focus Mode that turns
+   any book into a full-screen lesson with its own timer.
+   Same 28 books. Entirely different soul.
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --void:#070A14; --deep:#0C1122; --panel:#121933; --line:rgba(255,255,255,.09);
+  --ink:#EFF3FF; --dim:#8A94B8;
+  --amber:#FFB300; --cyan:#22D3EE; --rose:#F472B6; --mint:#34D399;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--void);color:var(--ink);overflow-x:hidden;
+  background-image:radial-gradient(900px 500px at 80% -10%, rgba(34,211,238,.10), transparent 60%),
+    radial-gradient(700px 420px at 0% 20%, rgba(255,179,0,.07), transparent 55%),
+    radial-gradient(800px 600px at 50% 120%, rgba(244,114,182,.06), transparent 60%)}
+button{font-family:inherit;cursor:pointer;color:inherit}
+::selection{background:rgba(255,179,0,.35)}
+::-webkit-scrollbar{height:8px;width:8px}
+::-webkit-scrollbar-thumb{background:#232c4e;border-radius:99px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- top bar ---------- */
+.top{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;gap:16px;
+  padding:16px 34px;background:linear-gradient(180deg,rgba(7,10,20,.92),rgba(7,10,20,0))}
+.brand{display:flex;align-items:baseline;gap:12px}
+.brand .en{font-size:21px;font-weight:900;letter-spacing:6px}
+.brand .en b{color:var(--amber)}
+.brand .ur{font-family:'Gulzar',serif;font-size:22px;color:var(--cyan);opacity:.9}
+.top .sp{flex:1}
+.clock{font-size:13px;font-weight:500;color:var(--dim);letter-spacing:1px}
+.spot-btn{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid var(--line);
+  border-radius:99px;padding:9px 18px;font-size:13px;color:var(--dim);transition:.2s;backdrop-filter:blur(8px)}
+.spot-btn:hover{border-color:var(--amber);color:var(--ink)}
+.spot-btn kbd{font-size:10px;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:78vh;display:flex;align-items:flex-end;padding:110px 60px 70px;overflow:hidden}
+.hero-bg{position:absolute;inset:-40px;background-size:cover;background-position:center 20%;
+  filter:blur(46px) saturate(1.3) brightness(.5);transform:scale(1.15);transition:background-image .8s}
+.hero-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,10,20,.25) 0%,rgba(7,10,20,.55) 55%,var(--void) 100%)}
+.hero-in{position:relative;display:flex;align-items:flex-end;gap:54px;width:100%;max-width:1280px;margin:0 auto}
+.hero-cov{width:264px;aspect-ratio:3/4;border-radius:14px;overflow:hidden;flex-shrink:0;
+  box-shadow:0 40px 90px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.1),0 0 80px rgba(255,179,0,.18);
+  transform:rotate(-2deg);transition:transform .4s}
+.hero-cov:hover{transform:rotate(0) scale(1.02)}
+.hero-cov img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-cov .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:84px;
+  background:linear-gradient(160deg,#1a2547,#0e1430)}
+.hero-txt{flex:1;padding-bottom:8px}
+.kick{font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--amber);margin-bottom:14px}
+.kick .lv{color:var(--cyan)}
+.hero-title{font-size:clamp(34px,5vw,62px);font-weight:900;line-height:1.04;letter-spacing:-1px;max-width:14ch}
+.hero-sub{color:var(--dim);font-size:15px;font-weight:300;margin:18px 0 30px;max-width:52ch;line-height:1.7}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+.cta{border:none;border-radius:12px;padding:15px 30px;font-size:15px;font-weight:700;letter-spacing:.5px;transition:.2s;display:inline-flex;align-items:center;gap:10px}
+.cta.gold{background:var(--amber);color:#1a1200;box-shadow:0 10px 40px rgba(255,179,0,.35)}
+.cta.gold:hover{transform:translateY(-3px);box-shadow:0 16px 50px rgba(255,179,0,.5)}
+.cta.ghost{background:rgba(255,255,255,.07);border:1px solid var(--line);color:var(--ink);backdrop-filter:blur(6px)}
+.cta.ghost:hover{border-color:var(--cyan);transform:translateY(-3px)}
+.hero-dots{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.hdot{width:22px;height:4px;border-radius:99px;background:rgba(255,255,255,.15);border:none;padding:0;transition:.3s}
+.hdot.on{background:var(--amber);width:38px}
+
+/* ---------- rails ---------- */
+.rails{max-width:1280px;margin:0 auto;padding:10px 34px 120px;display:flex;flex-direction:column;gap:46px}
+.rail h2{font-size:19px;font-weight:700;letter-spacing:.5px;margin-bottom:4px;display:flex;align-items:baseline;gap:12px}
+.rail h2 .ur{font-family:'Gulzar',serif;font-size:17px;color:var(--dim);font-weight:400}
+.rail .rsub{font-size:12.5px;color:var(--dim);font-weight:300;margin-bottom:16px}
+.row{display:flex;gap:18px;overflow-x:auto;padding:14px 6px 22px;scroll-snap-type:x proximity}
+.bk{flex-shrink:0;width:158px;border:none;background:none;text-align:left;scroll-snap-align:start;
+  transition:transform .25s;position:relative}
+.bk:hover{transform:translateY(-10px) scale(1.04);z-index:2}
+.bk .cov{width:158px;aspect-ratio:3/4;border-radius:11px;overflow:hidden;position:relative;
+  box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.07)}
+.bk:hover .cov{box-shadow:0 24px 50px rgba(0,0,0,.7),0 0 40px rgba(34,211,238,.22),0 0 0 1px rgba(34,211,238,.4)}
+.bk .cov img{width:100%;height:100%;object-fit:cover;display:block}
+.bk .cov .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(160deg,#1a2547,#0e1430)}
+.bk .cov .lv{position:absolute;top:8px;left:8px;font-size:9px;font-weight:900;letter-spacing:1px;text-transform:uppercase;
+  background:rgba(7,10,20,.75);backdrop-filter:blur(4px);padding:4px 9px;border-radius:99px;color:var(--cyan)}
+.bk .nm{font-size:12.5px;font-weight:500;margin-top:10px;line-height:1.35;color:var(--ink);opacity:.85}
+.bk:hover .nm{opacity:1}
+
+/* ---------- detail overlay ---------- */
+.dt{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:30px}
+.dt.on{display:flex}
+.dt-veil{position:absolute;inset:0;background:rgba(4,6,12,.8);backdrop-filter:blur(14px)}
+.dt-card{position:relative;width:min(880px,94vw);max-height:88vh;overflow-y:auto;background:linear-gradient(160deg,#141c3a,#0b0f22);
+  border:1px solid var(--line);border-radius:24px;padding:40px;display:flex;gap:36px;animation:rise .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes rise{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:none}}
+.dt-cov{width:230px;flex-shrink:0}
+.dt-cov .c{width:230px;aspect-ratio:3/4;border-radius:14px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.6),0 0 60px rgba(255,179,0,.15)}
+.dt-cov img{width:100%;height:100%;object-fit:cover}
+.dt-cov .ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:72px;background:linear-gradient(160deg,#1a2547,#0e1430)}
+.dt-body{flex:1;min-width:0}
+.dt-body h3{font-size:28px;font-weight:900;line-height:1.15;margin:6px 0 4px}
+.dt-body .meta{font-size:12px;color:var(--dim);letter-spacing:2px;text-transform:uppercase}
+.dt-acts{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
+.dt-x{position:absolute;top:18px;right:20px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);font-size:15px;z-index:2}
+.dt-x:hover{border-color:var(--rose);color:var(--rose)}
+.plist{border-top:1px solid var(--line);padding-top:16px;margin-top:6px}
+.plist .pt{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.prow{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;
+  border-bottom:1px solid rgba(255,255,255,.05);padding:10px 4px;font-size:13.5px;font-weight:500;color:var(--ink);transition:.15s;text-align:left}
+.prow:hover{color:var(--amber);padding-left:10px}
+.prow span:last-child{font-size:11px;color:var(--dim)}
+
+/* ---------- FOCUS MODE ---------- */
+.fx{position:fixed;inset:0;z-index:100;background:radial-gradient(1000px 700px at 50% -10%,#141d3f,var(--void) 70%);
+  display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center}
+.fx.on{display:flex;animation:fadein .4s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.fx .kick{margin-bottom:8px}
+.fx h2{font-size:clamp(30px,4.6vw,54px);font-weight:900;max-width:20ch;line-height:1.08;margin-bottom:38px}
+.fx-acts{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-bottom:52px}
+.fxa{width:200px;padding:26px 16px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.04);
+  backdrop-filter:blur(8px);font-size:15px;font-weight:700;transition:.25s}
+.fxa .i{font-size:38px;display:block;margin-bottom:12px}
+.fxa small{display:block;font-weight:300;font-size:11.5px;color:var(--dim);margin-top:5px}
+.fxa:hover{transform:translateY(-6px);border-color:var(--amber);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 40px rgba(255,179,0,.18)}
+.fxa[disabled]{opacity:.3;cursor:not-allowed}
+.fx-timer{display:flex;align-items:center;gap:26px}
+.tring{position:relative;width:130px;height:130px}
+.tring svg{transform:rotate(-90deg)}
+.tring .tt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:26px}
+.tring .tt small{font-size:9px;letter-spacing:2px;color:var(--dim);font-weight:700}
+.tbtns{display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.tchip{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:99px;padding:6px 16px;font-size:12px;font-weight:700;transition:.15s}
+.tchip:hover,.tchip.on{border-color:var(--cyan);color:var(--cyan)}
+.trow{display:flex;gap:8px}
+.fx-quiz{margin-top:8px}
+.fx-exit{position:absolute;top:26px;right:32px;border:1px solid var(--line);background:rgba(255,255,255,.05);
+  border-radius:99px;padding:10px 22px;font-size:13px;font-weight:700}
+.fx-exit:hover{border-color:var(--rose);color:var(--rose)}
+.fx.done{animation:pulse 1s infinite}
+@keyframes pulse{50%{background-color:#1d1430}}
+
+/* quiz overlay inside focus */
+.qz{position:fixed;inset:0;z-index:110;background:rgba(4,6,12,.88);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;padding:30px}
+.qz.on{display:flex}
+.qz-card{width:min(760px,94vw);text-align:center}
+.qz-q{font-size:clamp(22px,3.4vw,36px);font-weight:900;margin-bottom:10px;line-height:1.25}
+.qz-pg{font-size:12px;color:var(--dim);letter-spacing:2px;margin-bottom:34px}
+.qz-ops{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.qzo{min-width:150px;padding:22px 30px;font-size:22px;font-weight:900;border-radius:18px;border:1px solid var(--line);
+  background:rgba(255,255,255,.05);transition:.2s}
+.qzo:hover{border-color:var(--cyan);transform:translateY(-4px)}
+.qzo.yes{background:var(--mint);border-color:var(--mint);color:#03301f;animation:pop .4s}
+.qzo.no{background:var(--rose);border-color:var(--rose);color:#3d0a22;animation:shake .35s}
+@keyframes pop{50%{transform:scale(1.12)}}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.qz-foot{margin-top:38px;display:flex;gap:14px;justify-content:center;align-items:center;font-size:14px;color:var(--dim)}
+.qz-x{border:1px solid var(--line);background:none;border-radius:99px;padding:8px 20px;font-size:12.5px;font-weight:700}
+
+/* ---------- spotlight ---------- */
+.sl{position:fixed;inset:0;z-index:120;background:rgba(4,6,12,.85);backdrop-filter:blur(16px);display:none;
+  flex-direction:column;align-items:center;padding-top:16vh}
+.sl.on{display:flex}
+.sl input{width:min(680px,90vw);background:none;border:none;border-bottom:2px solid var(--amber);outline:none;
+  font-family:'Outfit';font-size:clamp(24px,4vw,40px);font-weight:300;color:var(--ink);padding:10px 6px;text-align:center}
+.sl input::placeholder{color:#3b456e}
+.sl-res{width:min(680px,90vw);margin-top:30px;max-height:46vh;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.slr{display:flex;align-items:center;gap:14px;background:none;border:none;border-radius:12px;padding:12px 16px;text-align:left;font-size:15px;color:var(--ink);transition:.15s}
+.slr:hover{background:rgba(255,255,255,.07)}
+.slr .e{font-size:20px}
+.slr small{display:block;font-size:11.5px;color:var(--dim)}
+.sl-hint{margin-top:26px;font-size:12px;color:#3b456e;letter-spacing:2px}
+
+/* ---------- BACKSTAGE ---------- */
+.bs{display:none;max-width:1180px;margin:0 auto;padding:112px 34px 100px;flex-direction:column;gap:34px}
+.bs.on{display:flex}
+.bs-hero{text-align:left}
+.bs-hero h1{font-size:clamp(28px,4vw,46px);font-weight:900;letter-spacing:-.5px}
+.bs-hero p{color:var(--dim);font-weight:300;margin-top:8px;font-size:14px}
+.panel{background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid var(--line);
+  border-radius:22px;padding:26px 28px;backdrop-filter:blur(6px)}
+.ph2{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.ph2 h2{font-size:18px;font-weight:700;letter-spacing:.5px}
+.ph2 .ur{font-family:'Gulzar',serif;font-size:16px;color:var(--dim)}
+.ph2 .end{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.psub{font-size:12px;color:var(--dim);font-weight:300;margin-bottom:16px}
+.pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:99px;padding:7px 16px;font-size:12.5px;font-weight:700;color:var(--dim);transition:.15s}
+.pill:hover{border-color:var(--cyan);color:var(--ink)}
+.pill.on{background:var(--amber);border-color:var(--amber);color:#1a1200}
+.din{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:10px 14px;
+  font-family:'Outfit';font-size:13.5px;color:var(--ink);outline:none;transition:.15s}
+.din:focus{border-color:var(--cyan)}
+input.din[type=date]{color-scheme:dark}
+.stuc{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:14px;padding:9px 14px;
+  background:rgba(255,255,255,.03);font-size:13px;font-weight:600;transition:.15s;color:var(--ink)}
+.stuc:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.25)}
+.stuc .st{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:900;color:#0a0d18;background:var(--dim);flex-shrink:0}
+.stuc.P{border-color:rgba(52,211,153,.5);box-shadow:0 0 18px rgba(52,211,153,.12)}.stuc.P .st{background:var(--mint)}
+.stuc.A{border-color:rgba(244,114,182,.55);box-shadow:0 0 18px rgba(244,114,182,.14)}.stuc.A .st{background:var(--rose)}
+.stuc.L{border-color:rgba(255,179,0,.55);box-shadow:0 0 18px rgba(255,179,0,.14)}.stuc.L .st{background:var(--amber)}
+.due{font-size:10px;font-weight:900;background:var(--rose);color:#3d0a22;border-radius:99px;padding:3px 9px}
+.people{display:flex;flex-wrap:wrap;gap:10px}
+.sumline{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;font-weight:700;color:var(--dim);margin-top:14px}
+.sumline i{font-style:normal;width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px}
+.bignums{display:flex;gap:40px;flex-wrap:wrap;margin-bottom:14px}
+.bignums b{font-size:30px;font-weight:900;display:block;line-height:1.1}
+.bignums span{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);font-weight:700}
+.bignums .g b{color:var(--mint)}.bignums .r b{color:var(--rose)}
+.frow2{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(255,255,255,.05);padding:10px 4px;font-size:13.5px}
+.frow2 .acts{display:flex;gap:8px}
+.mini2{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:99px;padding:5px 13px;font-size:11.5px;font-weight:800;transition:.15s}
+.mini2:hover{border-color:var(--cyan);color:var(--cyan)}
+.mini2.wa{border-color:rgba(52,211,153,.4);color:var(--mint)}
+.mini2.wa:hover{background:var(--mint);color:#03301f}
+.mgrid{width:100%;border-collapse:collapse;font-size:13px}
+.mgrid th{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+.mgrid td{padding:6px;border-bottom:1px solid rgba(255,255,255,.05);text-align:center}
+.mgrid td:first-child,.mgrid th:first-child{text-align:left}
+.minp2{width:60px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:9px;padding:8px 4px;
+  text-align:center;font-family:'Outfit';font-weight:700;font-size:13px;color:var(--ink);outline:none}
+.minp2:focus{border-color:var(--amber)}
+.rm3{border:none;background:none;color:var(--rose);font-size:12px;font-weight:900;padding:2px 6px;opacity:.7}
+.rm3:hover{opacity:1}
+.ntc2{border-bottom:1px solid rgba(255,255,255,.05);padding:12px 4px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.ntc2 b{font-size:14px}.ntc2 p{font-size:12px;color:var(--dim);font-weight:300;margin-top:3px}
+.addrow2{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.addrow2 .din{flex:1;min-width:160px}
+@media(max-width:760px){.bs{padding:96px 16px 80px}.panel{padding:18px 16px}.bignums{gap:22px}.bignums b{font-size:22px}}
+
+/* ---------- DAY THEME (Office = plain daylight software) ---------- */
+body.day{background:#EFF2F7;background-image:none;color:#1D2436}
+body.day .top{background:linear-gradient(180deg,rgba(239,242,247,.96),rgba(239,242,247,0))}
+body.day .brand .en{color:#1D2436}
+body.day .brand .ur{color:#0E7490}
+body.day .clock{color:#7A849E}
+body.day .spot-btn{background:#fff;border-color:#D9DFEC;color:#5C6782}
+body.day .spot-btn:hover{border-color:#B26A00;color:#1D2436}
+body.day .bs-hero h1{color:#1D2436}
+body.day .bs-hero p{color:#6B7590}
+body.day .kick{color:#B26A00}
+body.day .panel{background:#fff;border-color:#E2E7F1;box-shadow:0 1px 4px rgba(30,40,80,.07);backdrop-filter:none}
+body.day .ph2 h2{color:#1D2436}
+body.day .ph2 .ur{color:#8A93AC}
+body.day .psub{color:#6B7590}
+body.day .pill{background:#F4F6FB;border-color:#DCE2EE;color:#5C6782}
+body.day .pill:hover{border-color:#0E7490;color:#1D2436}
+body.day .pill.on{background:#153060;border-color:#153060;color:#fff}
+body.day .din{background:#fff;border-color:#D9DFEC;color:#1D2436}
+body.day .din:focus{border-color:#0E7490}
+body.day input.din[type=date]{color-scheme:light}
+body.day .stuc{background:#fff;border-color:#DCE2EE;color:#1D2436}
+body.day .stuc.P{border-color:#34D399;box-shadow:none;background:#ECFDF5}
+body.day .stuc.A{border-color:#F472B6;box-shadow:none;background:#FDF2F8}
+body.day .stuc.L{border-color:#FFB300;box-shadow:none;background:#FFFBEB}
+body.day .sumline{color:#6B7590}
+body.day .bignums .g b{color:#0B8A5F}
+body.day .bignums .r b{color:#D6336C}
+body.day .bignums b{color:#1D2436}
+body.day .bignums span{color:#8A93AC}
+body.day .frow2{border-bottom-color:#EDF0F7;color:#1D2436}
+body.day .mini2{background:#fff;border-color:#D9DFEC;color:#3C4763}
+body.day .mini2:hover{border-color:#0E7490;color:#0E7490}
+body.day .mini2.wa{border-color:#34D39966;color:#0B8A5F}
+body.day .mini2.wa:hover{background:#0B8A5F;color:#fff}
+body.day .mgrid th{color:#8A93AC;border-bottom-color:#E2E7F1}
+body.day .mgrid td{border-bottom-color:#EDF0F7;color:#1D2436}
+body.day .minp2{background:#fff;border-color:#D9DFEC;color:#1D2436}
+body.day .minp2:focus{border-color:#B26A00}
+body.day .ntc2{border-bottom-color:#EDF0F7}
+body.day .ntc2 b{color:#1D2436}
+body.day .ntc2 p{color:#6B7590}
+body.day .cta.gold{box-shadow:0 6px 20px rgba(255,179,0,.3)}
+body.day .dt-veil{background:rgba(40,50,80,.35);backdrop-filter:blur(6px)}
+body.day .dt-card{background:#fff;border-color:#E2E7F1;color:#1D2436}
+body.day .dt-body h3{color:#1D2436}
+body.day .dt-body .meta{color:#8A93AC}
+body.day .dt-x{background:#F4F6FB;border-color:#DCE2EE;color:#5C6782}
+body.day .rm3{color:#D6336C}
+body.day .tz{background:#153060;color:#fff;box-shadow:0 10px 30px rgba(21,48,96,.3)}
+
+/* toast */
+.toasts{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.tz{background:var(--amber);color:#1a1200;padding:11px 24px;border-radius:99px;font-size:13.5px;font-weight:700;box-shadow:0 12px 40px rgba(255,179,0,.4);animation:pop .3s}
+
+.credit{text-align:center;color:#2c3555;font-size:11.5px;letter-spacing:2px;padding:0 20px 40px}
+
+@media(max-width:760px){
+  .top{padding:12px 16px}
+  .brand .en{font-size:16px;letter-spacing:4px}
+  .clock{display:none}
+  .hero{padding:92px 22px 56px;min-height:64vh}
+  .hero-in{gap:24px}
+  .hero-cov{width:130px}
+  .hero-sub{font-size:13px;margin:12px 0 20px}
+  .cta{padding:12px 20px;font-size:13px}
+  .rails{padding:6px 16px 90px;gap:34px}
+  .bk{width:124px}.bk .cov{width:124px}
+  .dt-card{flex-direction:column;padding:26px;gap:20px}
+  .dt-cov{width:140px;margin:0 auto}.dt-cov .c{width:140px}
+  .fxa{width:150px;padding:18px 10px}.fxa .i{font-size:28px}
+  .fx h2{margin-bottom:24px}
+  .fx-timer{flex-direction:column;gap:14px}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><span class="en">MA<b>K</b>TAB</span><span class="ur">مکتب</span></div>
+  <div class="sp"></div>
+  <div class="clock" id="clock"></div>
+  <button class="spot-btn" id="bsBtn">🗂 Office</button>
+  <button class="spot-btn" id="slOpen">✦ Find anything <kbd>/</kbd></button>
+</div>
+
+<div class="hero" id="hero">
+  <div class="hero-bg" id="heroBg"></div>
+  <div class="hero-veil"></div>
+  <div class="hero-in">
+    <div class="hero-cov" id="heroCov"></div>
+    <div class="hero-txt">
+      <div class="kick" id="heroKick"></div>
+      <h1 class="hero-title" id="heroTitle"></h1>
+      <p class="hero-sub" id="heroSub"></p>
+      <div class="hero-cta">
+        <button class="cta gold" id="heroTeach">▶ &nbsp;Teach this now</button>
+        <button class="cta ghost" id="heroMore">Details</button>
+      </div>
+    </div>
+  </div>
+  <div class="hero-dots" id="heroDots"></div>
+</div>
+
+<div class="rails" id="rails"></div>
+<div class="credit" id="credit">MAKTAB · A CONCEPT BY CLAUDE FOR AZHAR PUBLISHERS · SAME LIBRARY, NEW SOUL</div>
+<div class="bs" id="bs"></div>
+
+<div class="dt" id="dt"><div class="dt-veil" id="dtVeil"></div><div class="dt-card" id="dtCard"></div></div>
+<div class="fx" id="fx"></div>
+<div class="qz" id="qz"></div>
+<div class="sl" id="sl">
+  <input id="slInput" placeholder="a book, a paper, a page…"/>
+  <div class="sl-res" id="slRes"></div>
+  <div class="sl-hint">ESC TO CLOSE · ENTER OPENS THE FIRST RESULT</div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* MAKTAB — vanilla JS, zero dependencies. Content: ../AzharEd_Deploy */
+const BASE="../AzharEd_Deploy/";
+const C=window.AZHAR_CONTENT||{books:[]};
+const QB=window.AZHAR_QBANK||{};
+const BOOKS=C.books;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+const store={get:(k,d)=>{try{const v=localStorage.getItem("maktab:"+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+             set:(k,v)=>{try{localStorage.setItem("maktab:"+k,JSON.stringify(v));}catch(e){}}};
+function toast(m){const el=document.createElement("div");el.className="tz";el.textContent=m;
+  $("#toasts").appendChild(el);setTimeout(()=>el.remove(),2400);}
+function openPath(p){ if(p) window.open(encodeURI(BASE+p),"_blank"); }
+const covUrl=b=>b.coverImg?encodeURI(BASE+b.coverImg):null;
+const NEW_IDS=["panda_playgroup_easy_draw_and_colour_a","panda_playgroup_easy_draw_and_colour_b",
+ "panda_playgroup_nursery_rhymes_book1","panda_playgroup_nursery_rhymes_book2",
+ "panda_playgroup_general_knowledge_c","panda_playgroup_science_introductory",
+ "panda_playgroup_computer_introductory","panda_playgroup_social_studies_introductory"];
+const SUBS={
+ "Counting":"Numbers, shapes and the joy of counting things that hop, fly and roll.",
+ "English":"First letters, first words, first sentences — the alphabet comes alive.",
+ "Urdu":"حروفِ تہجی سے کہانی تک — Urdu taught with love, letter by letter.",
+ "Tables":"Times tables that stick — with pictures, patterns and play.",
+ "General Knowledge":"The whole wide world, sized for small hands.",
+ "Rhymes":"Songs to sing, clap and remember forever.",
+ "Art":"Draw a line, then another — suddenly it's a peacock.",
+ "Science":"Why? How? What if? — first answers to the biggest little questions.",
+ "Computer":"Keyboards, mice and magic — a first hello to computers.",
+ "Social Studies":"Our home, our city, our Pakistan."};
+
+/* ---------- clock ---------- */
+function tickClock(){ $("#clock").textContent=new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})
+  +" · "+new Date().toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}); }
+tickClock(); setInterval(tickClock,20000);
+
+/* ---------- hero (rotating featured book) ---------- */
+const FEATURED=BOOKS.filter(b=>b.coverImg);
+let heroI=0, heroTimer=null;
+function setHero(i){
+  heroI=(i+FEATURED.length)%FEATURED.length;
+  const b=FEATURED[heroI];
+  $("#heroBg").style.backgroundImage=`url("${covUrl(b)}")`;
+  $("#heroCov").innerHTML=covUrl(b)?`<img src="${covUrl(b)}" alt=""/>`:`<div class="ph">${b.icon}</div>`;
+  $("#heroKick").innerHTML=`${esc(b.series)} SERIES · <span class="lv">${esc(b.level).toUpperCase()}</span> · TONIGHT ON MAKTAB`;
+  $("#heroTitle").textContent=b.title;
+  $("#heroSub").textContent=(SUBS[b.subject]||"A book from the Azhar Publishers library.")+
+    ` ${b.paperCount?b.paperCount+" exam papers":"Flipbook & interactive"} · ${(QB[b.id]&&QB[b.id].items.length)||0} quiz questions inside.`;
+  document.querySelectorAll(".hdot").forEach((d,di)=>d.classList.toggle("on",di===heroI%Math.min(FEATURED.length,8)));
+}
+function heroAuto(){ clearInterval(heroTimer); heroTimer=setInterval(()=>{ if(!$("#dt").classList.contains("on")&&!$("#fx").classList.contains("on")) setHero(heroI+1); },7000); }
+$("#heroDots").innerHTML=FEATURED.slice(0,8).map((_,i)=>`<button class="hdot" data-h="${i}"></button>`).join("");
+document.querySelectorAll(".hdot").forEach(d=>d.onclick=()=>{setHero(+d.dataset.h);heroAuto();});
+$("#heroTeach").onclick=()=>openFocus(FEATURED[heroI]);
+$("#heroMore").onclick=()=>openDetail(FEATURED[heroI]);
+
+/* ---------- rails ---------- */
+function bkCard(b){
+  return `<button class="bk" data-bk="${b.id}">
+    <div class="cov">${covUrl(b)?`<img loading="lazy" src="${covUrl(b)}" alt=""/>`:`<div class="ph">${b.icon}</div>`}
+      <span class="lv">${esc(b.level)}</span></div>
+    <div class="nm">${esc(b.title)}</div></button>`;
+}
+function rail(title,ur,sub,list){
+  if(!list.length) return "";
+  return `<div class="rail"><h2>${title} <span class="ur">${ur}</span></h2><div class="rsub">${sub}</div>
+    <div class="row">${list.map(bkCard).join("")}</div></div>`;
+}
+function renderRails(){
+  const newest=NEW_IDS.map(id=>BOOKS.find(b=>b.id===id)).filter(Boolean);
+  $("#rails").innerHTML=
+    rail("Fresh off the press","نئی کتابیں","The eight newest arrivals in the library",newest)+
+    rail("Playgroup shelf","پلے گروپ","Age 3+ · first books, biggest smiles",BOOKS.filter(b=>b.level==="Playgroup"&&!NEW_IDS.includes(b.id)))+
+    rail("Nursery shelf","نرسری","Growing readers, growing counters",BOOKS.filter(b=>b.level==="Nursery"))+
+    rail("Prep shelf","پریپ","Ready for big school",BOOKS.filter(b=>b.level==="Prep"))+
+    rail("Al-Fatah shelf — Classes 1 to 5","الفتح","Urdu, Islamiyat, Social Studies & Waqfeat-e-Aama",BOOKS.filter(b=>b.series==="Alfatah"))+
+    rail("Quiz-ready","سوالات کے ساتھ","Books whose pages come with built-in quiz questions",BOOKS.filter(b=>QB[b.id]&&QB[b.id].items.filter(q=>q.k==="mcq").length>=3).slice(0,12));
+  document.querySelectorAll("[data-bk]").forEach(el=>el.onclick=()=>openDetail(BOOKS.find(b=>b.id===el.dataset.bk)));
+}
+
+/* ---------- detail overlay ---------- */
+let dtBook=null;
+function openDetail(b){
+  dtBook=b;
+  $("#dtCard").innerHTML=`
+    <button class="dt-x" id="dtX">✕</button>
+    <div class="dt-cov"><div class="c">${covUrl(b)?`<img src="${covUrl(b)}"/>`:`<div class="ph">${b.icon}</div>`}</div></div>
+    <div class="dt-body">
+      <div class="meta">${esc(b.series)} SERIES · ${esc(b.level)} · ${esc(b.subject)}</div>
+      <h3>${esc(b.title)}</h3>
+      <p style="color:var(--dim);font-weight:300;font-size:14px;line-height:1.7;margin-top:8px">${esc(SUBS[b.subject]||"")}</p>
+      <div class="dt-acts">
+        <button class="cta gold" data-focus="1">▶ &nbsp;Focus Mode</button>
+        ${b.flipbook?`<button class="cta ghost" data-open="${esc(b.flipbook)}">📖 Flipbook</button>`:""}
+        ${b.interactive?`<button class="cta ghost" data-open="${esc(b.interactive)}">🎯 Interactive</button>`:""}
+        ${(b.deckPdf||b.deck)?`<button class="cta ghost" data-open="${esc(b.deckPdf||b.deck)}">🖥️ Slides</button>`:""}
+      </div>
+      ${b.papers.length?`<div class="plist"><div class="pt">Exam papers · ${b.papers.length}</div>
+        ${b.papers.map(p=>`<button class="prow" data-open="${esc(p.path)}"><span>📄 ${esc(p.label)}</span><span>OPEN ↗</span></button>`).join("")}
+      </div>`:""}
+    </div>`;
+  $("#dt").classList.add("on");
+  $("#dtX").onclick=closeDetail;
+  document.querySelectorAll("#dtCard [data-open]").forEach(x=>x.onclick=()=>openPath(x.dataset.open));
+  const f=document.querySelector("#dtCard [data-focus]"); if(f) f.onclick=()=>{closeDetail();openFocus(b);};
+}
+function closeDetail(){ $("#dt").classList.remove("on"); }
+$("#dtVeil").onclick=closeDetail;
+
+/* ---------- FOCUS MODE ---------- */
+let fxBook=null, tTotal=store.get("timerMin",20)*60, tLeft=tTotal, tRun=false, tInt=null;
+function fmt(sec){ const m=Math.floor(sec/60), s=sec%60; return m+":"+String(s).padStart(2,"0"); }
+function ringHTML(){
+  const r=56,c=2*Math.PI*r,p=tTotal?tLeft/tTotal:0;
+  return `<svg width="130" height="130">
+    <circle cx="65" cy="65" r="${r}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+    <circle cx="65" cy="65" r="${r}" fill="none" stroke="${tLeft<=60?"var(--rose)":"var(--cyan)"}" stroke-width="9" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}" style="transition:stroke-dashoffset .5s linear"/></svg>
+    <div class="tt">${fmt(tLeft)}<small>${tRun?"TEACHING":"PAUSED"}</small></div>`;
+}
+function renderFocus(){
+  if(!fxBook) return;
+  const b=fxBook, qn=(QB[b.id]?QB[b.id].items.filter(q=>q.k==="mcq").length:0);
+  $("#fx").innerHTML=`
+    <button class="fx-exit" id="fxExit">✕ &nbsp;Exit stage</button>
+    <div class="kick">${esc(b.series)} SERIES · <span class="lv" style="color:var(--cyan)">${esc(b.level).toUpperCase()}</span> · FOCUS MODE</div>
+    <h2>${esc(b.title)}</h2>
+    <div class="fx-acts">
+      <button class="fxa" ${b.flipbook?`data-open="${esc(b.flipbook)}"`:"disabled"}><span class="i">📖</span>Flipbook<small>read together</small></button>
+      <button class="fxa" ${b.interactive?`data-open="${esc(b.interactive)}"`:"disabled"}><span class="i">🎯</span>Interactive<small>play on the board</small></button>
+      <button class="fxa" ${(b.deckPdf||b.deck)?`data-open="${esc(b.deckPdf||b.deck)}"`:"disabled"}><span class="i">🖥️</span>Slides<small>teach & project</small></button>
+      <button class="fxa" id="fxQuiz" ${qn>=3?"":"disabled"}><span class="i">⚡</span>Quick quiz<small>${qn>=3?qn+" questions from its pages":"no bank yet"}</small></button>
+    </div>
+    <div class="fx-timer">
+      <div class="tring" id="tring">${ringHTML()}</div>
+      <div class="tbtns">
+        <div class="trow">${[10,20,30,40].map(m=>`<button class="tchip ${tTotal===m*60?"on":""}" data-min="${m}">${m} min</button>`).join("")}</div>
+        <div class="trow">
+          <button class="tchip" id="tGo">${tRun?"⏸ Pause":"▶ Start lesson"}</button>
+          <button class="tchip" id="tRe">↺ Reset</button>
+        </div>
+      </div>
+    </div>`;
+  $("#fxExit").onclick=closeFocus;
+  document.querySelectorAll("#fx [data-open]").forEach(x=>x.onclick=()=>openPath(x.dataset.open));
+  document.querySelectorAll("#fx [data-min]").forEach(x=>x.onclick=()=>{ tTotal=+x.dataset.min*60; tLeft=tTotal; store.set("timerMin",+x.dataset.min); renderFocus(); });
+  $("#tGo").onclick=()=>{ tRun=!tRun; if(tRun) startTick(); else stopTick(); renderFocus(); };
+  $("#tRe").onclick=()=>{ stopTick(); tRun=false; tLeft=tTotal; $("#fx").classList.remove("done"); renderFocus(); };
+  const q=$("#fxQuiz"); if(q&&!q.disabled) q.onclick=()=>openQuiz(b);
+}
+function startTick(){ stopTick(); tInt=setInterval(()=>{
+  if(tLeft>0){ tLeft--; const tr=$("#tring"); if(tr) tr.innerHTML=ringHTML(); }
+  if(tLeft===0){ stopTick(); tRun=false; $("#fx").classList.add("done"); toast("⏰ Time's up — shabash class!"); renderFocus(); }
+},1000); }
+function stopTick(){ clearInterval(tInt); tInt=null; }
+function openFocus(b){ fxBook=b; tLeft=tTotal; tRun=false; store.set("lastBook",b.id);
+  $("#fx").classList.remove("done"); $("#fx").classList.add("on"); renderFocus(); }
+function closeFocus(){ stopTick(); tRun=false; $("#fx").classList.remove("on"); }
+
+/* ---------- quick quiz ---------- */
+let qzQs=[], qzI=0, qzRight=0;
+function openQuiz(b){
+  const items=QB[b.id].items.filter(q=>q.k==="mcq"&&q.options.length<=4);
+  qzQs=[]; const used={};
+  while(qzQs.length<3&&qzQs.length<items.length){
+    const q=items[Math.floor(Math.random()*items.length)];
+    if(!used[q.text]){used[q.text]=1;qzQs.push(q);}
+  }
+  qzI=0; qzRight=0; renderQuiz(); $("#qz").classList.add("on");
+}
+function renderQuiz(){
+  if(qzI>=qzQs.length){
+    $("#qz").innerHTML=`<div class="qz-card">
+      <div class="qz-q">${qzRight===qzQs.length?"🌟 Perfect!":"👏 Well done!"}</div>
+      <div class="qz-pg">${qzRight} OUT OF ${qzQs.length}</div>
+      <div class="qz-foot"><button class="cta gold" id="qzAgain">⚡ Three more</button>
+      <button class="qz-x" id="qzClose">Back to the lesson</button></div></div>`;
+    $("#qzAgain").onclick=()=>openQuiz(fxBook);
+    $("#qzClose").onclick=()=>$("#qz").classList.remove("on");
+    return;
+  }
+  const q=qzQs[qzI];
+  $("#qz").innerHTML=`<div class="qz-card">
+    <div class="qz-q">${esc(q.text)}</div>
+    <div class="qz-pg">QUESTION ${qzI+1} OF ${qzQs.length} · PAGE ${q.pg} OF THE BOOK</div>
+    <div class="qz-ops">${q.options.map((o,i)=>`<button class="qzo" data-o="${i}">${esc(o)}</button>`).join("")}</div>
+    <div class="qz-foot"><button class="qz-x" id="qzClose">✕ Close quiz</button></div></div>`;
+  $("#qzClose").onclick=()=>$("#qz").classList.remove("on");
+  document.querySelectorAll(".qzo").forEach(btn=>btn.onclick=()=>{
+    if(document.querySelector(".qzo.yes,.qzo.no")) return;
+    const pick=q.options[+btn.dataset.o];
+    if(pick===q.answer){ btn.classList.add("yes"); qzRight++; }
+    else{ btn.classList.add("no");
+      document.querySelectorAll(".qzo").forEach(o=>{ if(o.textContent===q.answer) o.classList.add("yes"); }); }
+    setTimeout(()=>{ qzI++; renderQuiz(); },1100);
+  });
+}
+
+/* ---------- spotlight ---------- */
+const INDEX=(()=>{const ix=[];
+  BOOKS.forEach(b=>{
+    ix.push({e:b.icon,l:b.title+" · "+b.level,s:"Open the book",book:b.id});
+    if(b.flipbook)ix.push({e:"📖",l:b.title+" — Flipbook ("+b.level+")",s:"Read on screen",p:b.flipbook});
+    b.papers.forEach(p=>ix.push({e:"📄",l:p.label+" — "+b.title+" ("+b.level+")",s:"Exam paper",p:p.path}));
+  });return ix;})();
+function slRender(q){
+  const ql=q.toLowerCase().trim();
+  if(!ql){ $("#slRes").innerHTML=""; return; }
+  const toks=ql.split(/\s+/);
+  const hits=INDEX.filter(it=>toks.every(t=>it.l.toLowerCase().includes(t))).slice(0,10);
+  $("#slRes").innerHTML=hits.map(it=>`<button class="slr" data-i="${INDEX.indexOf(it)}">
+    <span class="e">${it.e}</span><span>${esc(it.l)}<small>${esc(it.s)}</small></span></button>`).join("");
+  document.querySelectorAll(".slr").forEach(el=>el.onclick=()=>{
+    const it=INDEX[+el.dataset.i]; slClose();
+    if(it.book) openDetail(BOOKS.find(b=>b.id===it.book)); else openPath(it.p);
+  });
+}
+function slOpen(){ $("#sl").classList.add("on"); $("#slInput").value=""; slRender(""); $("#slInput").focus(); }
+function slClose(){ $("#sl").classList.remove("on"); }
+$("#slOpen").onclick=slOpen;
+$("#slInput").addEventListener("input",e=>slRender(e.target.value));
+$("#slInput").addEventListener("keydown",e=>{ if(e.key==="Enter"){ const f=document.querySelector(".slr"); if(f) f.click(); } });
+$("#sl").addEventListener("click",e=>{ if(e.target.id==="sl") slClose(); });
+window.addEventListener("keydown",e=>{
+  if(e.key==="/"&&!/input|textarea/i.test(document.activeElement.tagName)){ e.preventDefault(); slOpen(); }
+  if(e.key==="Escape"){ slClose(); $("#qz").classList.remove("on"); closeDetail(); }
+});
+
+/* ---------- BACKSTAGE (office management) ----------
+   Shares the SAME storage as the wider ecosystem:
+   azharedone:* (register/staff/notices) + azhared2:gradebook (marks)
+   so AzharEd One, the Family portal and MAKTAB stay in sync. */
+const oget=(k,d)=>{try{const v=localStorage.getItem("azharedone:"+k);return v==null?d:JSON.parse(v);}catch(e){return d;}};
+const oset=(k,v)=>{try{localStorage.setItem("azharedone:"+k,JSON.stringify(v));}catch(e){}};
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const rupee=n=>"Rs "+Number(n||0).toLocaleString("en-PK");
+const CLASSES=["Playgroup","Nursery","Prep","One","Two","Three","Four","Five"];
+const EARLY=["Playgroup","Nursery","Prep"];
+const SEED_STU=[
+ {id:1,name:"Ahmed Ali",cls:"Nursery",roll:1,guardian:"Ali Raza",phone:"0300-1234501",fee:4500,paid:4500},
+ {id:2,name:"Fatima Noor",cls:"Nursery",roll:2,guardian:"Noor Ahmed",phone:"0300-1234502",fee:4500,paid:0},
+ {id:3,name:"Hassan Raza",cls:"Prep",roll:1,guardian:"Raza Khan",phone:"0300-1234503",fee:5000,paid:5000},
+ {id:4,name:"Zoya Khan",cls:"Prep",roll:2,guardian:"Imran Khan",phone:"0300-1234504",fee:5000,paid:2500},
+ {id:5,name:"Bilal Aslam",cls:"Playgroup",roll:1,guardian:"Aslam Butt",phone:"0300-1234505",fee:4000,paid:4000},
+ {id:6,name:"Ayesha Tariq",cls:"Playgroup",roll:2,guardian:"Tariq Mehmood",phone:"0300-1234506",fee:4000,paid:0},
+ {id:9,name:"Hamza Sheikh",cls:"Two",roll:1,guardian:"Sheikh Riaz",phone:"0300-1234509",fee:6000,paid:3000},
+ {id:12,name:"Hina Shah",cls:"Nursery",roll:3,guardian:"Shah Nawaz",phone:"0300-1234512",fee:4500,paid:4500}];
+const SEED_STAFF=[
+ {id:1,name:"Mrs. Aisha Khan",subject:"English"},{id:2,name:"Ms. Sana Tariq",subject:"Urdu"},
+ {id:3,name:"Mr. Bilal Ahmed",subject:"Maths"},{id:4,name:"Ms. Nadia Aslam",subject:"Counting"}];
+const SEED_NTC=[{id:1,date:"6 Jul",title:"Parent–Teacher Meeting",body:"PTM this Friday 9:00 AM."},
+ {id:2,date:"3 Jul",title:"Fee reminder",body:"July fees due by the 10th."}];
+let bsStudents=oget("students",null)||SEED_STU;
+let bsStaff=oget("staff",null)||SEED_STAFF;
+let bsNotices=oget("notices",null)||SEED_NTC;
+const saveStu=()=>oset("students",bsStudents);
+let view=store.get("view","stage"), bsCls=store.get("bsCls","Nursery"),
+    bsDate=todayISO(), bsTerm=store.get("bsTerm","1st Term");
+const CERT_TYPES=[["⭐","Star of the Week","for shining bright in class this week"],
+ ["🗓️","Excellent Attendance","for wonderful regularity and punctuality"],
+ ["✍️","Best Handwriting","for beautiful, careful writing"],
+ ["📚","Reading Champion","for outstanding progress in reading"],
+ ["💚","Good Behaviour Award","for kindness and wonderful manners"],
+ ["🏆","Achievement Award","for excellent performance"]];
+let certName="", certTi=0, certReason="";
+const dueOf=s=>s.fee-s.paid;
+function waLink(phone,msg){let d=String(phone||"").replace(/[^0-9]/g,"");if(!d)return null;
+  if(d.indexOf("0")===0)d="92"+d.slice(1);return "https://wa.me/"+d+"?text="+encodeURIComponent(msg);}
+function printPop(title,body){
+  const w=window.open("","_blank","width=780,height=920"); if(!w)return;
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title>
+  <style>body{font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#151a2e;padding:28px;max-width:720px;margin:0 auto}
+  h1{font-size:20px;color:#0f1e46;margin-bottom:2px}.sub{color:#8a90a8;font-size:12px;margin-bottom:18px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{border:1px solid #ccd3e5;padding:7px 9px;text-align:left}
+  th{background:#0f1e46;color:#fff}tr:nth-child(even){background:#f4f6fc}
+  .amt{background:#e8f6ef;border-radius:10px;padding:14px;text-align:center;margin:18px 0;font-size:15px}
+  .btn{display:block;width:100%;padding:11px;background:#0f1e46;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;margin-top:20px;cursor:pointer}
+  .f{text-align:center;font-size:10.5px;color:#aab;margin-top:16px}
+  @media print{.btn{display:none}}</style></head><body>${body}
+  <div class="f">MAKTAB · Azhar Model School · Azhar Publishers</div>
+  <button class="btn" onclick="window.print()">Print / Save as PDF</button></body></html>`);
+  w.document.close();
+}
+const gbKey=()=>bsCls+" A|"+bsTerm;
+const gbLoad=()=>{try{return JSON.parse(localStorage.getItem("azhared2:gradebook")||"{}");}catch(e){return{};}};
+const gbSave=g=>{try{localStorage.setItem("azhared2:gradebook",JSON.stringify(g));}catch(e){}};
+const gbSubs=()=>EARLY.includes(bsCls)?["English","Urdu","Counting"]:["English","Urdu","Maths","Islamiat","General Knowledge","Science"];
+
+function setView(v){ view=v; store.set("view",v);
+  const stage=v==="stage";
+  $("#hero").style.display=stage?"flex":"none";
+  $("#rails").style.display=stage?"flex":"none";
+  $("#credit").style.display=stage?"block":"none";
+  $("#bs").classList.toggle("on",!stage);
+  $("#bsBtn").textContent=stage?"🗂 Office":"📚 Books";
+  document.body.classList.toggle("day",!stage);
+  if(!stage) renderBS();
+  window.scrollTo(0,0);
+}
+$("#bsBtn").onclick=()=>setView(view==="stage"?"backstage":"stage");
+
+function renderBS(){
+  const kids=bsStudents.filter(s=>s.cls===bsCls);
+  const att=oget("att:"+bsDate,{});
+  const satt=oget("satt:"+bsDate,{});
+  const collected=bsStudents.reduce((a,s)=>a+s.paid,0);
+  const outstanding=bsStudents.reduce((a,s)=>a+dueOf(s),0);
+  const dueList=bsStudents.filter(s=>dueOf(s)>0);
+  const P=kids.filter(s=>(att[s.id]||"P")==="P").length,
+        A=kids.filter(s=>att[s.id]==="A").length,
+        L=kids.filter(s=>att[s.id]==="L").length;
+  const sheet=gbLoad()[gbKey()]||{subjects:gbSubs(),rows:[]};
+  const rowFor=n=>sheet.rows.find(r=>r.name===n)||{name:n,m:{}};
+
+  $("#bs").innerHTML=`
+  <div class="bs-hero"><div class="kick">SCHOOL OFFICE · ${new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}</div>
+    <h1>Office <span style="font-family:'Gulzar',serif;font-size:.7em;color:var(--cyan)">دفتر</span></h1>
+    <p>Attendance, fees, marks, staff and paperwork — one register shared with the whole MAKTAB ecosystem.</p></div>
+
+  <div class="panel"><div class="ph2"><h2>📋 Attendance</h2><span class="ur">حاضری</span>
+    <span class="end"><input type="date" class="din" id="bsDate" value="${bsDate}" max="${todayISO()}"/></span></div>
+   <div class="psub">1) Pick the class &nbsp;2) Tap each child's circle to mark P / A / L &nbsp;3) Tap a name to edit details &nbsp;4) Pink badge = fee due — tap it to receive payment.</div>
+   <div class="pillrow">${CLASSES.map(c=>`<button class="pill ${bsCls===c?"on":""}" data-cls="${c}">${c}</button>`).join("")}</div>
+   ${kids.length?`<div class="people">${kids.map(s=>{const st=att[s.id]||"P";
+     return `<button class="stuc ${st}" data-edit="${s.id}"><span class="st" data-cyc="${s.id}">${st}</span>${esc(s.name)}
+       ${dueOf(s)>0?`<span class="due" data-pay="${s.id}">${rupee(dueOf(s))}</span>`:""}</button>`;}).join("")}</div>
+   <div class="sumline"><span><i style="background:var(--mint)"></i>${P} present</span>
+     <span><i style="background:var(--rose)"></i>${A} absent</span>
+     <span><i style="background:var(--amber)"></i>${L} leave</span>
+     <button class="mini2" id="allPresent" style="margin-left:auto">✅ Mark all present</button></div>`
+   :`<div class="psub" style="margin:8px 0">No students in ${esc(bsCls)} yet — enroll the first below.</div>`}
+   <div class="addrow2"><input class="din" id="nStu" placeholder="Enroll in ${esc(bsCls)} — type a name…"/>
+     <button class="cta gold" style="padding:10px 22px;font-size:13px" id="nStuGo">+ Enroll</button></div>
+  </div>
+
+  <div class="panel"><div class="ph2"><h2>💰 Fees</h2><span class="ur">فیس</span>
+    <span class="end"><button class="mini2" id="allVouchers">🧾 All vouchers</button></span></div>
+   <div class="bignums">
+     <div class="g"><b>${rupee(collected)}</b><span>Collected</span></div>
+     <div class="r"><b>${rupee(outstanding)}</b><span>Outstanding</span></div>
+     <div><b>${dueList.length}</b><span>Families with dues</span></div>
+   </div>
+   ${dueList.length?dueList.map(s=>`<div class="frow2"><span>${esc(s.name)} · ${esc(s.cls)} — <b style="color:var(--rose)">${rupee(dueOf(s))}</b></span>
+     <span class="acts"><button class="mini2" data-vch="${s.id}">🧾 Voucher</button>
+     <button class="mini2 wa" data-wa="${s.id}">💬 Remind</button></span></div>`).join("")
+   :`<div class="psub">All clear — no dues. 🎉</div>`}
+  </div>
+
+  <div class="panel"><div class="ph2"><h2>🧾 Gradebook</h2><span class="ur">گریڈ بک</span>
+    <span class="end">${["1st Term","2nd Term","3rd Term"].map(tm=>`<button class="pill ${bsTerm===tm?"on":""}" data-term="${tm}">${tm}</button>`).join("")}
+      ${kids.length?`<button class="mini2" id="prCards">🖨️ Report cards</button>`:""}</span></div>
+   <div class="psub">Type each student's marks out of 100 — saved instantly. The parents' portal shows the same marks.</div>
+   ${kids.length?`<div style="overflow-x:auto"><table class="mgrid">
+     <thead><tr><th>Student</th>${sheet.subjects.map(x=>`<th>${esc(x)}</th>`).join("")}<th>%</th></tr></thead>
+     <tbody>${kids.map(k=>{const r=rowFor(k.name);
+       const tot=sheet.subjects.reduce((a,x)=>a+(+r.m[x]||0),0),pct=Math.round(tot/(sheet.subjects.length*100)*100);
+       return `<tr><td style="font-weight:600">${esc(k.name)}</td>
+         ${sheet.subjects.map(x=>`<td><input class="minp2" type="number" min="0" max="100" value="${r.m[x]!=null&&r.m[x]!==""?r.m[x]:""}" data-mn="${esc(k.name)}" data-ms="${esc(x)}"/></td>`).join("")}
+         <td style="font-weight:900;color:${pct>=80?"var(--mint)":pct>=50?"var(--amber)":pct>0?"var(--rose)":"var(--dim)"}">${pct||"—"}</td></tr>`;}).join("")}
+     </tbody></table></div>`:`<div class="psub">Enroll students above to enter marks.</div>`}
+  </div>
+
+  <div class="panel"><div class="ph2"><h2>🏅 Certificates</h2><span class="ur">اسناد</span>
+    <span class="end"><button class="mini2" id="certPrint">🖨️ Print certificate</button></span></div>
+   <div class="psub">Pick the child, pick the award, print — A4 landscape with signature lines.</div>
+   <div class="pillrow" style="margin-bottom:10px">
+     <select class="din" id="certSel" style="min-width:220px">
+       ${bsStudents.map(x=>`<option value="${esc(x.name)}" ${x.name===certName?"selected":""}>${esc(x.name)} · ${esc(x.cls)}</option>`).join("")}
+     </select>
+     <input class="din" id="certReason" placeholder="Reason (optional)" value="${esc(certReason)}" style="flex:1;min-width:180px"/>
+   </div>
+   <div class="pillrow" style="margin-bottom:0">${CERT_TYPES.map((c,i)=>`<button class="pill ${certTi===i?"on":""}" data-cert="${i}">${c[0]} ${c[1]}</button>`).join("")}</div>
+  </div>
+
+  <div class="panel"><div class="ph2"><h2>📇 Student Register</h2><span class="ur">رجسٹر</span>
+    <span class="end"><button class="mini2" id="prStuReg">🖨️ Print register</button></span></div>
+   <div class="psub">Every student in the school — all classes. Tap a row to edit their details.</div>
+   <div style="overflow-x:auto"><table class="mgrid">
+     <thead><tr><th style="text-align:left">Name</th><th>Class</th><th>Roll</th><th style="text-align:left">Guardian</th><th style="text-align:left">Phone</th><th>Fee</th><th>Paid</th><th>Due</th></tr></thead>
+     <tbody>${bsStudents.map(x=>`<tr data-rowedit="${x.id}" style="cursor:pointer">
+       <td style="text-align:left;font-weight:600">${esc(x.name)}</td><td>${esc(x.cls)}</td><td>${x.roll}</td>
+       <td style="text-align:left">${esc(x.guardian||"—")}</td><td style="text-align:left">${esc(x.phone||"—")}</td>
+       <td>${rupee(x.fee)}</td><td>${rupee(x.paid)}</td>
+       <td style="font-weight:800;color:${dueOf(x)>0?"var(--rose)":"var(--mint)"}">${dueOf(x)>0?rupee(dueOf(x)):"—"}</td></tr>`).join("")}
+     </tbody></table></div>
+  </div>
+
+  <div class="panel"><div class="ph2"><h2>🧑‍🏫 Staff Register</h2><span class="ur">عملہ</span></div>
+   <div class="psub">Tap the P/A/L button to mark today's attendance (uses the date above) · ✕ removes.</div>
+   <div style="overflow-x:auto"><table class="mgrid">
+     <thead><tr><th style="text-align:left">Name</th><th style="text-align:left">Subject</th><th>Mark</th><th>This month</th><th></th></tr></thead>
+     <tbody>${bsStaff.map(st0=>{const st=satt[st0.id]||"P";
+       let mp=0,mt=0;const mm=bsDate.slice(0,7);
+       for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
+         if(k&&k.indexOf("azharedone:satt:")===0&&k.slice(16).slice(0,7)===mm){
+           const rec=oget(k.slice(11),{});const v=rec[st0.id];if(v){mt++;if(v==="P")mp++;}}}
+       return `<tr><td style="text-align:left;font-weight:600">${esc(st0.name)}</td><td style="text-align:left">${esc(st0.subject)}</td>
+         <td><button class="stuc ${st}" style="padding:5px 12px"><span class="st" data-scyc="${st0.id}">${st}</span></button></td>
+         <td>${mt?Math.round(mp/mt*100)+"% ("+mp+"/"+mt+")":"—"}</td>
+         <td><button class="rm3" data-rmstaff="${st0.id}">✕</button></td></tr>`;}).join("")}
+     </tbody></table></div>
+   <div class="addrow2"><input class="din" id="nStaffN" placeholder="Name…"/><input class="din" id="nStaffS" placeholder="Subject…" style="max-width:150px"/>
+     <button class="cta gold" style="padding:10px 22px;font-size:13px" id="nStaffGo">+ Add</button></div>
+  </div>
+
+  <div class="panel"><div class="ph2"><h2>📢 Noticeboard</h2><span class="ur">اعلانات</span></div>
+   ${bsNotices.map(n=>`<div class="ntc2"><div><b>${esc(n.title)}</b><p>${esc(n.body)}${n.body?" · ":""}${esc(n.date)}</p></div>
+     <span class="acts" style="display:flex;gap:8px"><button class="mini2 wa" data-shr="${n.id}">💬</button><button class="rm3" data-rmntc="${n.id}">✕</button></span></div>`).join("")}
+   <div class="addrow2"><input class="din" id="nNtc" placeholder="Post a notice…"/>
+     <button class="cta gold" style="padding:10px 22px;font-size:13px" id="nNtcGo">Post</button></div>
+  </div>
+
+  <div class="panel"><div class="ph2"><h2>🖨️ Printables</h2><span class="ur">رپورٹس</span></div>
+   <div class="psub">One-tap registers for ${bsDate.slice(0,7)} (set the Attendance date to change month).</div>
+   <div class="pillrow" style="margin-bottom:0">
+     <button class="mini2" id="prAtt">🗓️ Student attendance register</button>
+     <button class="mini2" id="prStaff">🧑‍🏫 Staff attendance register</button>
+     <button class="mini2" id="prFees">💰 Fee report + defaulters</button>
+   </div>
+  </div>`;
+  wireBS();
+}
+function receiptFor(s,amt){
+  printPop("Receipt — "+s.name,
+    `<h1>Azhar Model School</h1><div class="sub">FEE PAYMENT RECEIPT · ${new Date().toLocaleDateString("en-GB")}</div>
+     <table><tr><th>Student</th><td>${esc(s.name)}</td></tr><tr><th>Class</th><td>${esc(s.cls)}</td></tr>
+     <tr><th>Guardian</th><td>${esc(s.guardian||"—")}</td></tr><tr><th>Remaining due</th><td>${rupee(dueOf(s))}</td></tr></table>
+     <div class="amt">Amount received: <b>${rupee(amt)}</b></div>`);
+}
+function voucherFor(s){
+  const month=new Date().toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+  const amt=dueOf(s)>0?dueOf(s):s.fee;
+  printPop("Voucher — "+s.name,
+    `<h1>Azhar Model School</h1><div class="sub">FEE VOUCHER · ${month}</div>
+     <table><tr><th>Student</th><td>${esc(s.name)}</td></tr><tr><th>Class</th><td>${esc(s.cls)} · Roll ${s.roll}</td></tr>
+     <tr><th>Guardian</th><td>${esc(s.guardian||"—")}</td></tr><tr><th>Monthly fee</th><td>${rupee(s.fee)}</td></tr></table>
+     <div class="amt">Amount payable: <b>${rupee(amt)}</b> · due by the 10th</div>
+     <div class="sub">Cash / Bank transfer / JazzCash / EasyPaisa — receipt always issued.</div>`);
+}
+function wireBS(){
+  const d=document;
+  $("#bsDate").onchange=e=>{bsDate=e.target.value||todayISO();renderBS();};
+  d.querySelectorAll("[data-cls]").forEach(b=>b.onclick=()=>{bsCls=b.dataset.cls;store.set("bsCls",bsCls);renderBS();});
+  d.querySelectorAll("[data-cyc]").forEach(b=>b.onclick=e=>{e.stopPropagation();
+    const att=oget("att:"+bsDate,{});const id=+b.dataset.cyc;
+    att[id]={P:"A",A:"L",L:"P"}[att[id]||"P"];oset("att:"+bsDate,att);renderBS();});
+  d.querySelectorAll("[data-pay]").forEach(b=>b.onclick=e=>{e.stopPropagation();
+    const s=bsStudents.find(x=>x.id===+b.dataset.pay);if(!s)return;
+    const amt=Math.min(dueOf(s),Math.max(0,+(prompt("Amount received from "+s.name+" (due "+rupee(dueOf(s))+"):",dueOf(s))||0)));
+    if(amt>0){s.paid+=amt;saveStu();toast("💰 Received "+rupee(amt)+" — receipt opening");receiptFor(s,amt);renderBS();}});
+  d.querySelectorAll("[data-edit]").forEach(b=>b.onclick=e=>{
+    if(e.target.dataset.cyc||e.target.dataset.pay)return;
+    openStuEditor(+b.dataset.edit);});
+  $("#nStuGo").onclick=()=>{const v=$("#nStu").value.trim();if(!v)return;
+    const roll=bsStudents.filter(s=>s.cls===bsCls).length+1;
+    bsStudents.push({id:Date.now(),name:v,cls:bsCls,roll,guardian:"",phone:"",fee:EARLY.includes(bsCls)?4500:5500,paid:0});
+    saveStu();toast("📋 "+v+" enrolled — tap the name to add guardian & fee");renderBS();};
+  $("#nStu").onkeydown=e=>{if(e.key==="Enter")$("#nStuGo").click();};
+  const ap=$("#allPresent"); if(ap) ap.onclick=()=>{ const att=oget("att:"+bsDate,{});
+    bsStudents.filter(x=>x.cls===bsCls).forEach(x=>att[x.id]="P"); oset("att:"+bsDate,att);
+    toast("✅ All of "+bsCls+" marked present"); renderBS(); };
+  d.querySelectorAll("[data-vch]").forEach(b=>b.onclick=()=>voucherFor(bsStudents.find(x=>x.id===+b.dataset.vch)));
+  $("#allVouchers").onclick=()=>{const due=bsStudents.filter(s=>dueOf(s)>0);
+    if(!due.length){toast("No dues — nothing to print 🎉");return;}
+    const month=new Date().toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+    printPop("Fee vouchers",`<h1>Azhar Model School</h1><div class="sub">Fee Vouchers — ${month}</div>`+
+      due.map(s=>`<table style="margin-bottom:14px;page-break-inside:avoid"><tr><th>Student</th><td>${esc(s.name)} · ${esc(s.cls)} · Roll ${s.roll}</td></tr>
+      <tr><th>Guardian</th><td>${esc(s.guardian||"—")}</td></tr><tr><th>Amount payable</th><td><b>${rupee(dueOf(s))}</b> · due by the 10th</td></tr></table>`).join(""));};
+  d.querySelectorAll("[data-wa]").forEach(b=>b.onclick=()=>{
+    const s=bsStudents.find(x=>x.id===+b.dataset.wa);if(!s)return;
+    const link=waLink(s.phone,"Dear "+(s.guardian||"Parent")+", a friendly reminder that "+rupee(dueOf(s))+" in school fees is due for "+s.name+" ("+s.cls+"). JazakAllah — Azhar Model School");
+    if(link)window.open(link,"_blank");else toast("No phone saved — tap "+s.name+"'s name in Roll Call to add one");});
+  d.querySelectorAll("[data-term]").forEach(b=>b.onclick=()=>{bsTerm=b.dataset.term;store.set("bsTerm",bsTerm);renderBS();});
+  d.querySelectorAll(".minp2").forEach(inp=>inp.onchange=()=>{
+    const gb=gbLoad();const sheet=gb[gbKey()]||{subjects:gbSubs(),rows:[]};
+    let row=sheet.rows.find(r=>r.name===inp.dataset.mn);
+    if(!row){row={name:inp.dataset.mn,m:{}};sheet.rows.push(row);}
+    row.m[inp.dataset.ms]=Math.max(0,Math.min(100,+inp.value||0));
+    gb[gbKey()]=sheet;gbSave(gb);toast("🧾 Marks saved to the shared gradebook");renderBS();});
+  const pc=$("#prCards");if(pc)pc.onclick=()=>{
+    const sheet=gbLoad()[gbKey()]||{subjects:gbSubs(),rows:[]};
+    const kids=bsStudents.filter(s=>s.cls===bsCls);
+    const grade=p=>p>=80?"A":p>=65?"B":p>=50?"C":p>0?"D":"—";
+    printPop("Report cards — "+bsCls,kids.map(k=>{
+      const r=sheet.rows.find(x=>x.name===k.name)||{m:{}};
+      const tot=sheet.subjects.reduce((a,x)=>a+(+r.m[x]||0),0),max=sheet.subjects.length*100,p=Math.round(tot/max*100);
+      return `<div style="page-break-after:always"><h1>Azhar Model School</h1>
+       <div class="sub">Progress Report Card · ${bsTerm} · Session 2026–27</div>
+       <p style="font-size:13.5px;margin-bottom:12px"><b>Student:</b> ${esc(k.name)} &nbsp;&nbsp; <b>Class:</b> ${esc(k.cls)} &nbsp;&nbsp; <b>Roll:</b> ${k.roll}</p>
+       <table><tr><th>Subject</th><th>Max</th><th>Obtained</th><th>Grade</th></tr>
+       ${sheet.subjects.map(x=>`<tr><td>${esc(x)}</td><td>100</td><td>${+r.m[x]||0}</td><td><b>${grade(+r.m[x]||0)}</b></td></tr>`).join("")}
+       <tr style="background:#eef2fb"><td><b>Total</b></td><td><b>${max}</b></td><td><b>${tot}</b></td><td><b>${p}% · ${grade(p)}</b></td></tr></table>
+       <p style="font-size:12.5px;margin-top:16px"><b>Teacher's remarks:</b> ______________________________________</p>
+       <div style="display:flex;justify-content:space-between;margin-top:44px;font-size:12px;color:#556">
+        <span style="border-top:1px solid #333;padding:5px 18px 0">Class Teacher</span>
+        <span style="border-top:1px solid #333;padding:5px 18px 0">Principal</span>
+        <span style="border-top:1px solid #333;padding:5px 18px 0">Parent</span></div></div>`;}).join(""));
+    toast("🖨️ "+kids.length+" report cards ready");};
+  d.querySelectorAll("[data-scyc]").forEach(b=>b.onclick=e=>{e.stopPropagation();
+    const satt=oget("satt:"+bsDate,{});const id=+b.dataset.scyc;
+    satt[id]={P:"A",A:"L",L:"P"}[satt[id]||"P"];oset("satt:"+bsDate,satt);renderBS();});
+  d.querySelectorAll("[data-rmstaff]").forEach(b=>b.onclick=e=>{e.stopPropagation();
+    const st=bsStaff.find(x=>x.id===+b.dataset.rmstaff);
+    if(st&&confirm("Remove "+st.name+"?")){bsStaff=bsStaff.filter(x=>x.id!==st.id);oset("staff",bsStaff);renderBS();}});
+  $("#nStaffGo").onclick=()=>{const n=$("#nStaffN").value.trim();if(!n)return;
+    bsStaff.push({id:Date.now(),name:n,subject:$("#nStaffS").value.trim()||"—"});
+    oset("staff",bsStaff);toast("🧑‍🏫 "+n+" added to staff");renderBS();};
+  d.querySelectorAll("[data-shr]").forEach(b=>b.onclick=()=>{
+    const n=bsNotices.find(x=>x.id===+b.dataset.shr);if(!n)return;
+    window.open("https://wa.me/?text="+encodeURIComponent("📢 "+n.title+(n.body?"\n"+n.body:"")+"\n— Azhar Model School"),"_blank");});
+  d.querySelectorAll("[data-rmntc]").forEach(b=>b.onclick=()=>{
+    bsNotices=bsNotices.filter(x=>x.id!==+b.dataset.rmntc);oset("notices",bsNotices);renderBS();});
+  $("#nNtcGo").onclick=()=>{const v=$("#nNtc").value.trim();if(!v)return;
+    bsNotices.unshift({id:Date.now(),date:new Date().toLocaleDateString("en-GB",{day:"numeric",month:"short"}),title:v,body:""});
+    oset("notices",bsNotices);toast("📢 Notice posted");renderBS();};
+  /* certificates */
+  if(!certName && bsStudents.length) certName=bsStudents[0].name;
+  const cs=$("#certSel"); if(cs) cs.onchange=()=>{certName=cs.value;};
+  const cr=$("#certReason"); if(cr) cr.oninput=()=>{certReason=cr.value;};
+  document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>{certTi=+b.dataset.cert;renderBS();});
+  const cp=$("#certPrint"); if(cp) cp.onclick=()=>{
+    const name=($("#certSel")&&$("#certSel").value)||certName||"Student";
+    const stu=bsStudents.find(x=>x.name===name);
+    const [em,title,defReason]=CERT_TYPES[certTi];
+    const why=(certReason||"").trim()||defReason;
+    const dateStr=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+    const w2=window.open("","_blank","width=980,height=720"); if(!w2)return;
+    w2.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Certificate — ${esc(name)}</title>
+    <style>@page{size:A4 landscape;margin:10mm}
+    body{font-family:Georgia,serif;margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f4efe4}
+    .cert{width:960px;background:#fffdf6;border:10px solid #153060;outline:4px solid #FFB300;outline-offset:-22px;padding:56px 70px;text-align:center;position:relative;color:#1a1a2e}
+    .sch{font-size:15px;letter-spacing:4px;text-transform:uppercase;color:#153060;font-weight:700}
+    .big{font-size:44px;color:#153060;margin:14px 0 2px;letter-spacing:2px}
+    .type{font-size:22px;color:#D6336C;font-style:italic;margin-bottom:22px}
+    .pres{font-size:13px;color:#888;letter-spacing:2px;text-transform:uppercase}
+    .nm{font-size:40px;margin:12px 0 4px;font-style:italic}
+    .cl{font-size:14px;color:#777;margin-bottom:14px}
+    .why{font-size:16px;color:#444;max-width:600px;margin:0 auto 26px;line-height:1.6}
+    .row{display:flex;justify-content:space-between;margin-top:38px;font-size:12px;color:#666}
+    .row div{border-top:1.5px solid #333;padding:6px 30px 0}
+    .dt2{position:absolute;top:26px;right:36px;font-size:12px;color:#999}
+    .btn{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:11px 26px;background:#153060;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:sans-serif}
+    @media print{.btn{display:none}body{background:#fff}}</style></head><body>
+    <div class="cert"><div class="dt2">${dateStr}</div>
+      <div class="sch">Azhar Model School · Azhar Publishers</div>
+      <div class="big">🏅 CERTIFICATE</div>
+      <div class="type">${em} ${title}</div>
+      <div class="pres">proudly presented to</div>
+      <div class="nm">${esc(name)}</div>
+      <div class="cl">${stu?"Class "+esc(stu.cls)+" · ":""}Session 2026–27</div>
+      <div class="why">${esc(why)}</div>
+      <div class="row"><div>Class Teacher</div><div>Principal</div></div>
+    </div><button class="btn" onclick="window.print()">🖨️ Print certificate</button></body></html>`);
+    w2.document.close();
+    toast("🏅 Certificate ready for "+name);
+  };
+
+  /* student register */
+  document.querySelectorAll("[data-rowedit]").forEach(r=>r.onclick=()=>openStuEditor(+r.dataset.rowedit));
+  const psr=$("#prStuReg"); if(psr) psr.onclick=()=>{
+    printPop("Student register",
+      `<h1>Azhar Model School</h1><div class="sub">Student Register — ${bsStudents.length} students · ${new Date().toLocaleDateString("en-GB")}</div>
+       <table><tr><th>Name</th><th>Class</th><th>Roll</th><th>Guardian</th><th>Phone</th><th>Monthly fee</th><th>Due</th></tr>
+       ${bsStudents.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.cls)}</td><td>${x.roll}</td><td>${esc(x.guardian||"—")}</td><td>${esc(x.phone||"—")}</td><td>${rupee(x.fee)}</td><td>${dueOf(x)>0?rupee(dueOf(x)):"—"}</td></tr>`).join("")}</table>`);
+  };
+
+  const mm=bsDate.slice(0,7);
+  const days=pre=>{const out=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
+    if(k&&k.indexOf("azharedone:"+pre)===0){const dd=k.slice(("azharedone:"+pre).length);if(dd.slice(0,7)===mm)out.push(dd);}}return out.sort();};
+  const cnt=(pre,ds,id)=>{let P=0,A=0,L=0;ds.forEach(dd=>{const st=oget(pre+dd,{})[id];
+    if(st==="P")P++;else if(st==="A")A++;else if(st==="L")L++;});return{P,A,L,T:P+A+L};};
+  $("#prAtt").onclick=()=>{const ds=days("att:");
+    printPop("Attendance "+mm,`<h1>Azhar Model School</h1><div class="sub">Student Attendance Register — ${mm} (${ds.length} marked days)</div>
+     <table><tr><th>Student</th><th>Class</th><th>P</th><th>A</th><th>L</th><th>%</th></tr>
+     ${bsStudents.map(s=>{const c=cnt("att:",ds,s.id);return `<tr><td>${esc(s.name)}</td><td>${esc(s.cls)}</td><td>${c.P}</td><td>${c.A}</td><td>${c.L}</td><td>${c.T?Math.round(c.P/c.T*100)+"%":"—"}</td></tr>`;}).join("")}</table>`);};
+  $("#prStaff").onclick=()=>{const ds=days("satt:");
+    printPop("Staff attendance "+mm,`<h1>Azhar Model School</h1><div class="sub">Staff Attendance Register — ${mm} (${ds.length} marked days)</div>
+     <table><tr><th>Name</th><th>Subject</th><th>P</th><th>A</th><th>L</th><th>%</th></tr>
+     ${bsStaff.map(s=>{const c=cnt("satt:",ds,s.id);return `<tr><td>${esc(s.name)}</td><td>${esc(s.subject)}</td><td>${c.P}</td><td>${c.A}</td><td>${c.L}</td><td>${c.T?Math.round(c.P/c.T*100)+"%":"—"}</td></tr>`;}).join("")}</table>`);};
+  $("#prFees").onclick=()=>{const due=bsStudents.filter(s=>dueOf(s)>0);
+    printPop("Fee report "+mm,`<h1>Azhar Model School</h1><div class="sub">Fee Report — ${mm}</div>
+     <p style="font-size:13.5px;margin:12px 0"><b>Collected:</b> ${rupee(bsStudents.reduce((a,s)=>a+s.paid,0))} · <b>Outstanding:</b> ${rupee(bsStudents.reduce((a,s)=>a+dueOf(s),0))} · <b>Defaulters:</b> ${due.length}</p>
+     <table><tr><th>Student</th><th>Class</th><th>Guardian</th><th>Phone</th><th>Due</th></tr>
+     ${due.map(s=>`<tr><td>${esc(s.name)}</td><td>${esc(s.cls)}</td><td>${esc(s.guardian||"—")}</td><td>${esc(s.phone||"—")}</td><td>${rupee(dueOf(s))}</td></tr>`).join("")}</table>`);};
+}
+function openStuEditor(id){
+  const s=bsStudents.find(x=>x.id===id);if(!s)return;
+  $("#dtCard").innerHTML=`
+    <button class="dt-x" id="dtX">✕</button>
+    <div class="dt-body" style="width:100%">
+      <div class="meta">OFFICE · EDIT STUDENT</div>
+      <h3>${esc(s.name)}</h3>
+      <p style="color:var(--dim);font-size:13px;margin:4px 0 18px">Class ${esc(s.cls)} · Roll ${s.roll} · ${dueOf(s)>0?rupee(dueOf(s))+" due":"fees clear ✓"}</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <label style="font-size:10px;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;display:flex;flex-direction:column;gap:6px">Name<input class="din" id="eN" value="${esc(s.name)}"/></label>
+        <label style="font-size:10px;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;display:flex;flex-direction:column;gap:6px">Guardian<input class="din" id="eG" value="${esc(s.guardian||"")}"/></label>
+        <label style="font-size:10px;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;display:flex;flex-direction:column;gap:6px">Phone (03xx…)<input class="din" id="eP" value="${esc(s.phone||"")}"/></label>
+        <label style="font-size:10px;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;display:flex;flex-direction:column;gap:6px">Monthly fee<input class="din" id="eF" type="number" value="${s.fee}"/></label>
+      </div>
+      <div class="dt-acts" style="margin-top:22px">
+        <button class="cta gold" id="eSave">💾 Save</button>
+        <button class="cta ghost" id="eDel" style="border-color:rgba(244,114,182,.5);color:var(--rose)">🗑 Remove student</button>
+      </div>
+    </div>`;
+  $("#dt").classList.add("on");
+  $("#dtX").onclick=closeDetail;
+  $("#eSave").onclick=()=>{ s.name=$("#eN").value.trim()||s.name; s.guardian=$("#eG").value.trim();
+    s.phone=$("#eP").value.trim(); s.fee=Math.max(0,+$("#eF").value||s.fee);
+    saveStu(); toast("💾 Saved"); closeDetail(); renderBS(); };
+  $("#eDel").onclick=()=>{ if(confirm("Remove "+s.name+" from "+s.cls+"?")){
+    bsStudents=bsStudents.filter(x=>x.id!==s.id); saveStu(); toast("Removed"); closeDetail(); renderBS(); }};
+}
+if(view==="backstage") setView("backstage");
+
+/* ---------- teacher training (shared with AzharEd) ---------- */
+const TRAIN_SEED=[
+ {id:1,icon:"🍎",title:"Classroom management for early years",desc:"Setting up routines for Playgroup–Prep",url:""},
+ {id:2,icon:"🔤",title:"Teaching phonics with GoldCrest English",desc:"Sounds, blending and reading readiness",url:""},
+ {id:3,icon:"🔢",title:"Counting & number sense",desc:"Hands-on methods for numeracy",url:""},
+ {id:4,icon:"✍️",title:"Pre-writing & handwriting strokes",desc:"Building fine-motor control",url:""},
+ {id:5,icon:"📝",title:"Conducting monthly & term exams",desc:"Using the paper bank and marking fairly",url:""},
+ {id:6,icon:"ﺍ",title:"Teaching Urdu Qaida",desc:"Letter recognition and pronunciation",url:""}];
+function trGet(){ try{const v=localStorage.getItem("azhared2:training"); return v?JSON.parse(v):TRAIN_SEED;}catch(e){return TRAIN_SEED;} }
+function trSet(t){ try{localStorage.setItem("azhared2:training",JSON.stringify(t));}catch(e){} }
+function ytId(u){ const m=String(u||"").match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/); return m?m[1]:null; }
+function renderTraining(){
+  const topics=trGet();
+  const el=document.createElement("div"); el.className="rail"; el.id="trainRail";
+  el.innerHTML=`<h2>Teacher training <span class="ur">اساتذہ کی تربیت</span></h2>
+   <div class="rsub">Training videos for your staff — tap 🔗 on any card to paste a YouTube link; tap the card to watch.</div>
+   <div class="row">${topics.map(t=>{const y=ytId(t.url);
+     return `<button class="bk" style="width:236px" data-tr="${t.id}">
+       <div class="cov" style="width:236px;aspect-ratio:16/10">
+         ${y?`<img loading="lazy" src="https://img.youtube.com/vi/${y}/hqdefault.jpg" alt=""/>`
+            :`<div class="ph" style="font-size:42px">${t.icon}</div>`}
+         <span class="lv">${y?"▶ WATCH":"NO VIDEO YET"}</span>
+         <span class="lv" style="left:auto;right:8px;top:auto;bottom:8px" data-trlink="${t.id}">🔗 LINK</span>
+       </div>
+       <div class="nm">${esc(t.title)}<br><span style="color:var(--dim);font-weight:300">${esc(t.desc)}</span></div>
+     </button>`;}).join("")}</div>`;
+  const old=document.getElementById("trainRail"); if(old) old.remove();
+  $("#rails").appendChild(el);
+  el.querySelectorAll("[data-tr]").forEach(b=>b.onclick=e=>{
+    const t=trGet().find(x=>x.id===+b.dataset.tr); if(!t) return;
+    if(e.target.dataset.trlink){ e.stopPropagation();
+      const u=prompt("Paste the YouTube link for “"+t.title+"”:",t.url||"");
+      if(u!=null){ const list=trGet().map(x=>x.id===t.id?{...x,url:u.trim()}:x); trSet(list); renderTraining();
+        toast(u.trim()?"🔗 Video linked":"Link removed"); }
+      return; }
+    const y=ytId(t.url);
+    if(!y){ toast("No video linked yet — tap 🔗 to add one"); return; }
+    $("#dtCard").innerHTML=`<button class="dt-x" id="dtX">✕</button>
+      <div class="dt-body" style="width:100%">
+        <div class="meta">TEACHER TRAINING</div><h3 style="margin-bottom:16px">${esc(t.title)}</h3>
+        <iframe style="width:100%;aspect-ratio:16/9;border:none;border-radius:14px;background:#000"
+          src="https://www.youtube.com/embed/${y}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+      </div>`;
+    $("#dt").classList.add("on");
+    $("#dtX").onclick=closeDetail;
+  });
+}
+
+/* ---------- boot ---------- */
+setHero(Math.floor(Math.random()*FEATURED.length));
+heroAuto();
+renderRails();
+renderTraining();
+const last=store.get("lastBook",null);
+if(last){ const b=BOOKS.find(x=>x.id===last); if(b) toast("Welcome back — last on stage: "+b.title); }
+</script>
+</body>
+</html>

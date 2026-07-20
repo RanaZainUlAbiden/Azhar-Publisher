@@ -1,0 +1,112 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>3rd Term</title><style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 12pt; }
+.page { width: 210mm; height: 297mm; padding: 6mm; page-break-after: always; position: relative; }
+.page:last-child { page-break-after: auto; }
+.frame { border: 4px solid #000; padding: 5mm 6mm; height: 285mm; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.pgnum { position: absolute; top: -7mm; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px; font-weight: 700; font-size: 12pt; }
+.header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 3mm; margin-bottom: 3mm; }
+.subject-label { font-weight: 700; font-size: 11pt; color: #c00; }
+.brand-center { text-align: center; line-height: 1.05; }
+.brand-center .azhar { font-family: Georgia, serif; font-weight: 700; font-size: 15pt; color: #1a3a8f; letter-spacing: 1px; }
+.brand-center .series { font-size: 9pt; color: #555; }
+.time { font-weight: 700; font-size: 10.5pt; }
+.title { text-align: center; font-size: 20pt; font-weight: 700; margin: 1mm 0 3mm; color: #1a3a8f; letter-spacing: 1px; }
+.student-row { display: flex; gap: 4mm; margin-bottom: 3mm; font-size: 10.5pt; font-weight: 700; }
+.student-row > div { flex: 1; border-bottom: 1.5px solid #000; padding: 1mm 0; }
+.student-row > div span { color: #555; font-weight: 400; }
+.marks-table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 10pt; }
+.marks-table th, .marks-table td { border: 1.5px solid #000; padding: 1mm; text-align: center; }
+.marks-table th { background: #1a3a8f; color: #fff; }
+.qhead { background: #fef0d5; border: 1.5px solid #000; padding: 1.2mm 4mm; font-weight: 700; font-size: 11pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+.qhead .marks-box { border: 1.5px solid #000; padding: 0.4mm 4mm; font-size: 10pt; background: #fff; min-width: 13mm; text-align: center; }
+.footer { margin-top: auto; text-align: center; font-size: 8.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 1mm; }
+
+/* trace numbers */
+.trace-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2mm; margin: 2mm 0; }
+.trace-cell, .trace-blank { aspect-ratio: 1; border: 1.5px solid #d6d6d6; background: #fafafa; }
+.trace-blank { border: 1.5px solid #d96098; background: #fff; }
+.trace-cell svg { width: 100%; height: 100%; display: block; }
+
+/* find-and-circle */
+.find-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2mm; margin: 2mm 0; }
+.find-cell { aspect-ratio: 1; border: 2px solid #d96098; background: #fff; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; }
+
+/* dot count boxes */
+.dot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; margin: 2mm 0; }
+.dot-box { border: 1.5px solid #d96098; padding: 2mm; aspect-ratio: 1.4; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1.5mm; background: #fff; }
+.dot { width: 6mm; height: 6mm; background: #ffd700; border-radius: 50%; border: 1.5px solid #c8a800; flex: 0 0 6mm; }
+.answer-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; margin-top: 1mm; }
+.answer-box { height: 12mm; border: 1.5px solid #d96098; background: #fff; }
+
+/* count-objects table */
+.obj-table { width: 100%; border-collapse: collapse; margin: 2mm 0; border: 1.5px solid #d96098; }
+.obj-table tr { border-bottom: 1.5px solid #d96098; }
+.obj-table tr:last-child { border-bottom: none; }
+.obj-table td.objects { padding: 2mm 3mm; vertical-align: middle; height: 18mm; max-height: 20mm; }
+.obj-table td.objects .icon-row { display: flex; gap: 4mm; align-items: center; flex-wrap: nowrap; overflow: hidden; }
+.obj-table td.objects img { height: 12mm; width: auto; max-width: 14mm; flex-shrink: 0; }
+.obj-table td.answer { width: 24mm; text-align: center; border-left: 1.5px solid #d96098; }
+
+/* concept pairs (BIG/small, MORE/less, HEAVY/light, FULL/empty) */
+.concept-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin: 2mm 0; }
+.concept-cell { border: 2px solid #d96098; padding: 3mm; text-align: center; background: #fff; min-height: 50mm; max-height: 56mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2mm; overflow: hidden; }
+.concept-cell img { height: 22mm; width: auto; max-width: 30mm; }
+.concept-cell .label { font-size: 13pt; font-weight: 700; color: #1a3a8f; }
+.concept-cell .blank-circle { width: 10mm; height: 10mm; border: 2px solid #1a3a8f; border-radius: 50%; }
+
+/* match number to picture */
+.match-grid { display: grid; grid-template-columns: 1fr 2.4fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 3mm; background: #fff; }
+.match-grid .left, .match-grid .right { display: flex; flex-direction: column; gap: 3mm; justify-content: center; }
+.match-num { font-family: "Times New Roman", serif; font-size: 18pt; font-weight: 700; color: #1a3a8f; width: 14mm; height: 14mm; border: 2.5px solid #1a3a8f; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fff; align-self: center; }
+.match-quantity { height: 16mm; display: flex; align-items: center; gap: 3mm; padding: 0 4mm; border: 1.5px solid #d96098; border-radius: 4mm; background: #fff; overflow: hidden; }
+.match-quantity img { height: 11mm; width: auto; max-width: 13mm; flex-shrink: 0; }
+
+/* color-row (target number + countable items) */
+.color-row { border: 1.5px solid #d96098; padding: 2.5mm 3mm; display: flex; align-items: center; gap: 4mm; margin: 1.5mm 0; background: #fff; overflow: hidden; }
+.color-row .target { font-family: "Times New Roman", serif; font-size: 16pt; font-weight: 700; color: #1a3a8f; background: #fff; border: 2.5px solid #1a3a8f; border-radius: 50%; width: 12mm; height: 12mm; display: flex; align-items: center; justify-content: center; flex: 0 0 12mm; }
+.color-row .objs { display: flex; gap: 3mm; align-items: center; flex-wrap: nowrap; overflow: hidden; flex: 1; }
+.color-row .objs img { height: 11mm; width: auto; max-width: 13mm; flex-shrink: 0; }
+
+/* compare (>, <, =) */
+.compare-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 3mm; background: #fff; }
+.compare-cell { display: flex; align-items: center; justify-content: center; gap: 4mm; font-family: Georgia, serif; font-size: 16pt; font-weight: 700; color: #1a3a8f; padding: 2mm; }
+.compare-cell .blank { width: 12mm; height: 8mm; border-bottom: 2px solid #000; display: inline-block; }
+
+/* missing numbers / fill blanks */
+.miss-row { border: 1.5px solid #d96098; padding: 3mm 4mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 14pt; line-height: 2; background: #fff; }
+
+/* tally marks */
+.tally-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3mm; margin: 2mm 0; }
+.tally-cell { border: 1.5px solid #d96098; padding: 3mm; background: #fff; display: flex; align-items: center; gap: 4mm; min-height: 14mm; }
+.tally-cell .marks { font-family: Georgia, serif; font-size: 16pt; letter-spacing: 1px; flex: 1; }
+.tally-cell .ans { width: 16mm; height: 10mm; border: 1.5px solid #1a3a8f; }
+
+/* addition/subtraction grids */
+.add-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3mm; margin: 2mm 0; }
+.add-cell { border: 1.5px solid #d96098; padding: 3mm 4mm; background: #fff; font-family: Georgia, serif; font-size: 14pt; display: flex; align-items: center; justify-content: center; gap: 3mm; min-height: 12mm; }
+.add-cell .ans-line { display: inline-block; width: 14mm; border-bottom: 2px solid #000; }
+
+/* ordinal positions */
+.ordinal-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 3mm; background: #fff; }
+.ordinal-cell { display: flex; flex-direction: column; align-items: center; gap: 1mm; }
+.ordinal-cell img { height: 14mm; width: auto; max-width: 18mm; }
+.ordinal-cell .pos { font-size: 10pt; font-weight: 700; color: #1a3a8f; }
+</style></head><body><div class="page"><div class="frame"><div class="pgnum">1</div><div class="header-row">
+<div class="subject-label">Counting Prep</div>
+<div class="brand-center"><div class="azhar">AZHAR PUBLISHERS</div><div class="series">Early Years Assessment Series</div></div>
+<div class="time">Time: 2 Hours</div>
+</div>
+<div class="title">3rd Term Sheet Exam</div>
+<div class="student-row">
+<div><span>Name:</span> ____________________</div>
+<div><span>Roll No:</span> __________</div>
+<div><span>Date:</span> __________</div>
+</div>
+<table class="marks-table">
+<tr><th>Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>Total</th></tr>
+<tr><td><b>Total Marks</b></td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>40</b></td></tr>
+<tr><td><b>Obtained Marks</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table><div class="qhead"><span>Q. No. 1: Trace and write the numbers 31 to 37.</span><span class="marks-box">5</span></div><div class="trace-row"><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M12.6 14.0L46.1 14.0M46.1 14.0L27.8 38.4M27.8 38.4L37.0 38.4M37.0 38.4L43.0 41.4M43.0 41.4L46.1 44.5M46.1 44.5L49.1 53.6M49.1 53.6L49.1 59.7M49.1 59.7L46.1 68.9M46.1 68.9L40.0 75.0M40.0 75.0L30.9 78.0M30.9 78.0L21.7 78.0M21.7 78.0L12.6 75.0M12.6 75.0L9.5 71.9M9.5 71.9L6.5 65.8M58.3 26.2L64.4 23.1M64.4 23.1L73.5 14.0M73.5 14.0L73.5 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.9 14.0L33.9 14.0M33.9 14.0L19.2 38.4M19.2 38.4L26.5 38.4M26.5 38.4L31.4 41.4M31.4 41.4L33.9 44.5M33.9 44.5L36.3 53.6M36.3 53.6L36.3 59.7M36.3 59.7L33.9 68.9M33.9 68.9L29.0 75.0M29.0 75.0L21.6 78.0M21.6 78.0L14.3 78.0M14.3 78.0L6.9 75.0M6.9 75.0L4.5 71.9M4.5 71.9L2.0 65.8M46.1 29.2L46.1 26.2M46.1 26.2L48.6 20.1M48.6 20.1L51.0 17.0M51.0 17.0L55.9 14.0M55.9 14.0L65.7 14.0M65.7 14.0L70.6 17.0M70.6 17.0L73.1 20.1M73.1 20.1L75.5 26.2M75.5 26.2L75.5 32.3M75.5 32.3L73.1 38.4M73.1 38.4L68.2 47.5M68.2 47.5L43.7 78.0M43.7 78.0L78.0 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.9 14.0L33.9 14.0M33.9 14.0L19.2 38.4M19.2 38.4L26.5 38.4M26.5 38.4L31.4 41.4M31.4 41.4L33.9 44.5M33.9 44.5L36.3 53.6M36.3 53.6L36.3 59.7M36.3 59.7L33.9 68.9M33.9 68.9L29.0 75.0M29.0 75.0L21.6 78.0M21.6 78.0L14.3 78.0M14.3 78.0L6.9 75.0M6.9 75.0L4.5 71.9M4.5 71.9L2.0 65.8M48.6 14.0L75.5 14.0M75.5 14.0L60.8 38.4M60.8 38.4L68.2 38.4M68.2 38.4L73.1 41.4M73.1 41.4L75.5 44.5M75.5 44.5L78.0 53.6M78.0 53.6L78.0 59.7M78.0 59.7L75.5 68.9M75.5 68.9L70.6 75.0M70.6 75.0L63.3 78.0M63.3 78.0L55.9 78.0M55.9 78.0L48.6 75.0M48.6 75.0L46.1 71.9M46.1 71.9L43.7 65.8" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.8 14.0L32.9 14.0M32.9 14.0L18.6 38.4M18.6 38.4L25.8 38.4M25.8 38.4L30.5 41.4M30.5 41.4L32.9 44.5M32.9 44.5L35.2 53.6M35.2 53.6L35.2 59.7M35.2 59.7L32.9 68.9M32.9 68.9L28.1 75.0M28.1 75.0L21.0 78.0M21.0 78.0L13.9 78.0M13.9 78.0L6.8 75.0M6.8 75.0L4.4 71.9M4.4 71.9L2.0 65.8M66.1 14.0L42.4 56.7M42.4 56.7L78.0 56.7M66.1 14.0L66.1 78.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.9 14.0L33.9 14.0M33.9 14.0L19.2 38.4M19.2 38.4L26.5 38.4M26.5 38.4L31.4 41.4M31.4 41.4L33.9 44.5M33.9 44.5L36.3 53.6M36.3 53.6L36.3 59.7M36.3 59.7L33.9 68.9M33.9 68.9L29.0 75.0M29.0 75.0L21.6 78.0M21.6 78.0L14.3 78.0M14.3 78.0L6.9 75.0M6.9 75.0L4.5 71.9M4.5 71.9L2.0 65.8M73.1 14.0L48.6 14.0M48.6 14.0L46.1 41.4M46.1 41.4L48.6 38.4M48.6 38.4L55.9 35.3M55.9 35.3L63.3 35.3M63.3 35.3L70.6 38.4M70.6 38.4L75.5 44.5M75.5 44.5L78.0 53.6M78.0 53.6L78.0 59.7M78.0 59.7L75.5 68.9M75.5 68.9L70.6 75.0M70.6 75.0L63.3 78.0M63.3 78.0L55.9 78.0M55.9 78.0L48.6 75.0M48.6 75.0L46.1 71.9M46.1 71.9L43.7 65.8" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M7.1 14.0L34.9 14.0M34.9 14.0L19.7 38.4M19.7 38.4L27.3 38.4M27.3 38.4L32.4 41.4M32.4 41.4L34.9 44.5M34.9 44.5L37.5 53.6M37.5 53.6L37.5 59.7M37.5 59.7L34.9 68.9M34.9 68.9L29.9 75.0M29.9 75.0L22.3 78.0M22.3 78.0L14.7 78.0M14.7 78.0L7.1 75.0M7.1 75.0L4.5 71.9M4.5 71.9L2.0 65.8M75.5 23.1L72.9 17.0M72.9 17.0L65.3 14.0M65.3 14.0L60.3 14.0M60.3 14.0L52.7 17.0M52.7 17.0L47.6 26.2M47.6 26.2L45.1 41.4M45.1 41.4L45.1 56.7M45.1 56.7L47.6 68.9M47.6 68.9L52.7 75.0M52.7 75.0L60.3 78.0M60.3 78.0L62.8 78.0M62.8 78.0L70.4 75.0M70.4 75.0L75.5 68.9M75.5 68.9L78.0 59.7M78.0 59.7L78.0 56.7M78.0 56.7L75.5 47.5M75.5 47.5L70.4 41.4M70.4 41.4L62.8 38.4M62.8 38.4L60.3 38.4M60.3 38.4L52.7 41.4M52.7 41.4L47.6 47.5M47.6 47.5L45.1 56.7" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div><div class="trace-cell"><svg viewBox="0 0 80 100"><path d="M6.9 14.0L33.9 14.0M33.9 14.0L19.2 38.4M19.2 38.4L26.5 38.4M26.5 38.4L31.4 41.4M31.4 41.4L33.9 44.5M33.9 44.5L36.3 53.6M36.3 53.6L36.3 59.7M36.3 59.7L33.9 68.9M33.9 68.9L29.0 75.0M29.0 75.0L21.6 78.0M21.6 78.0L14.3 78.0M14.3 78.0L6.9 75.0M6.9 75.0L4.5 71.9M4.5 71.9L2.0 65.8M78.0 14.0L53.5 78.0M43.7 14.0L78.0 14.0" fill="none" stroke="#bbb" stroke-width="1.8" stroke-dasharray="0.1 4.5" stroke-linecap="round"/></svg></div></div><div class="qhead"><span>Q. No. 2: Solve the addition.</span><span class="marks-box">5</span></div><div class="add-grid"><div class="add-cell">12 + 5 = <span class="ans-line"></span></div><div class="add-cell">15 + 4 = <span class="ans-line"></span></div><div class="add-cell">20 + 8 = <span class="ans-line"></span></div><div class="add-cell">17 + 3 = <span class="ans-line"></span></div><div class="add-cell">14 + 6 = <span class="ans-line"></span></div><div class="add-cell">18 + 2 = <span class="ans-line"></span></div></div><div class="footer">Counting Prep — 3rd Term Sheet Exam — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">2</div><div class="qhead"><span>Q. No. 3: Solve the subtraction.</span><span class="marks-box">5</span></div><div class="add-grid"><div class="add-cell">18 − 3 = <span class="ans-line"></span></div><div class="add-cell">20 − 7 = <span class="ans-line"></span></div><div class="add-cell">15 − 5 = <span class="ans-line"></span></div><div class="add-cell">19 − 4 = <span class="ans-line"></span></div><div class="add-cell">17 − 2 = <span class="ans-line"></span></div><div class="add-cell">16 − 6 = <span class="ans-line"></span></div></div><div class="qhead"><span>Q. No. 4: Identify the ordinal position.</span><span class="marks-box">5</span></div><div class="ordinal-grid"><div class="ordinal-cell"><img src="_goldcrest_icons/dog.png"><div class="pos">1st</div></div><div class="ordinal-cell"><img src="_goldcrest_icons/cat.png"><div class="pos">2nd</div></div><div class="ordinal-cell"><img src="_goldcrest_icons/bee.png"><div class="pos">3rd</div></div><div class="ordinal-cell"><img src="_goldcrest_icons/duck.png"><div class="pos">4th</div></div><div class="ordinal-cell"><img src="_goldcrest_icons/lion.png"><div class="pos">5th</div></div></div><div class="qhead"><span>Q. No. 5: Compare and write &gt;, &lt;, or = in the blank.</span><span class="marks-box">5</span></div><div class="compare-grid"><div class="compare-cell">35 <span class="blank"></span> 17</div><div class="compare-cell">28 <span class="blank"></span> 34</div><div class="compare-cell">31 <span class="blank"></span> 31</div><div class="compare-cell">40 <span class="blank"></span> 29</div><div class="compare-cell">26 <span class="blank"></span> 36</div></div><div class="footer">Counting Prep — 3rd Term Sheet Exam — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">3</div><div class="qhead"><span>Q. No. 6: Count tally marks and write the number.</span><span class="marks-box">5</span></div><div class="tally-grid"><div class="tally-cell"><div class="marks">|||| |||| |||</div><div class="ans"></div></div><div class="tally-cell"><div class="marks">|||| |||| ||||</div><div class="ans"></div></div><div class="tally-cell"><div class="marks">|||| |||| |||| |</div><div class="ans"></div></div><div class="tally-cell"><div class="marks">|||| |||| |||| ||</div><div class="ans"></div></div></div><div class="qhead"><span>Q. No. 7: Count and write the missing numbers.</span><span class="marks-box">5</span></div><div class="miss-row">31, 32, ____, 34, ____, 36<br>40, 39, ____, 37, ____, 35<br>10, 20, ____, 40, ____</div><div class="qhead"><span>Q. No. 8: Circle the bigger number in each pair.</span><span class="marks-box">5</span></div><div class="compare-grid"><div class="compare-cell">27 &nbsp;&nbsp; 32</div><div class="compare-cell">35 &nbsp;&nbsp; 29</div><div class="compare-cell">31 &nbsp;&nbsp; 38</div><div class="compare-cell">40 &nbsp;&nbsp; 34</div><div class="compare-cell">28 &nbsp;&nbsp; 36</div></div><div class="footer">Counting Prep — 3rd Term Sheet Exam — © Azhar Publishers</div></div></div></body></html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Monthly Test 8 (Nature + Prepositions)</title><style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #000; font-size: 12pt; }
+.page { width: 210mm; height: 297mm; padding: 6mm; page-break-after: always; position: relative; }
+.page:last-child { page-break-after: auto; }
+.frame { border: 4px solid #000; padding: 5mm 6mm; height: 285mm; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+.pgnum { position: absolute; top: -7mm; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 6px; font-weight: 700; font-size: 12pt; }
+.header-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #000; padding-bottom: 3mm; margin-bottom: 3mm; }
+.subject-label { font-weight: 700; font-size: 11pt; color: #c00; }
+.brand-center { text-align: center; line-height: 1.05; }
+.brand-center .azhar { font-family: Georgia, serif; font-weight: 700; font-size: 15pt; color: #1a3a8f; letter-spacing: 1px; }
+.brand-center .series { font-size: 9pt; color: #555; }
+.time { font-weight: 700; font-size: 10.5pt; }
+.title { text-align: center; font-size: 20pt; font-weight: 700; margin: 1mm 0 3mm; color: #1a3a8f; letter-spacing: 1px; }
+.student-row { display: flex; gap: 4mm; margin-bottom: 3mm; font-size: 10.5pt; font-weight: 700; }
+.student-row > div { flex: 1; border-bottom: 1.5px solid #000; padding: 1mm 0; }
+.student-row > div span { color: #555; font-weight: 400; }
+.marks-table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 10pt; }
+.marks-table th, .marks-table td { border: 1.5px solid #000; padding: 1mm; text-align: center; }
+.marks-table th { background: #1a3a8f; color: #fff; }
+.qhead { background: #fef0d5; border: 1.5px solid #000; padding: 1.2mm 4mm; font-weight: 700; font-size: 11pt; margin: 3mm 0 2mm; display: flex; justify-content: space-between; align-items: center; }
+.qhead .marks-box { border: 1.5px solid #000; padding: 0.4mm 4mm; font-size: 10pt; background: #fff; min-width: 13mm; text-align: center; }
+.footer { margin-top: auto; text-align: center; font-size: 8.5pt; color: #777; border-top: 1px solid #ccc; padding-top: 1mm; }
+
+/* trace letters */
+.trace-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2mm; margin: 3mm 0; width: 100%; }
+.trace-cell, .trace-blank { aspect-ratio: 1; border: 1.5px solid #d6d6d6; background: #fafafa; }
+.trace-blank { border: 1.5px solid #d96098; background: #fff; }
+.trace-cell svg { width: 100%; height: 100%; display: block; }
+
+/* match capital-small */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 3mm; background: #fff; }
+.match-grid .col { display: flex; flex-direction: column; gap: 3mm; }
+.match-cell { font-family: Georgia, serif; font-size: 22pt; font-weight: 700; color: #1a3a8f; width: 16mm; height: 14mm; border: 2.5px solid #1a3a8f; border-radius: 4mm; display: flex; align-items: center; justify-content: center; background: #fff; align-self: center; }
+
+/* picture grid */
+.pic-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 2mm 0; }
+.pic-cell { border: 1.5px solid #d96098; background: #fff; padding: 2mm; text-align: center; overflow: hidden; }
+.pic-cell img { width: 100%; height: 22mm; object-fit: contain; }
+.pic-cell .lbl { font-size: 10pt; font-weight: 700; color: #1a3a8f; margin-top: 1mm; }
+.pic-cell .blank-circle { width: 7mm; height: 7mm; border: 2px solid #1a3a8f; border-radius: 50%; margin: 1mm auto 0; }
+
+/* fill-blank box */
+.fill-row { border: 1.5px solid #d96098; padding: 3mm 4mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 14pt; line-height: 2; background: #fff; }
+
+/* word grid */
+.word-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 2mm 0; }
+.word-cell { border: 1.5px solid #d96098; background: #fff; padding: 3mm; display: flex; flex-direction: column; align-items: center; gap: 2mm; }
+.word-cell img { height: 18mm; width: auto; max-width: 28mm; }
+.word-cell .word { font-family: Georgia, serif; font-size: 14pt; font-weight: 700; color: #1a3a8f; letter-spacing: 2px; }
+
+/* sentence row */
+.sent-row { border: 1.5px solid #d96098; background: #fff; padding: 2.5mm 3mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; min-height: 12mm; line-height: 1.6; }
+
+/* read-write block (lines for student answers) */
+.write-lines { border: 1.5px solid #d96098; padding: 3mm 4mm; margin: 2mm 0; background: #fff; }
+.write-lines .line { border-bottom: 1.5px dashed #999; height: 9mm; margin-bottom: 1mm; }
+
+/* circle grid for vowels/consonants */
+.circle-row { border: 1.5px solid #d96098; background: #fff; padding: 3mm 4mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 16pt; letter-spacing: 5px; }
+
+/* days/greetings panel */
+.list-box { border: 1.5px solid #d96098; background: #fff; padding: 3mm 4mm; margin: 2mm 0; }
+.list-box .item { font-family: Georgia, serif; font-size: 13pt; padding: 1.5mm 0; border-bottom: 1px dashed #ccc; }
+.list-box .item:last-child { border-bottom: none; }
+
+.sound-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin: 2mm 0; border: 1.5px solid #d96098; padding: 4mm; background: #fff; }
+.sound-grid .col { display: flex; flex-direction: column; gap: 2mm; }
+.sound-grid .col .head { font-weight: 700; color: #1a3a8f; text-align: center; padding-bottom: 2mm; border-bottom: 1.5px solid #d96098; font-size: 12pt; }
+.sound-grid .col .word { font-family: Georgia, serif; font-size: 13pt; padding: 1mm 0; text-align: center; letter-spacing: 1px; }
+.word-bank { border: 2px dashed #1a3a8f; background: #f3f6ff; padding: 3mm 4mm; margin: 2mm 0; text-align: center; font-family: Georgia, serif; font-size: 13pt; letter-spacing: 2px; }
+.sent-fill { border: 1.5px solid #d96098; background: #fff; padding: 2.5mm 3mm; margin: 1.5mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 1.4; }
+.read-box { border: 2px solid #1a3a8f; background: #fffbe6; padding: 4mm 5mm; margin: 2mm 0; font-family: Georgia, serif; font-size: 13pt; line-height: 1.7; }
+.q-list-box { border: 1.5px solid #d96098; padding: 3mm 5mm; margin: 2mm 0; background: #fff; font-family: Georgia, serif; font-size: 12.5pt; line-height: 1.9; }
+</style></head><body><div class="page"><div class="frame"><div class="pgnum">1</div><div class="header-row">
+<div class="subject-label">English Prep</div>
+<div class="brand-center"><div class="azhar">AZHAR PUBLISHERS</div><div class="series">Early Years Assessment Series</div></div>
+<div class="time">Time: 2 Hours</div>
+</div>
+<div class="title">Monthly Test 8 (Nature + Prepositions)</div>
+<div class="student-row">
+<div><span>Name:</span> ____________________</div>
+<div><span>Roll No:</span> __________</div>
+<div><span>Date:</span> __________</div>
+</div>
+<table class="marks-table">
+<tr><th>Question No.</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>Total</th></tr>
+<tr><td><b>Total Marks</b></td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td>5</td><td><b>40</b></td></tr>
+<tr><td><b>Obtained Marks</b></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+</table><div class="qhead"><span>Q. No. 1: Read these nature vocabulary words.</span><span class="marks-box">5</span></div><div class="word-bank">sun &nbsp;&nbsp; star &nbsp;&nbsp; moon &nbsp;&nbsp; sky &nbsp;&nbsp; land &nbsp;&nbsp; hill &nbsp;&nbsp; forest &nbsp;&nbsp; mountain</div><div class="qhead"><span>Q. No. 2: Match the picture to the nature word.</span><span class="marks-box">5</span></div><div class="word-bank">Word Bank: &nbsp; Sun &nbsp;•&nbsp; Star &nbsp;•&nbsp; Moon &nbsp;•&nbsp; Forest</div><div class="pic-grid"><div class="pic-cell"><img src="_eng_icons/sun_p.png"><div class="lbl">______________</div></div><div class="pic-cell"><img src="_eng_icons/star.png"><div class="lbl">______________</div></div><div class="pic-cell"><img src="_eng_icons/moon_p.png"><div class="lbl">______________</div></div><div class="pic-cell"><img src="_eng_icons/forest.png"><div class="lbl">______________</div></div></div><div class="footer">English Prep — Monthly Test 8 (Nature + Prepositions) — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">2</div><div class="qhead"><span>Q. No. 3: Read these prepositions of place.</span><span class="marks-box">5</span></div><div class="word-bank">in &nbsp;&nbsp; on &nbsp;&nbsp; under &nbsp;&nbsp; next to &nbsp;&nbsp; behind &nbsp;&nbsp; above &nbsp;&nbsp; in front of &nbsp;&nbsp; between</div><div class="qhead"><span>Q. No. 4: Choose the correct preposition: in, on, under, behind, above, between.</span><span class="marks-box">5</span></div><div class="q-list-box">1) The cat is __________ the box.<br>2) The bird is __________ the tree.<br>3) The ball is __________ the table.<br>4) The sun is __________ the clouds.<br>5) The dog sits __________ the chair.</div><div class="footer">English Prep — Monthly Test 8 (Nature + Prepositions) — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">3</div><div class="qhead"><span>Q. No. 5: Complete each sentence with the correct word.</span><span class="marks-box">5</span></div><div class="word-bank">Word Bank: &nbsp; sun &nbsp;•&nbsp; river &nbsp;•&nbsp; chair &nbsp;•&nbsp; moon &nbsp;•&nbsp; nest</div><div class="q-list-box">1) &nbsp; The ________ is in the sky.<br>2) &nbsp; The ________ flows down the mountain.<br>3) &nbsp; The cat is on the ________.<br>4) &nbsp; The ________ shines at night.<br>5) &nbsp; Birds make a ________ in the tree.</div><div class="qhead"><span>Q. No. 6: Write any 4 nature words.</span><span class="marks-box">5</span></div><div class="write-lines"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div><div class="footer">English Prep — Monthly Test 8 (Nature + Prepositions) — © Azhar Publishers</div></div></div><div class="page"><div class="frame"><div class="pgnum">4</div><div class="qhead"><span>Q. No. 7: Underline the nature word.</span><span class="marks-box">5</span></div><div class="q-list-box">1) bus &nbsp;&nbsp; star &nbsp;&nbsp; pen<br>2) cup &nbsp;&nbsp; river &nbsp;&nbsp; bag<br>3) hat &nbsp;&nbsp; sea &nbsp;&nbsp; map<br>4) toy &nbsp;&nbsp; forest &nbsp;&nbsp; ball<br>5) mug &nbsp;&nbsp; moon &nbsp;&nbsp; tin</div><div class="qhead"><span>Q. No. 8: Where would you find each? sky, land, or sea.</span><span class="marks-box">5</span></div><div class="q-list-box">1) star → __________<br>2) fish → __________<br>3) tree → __________<br>4) cloud → __________<br>5) ship → __________</div><div class="footer">English Prep — Monthly Test 8 (Nature + Prepositions) — © Azhar Publishers</div></div></div></body></html>
