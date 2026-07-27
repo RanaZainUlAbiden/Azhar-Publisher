@@ -634,8 +634,8 @@ function SearchModal({onClose,onOpenBook,go}){
 
 /* ---------- AUTH ---------- */
 const USERS = [
-  {id:1,email:"teacher@azhar.edu",password:"teacher123",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School"},
-  {id:2,email:"admin@azhar.edu",password:"admin123",name:"Mr. Khalid",role:"admin",school:"Azhar Model School"},
+  {id:1,email:"teacher@maktabedtech.com",password:"teacher@786",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School"},
+  {id:2,email:"admin@maktabedtech.com",password:"admin@786",name:"Mr. Omer",role:"admin",school:"Azhar Model School"},
 ];
 function Auth({onLogin}){
   const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState("");
@@ -667,11 +667,7 @@ function Auth({onLogin}){
         <div className="field"><label>Email</label><input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="you@azhar.edu"/></div>
         <div className="field"><label>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="••••••••"/></div>
         <button className="btn-primary" onClick={submit}>Sign In</button>
-        <div className="demo">
-          <p>Demo accounts — click to enter</p>
-          {USERS.map(u=><span key={u.id} className="chip" onClick={()=>onLogin(u)}>
-            <span className="dot" style={{background:u.role==='admin'?'#e94560':'#00a884'}}></span>{u.role}: {u.email}</span>)}
-        </div>
+
       </div>
     </div>
    </div>
