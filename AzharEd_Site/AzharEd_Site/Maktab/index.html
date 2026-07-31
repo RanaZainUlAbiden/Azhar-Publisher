@@ -723,12 +723,7 @@ function Auth({onLogin}){
         <div className="field"><label>Email</label><input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="you@azhar.edu"/></div>
         <div className="field"><label>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="••••••••"/></div>
         <button className="btn-primary" onClick={submit}>Sign In</button>
-        <div className="demo">
-          <p>Demo accounts — click to enter</p>
-          {USERS.map(u=><span key={u.id} className="chip" onClick={()=>onLogin(u)}>
-            <span className="dot" style={{background:u.role==='admin'?'#e94560':'#00a884'}}></span>{u.role}: {u.email}</span>)}
         </div>
-      </div>
     </div>
    </div>
   );
