@@ -10,6 +10,38 @@ const BASE = "../AzharEd_Deploy/";
 const LOGO_AZHAR = BASE + "assets/azhar_logo.png";
 const LOGO_BF = BASE + "assets/bookfactory_logo.png";
 const NS = "azhared2:";
+const DEMO_KEY = NS + "demoMode";
+const isDemo = () => {
+  try {
+    return localStorage.getItem(DEMO_KEY) === "1";
+  } catch (e) {
+    return false;
+  }
+};
+const seedIfDemo = (arr) => isDemo() ? arr : Array.isArray(arr) ? [] : arr;
+const enterDemo = () => {
+  try {
+    localStorage.setItem(DEMO_KEY, "1");
+    const seed = (k, v) => {
+      const cur = localStorage.getItem(NS + k);
+      if (cur == null || cur === "[]" || cur === "{}" || cur === '"My School"') localStorage.setItem(NS + k, JSON.stringify(v));
+    };
+    seed("sms:students", SEED_STUDENTS);
+    seed("sms:staff", SEED_STAFF);
+    seed("sms:notices", SEED_NOTICES);
+    seed("sms:payments", SEED_PAYMENTS);
+    seed("sms:timetables", SEED_TT);
+    seed("schoolName", "Azhar Model School");
+  } catch (e) {
+  }
+};
+const clearDemoData = () => {
+  try {
+    ["sms:students", "sms:staff", "sms:notices", "sms:payments", "sms:timetables", "sms:stuAtt", "sms:staffAtt", "gradebook", "reportcard", "diary", "planner", "schoolName", "sms:tab", "gb:cls", "gb:sec", "gb:term"].forEach((k) => localStorage.removeItem(NS + k));
+    localStorage.removeItem(DEMO_KEY);
+  } catch (e) {
+  }
+};
 const LS = {
   get(k, d) {
     try {
@@ -530,7 +562,9 @@ function Auth({ onLogin }) {
     const em = email.toLowerCase().trim();
     const demo = USERS.find((x) => x.email === em && x.password === pw);
     if (demo) {
-      onLogin(demo);
+      enterDemo();
+      LS.set("session", demo);
+      location.reload();
       return;
     }
     if (SB) {
@@ -549,7 +583,10 @@ function Auth({ onLogin }) {
         setErr("This is a parent account \u2014 please sign in on the Maktab Family portal instead.");
         return;
       }
-      if (prof) onLogin(prof);
+      if (prof) {
+        if (isDemo()) clearDemoData();
+        onLogin(prof);
+      }
       else setErr("Signed in, but no profile found \u2014 ask your admin.");
     } else setErr("Invalid email or password.");
   };
@@ -627,13 +664,14 @@ function FocusMode({ book, onClose }) {
 function LibraryHero({ onOpen, onFocus }) {
   const feats = useMemo(() => BOOKS.filter((b2) => b2.coverImg), [BOOKS.length]);
   const [i, setI] = useState(() => Math.floor(Math.random() * Math.max(feats.length, 1)));
+  const hovRef = useRef(false);
   useEffect(() => {
-    const t2 = setInterval(() => setI((x) => (x + 1) % feats.length), 7e3);
+    const t2 = setInterval(() => setI((x) => hovRef.current ? x : (x + 1) % feats.length), 7e3);
     return () => clearInterval(t2);
   }, [feats.length]);
   if (!feats.length) return null;
   const b = feats[i % feats.length];
-  return /* @__PURE__ */ React.createElement("div", { className: "lib-hero" }, /* @__PURE__ */ React.createElement("div", { className: "lh-bg", style: { backgroundImage: `url("${encodeURI(BASE + b.coverImg)}")` } }), /* @__PURE__ */ React.createElement("div", { className: "lh-veil" }), /* @__PURE__ */ React.createElement("div", { className: "lh-in" }, /* @__PURE__ */ React.createElement("div", { className: "lh-cov" }, /* @__PURE__ */ React.createElement("img", { src: encodeURI(BASE + b.coverImg), alt: "" })), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { className: "lh-kick" }, b.series, " SERIES \xB7 ", /* @__PURE__ */ React.createElement("b", null, b.level.toUpperCase()), " \xB7 FEATURED"), /* @__PURE__ */ React.createElement("div", { className: "lh-title" }, b.title), /* @__PURE__ */ React.createElement("div", { className: "lh-cta" }, /* @__PURE__ */ React.createElement("button", { className: "lh-gold", onClick: () => onFocus(b) }, "\u25B6 \xA0Teach this now"), /* @__PURE__ */ React.createElement("button", { className: "lh-ghost", onClick: () => onOpen(b) }, "Details")))), /* @__PURE__ */ React.createElement("div", { className: "lh-dots" }, feats.slice(0, 8).map((_, di) => /* @__PURE__ */ React.createElement("button", { key: di, className: "lh-dot" + (di === i % Math.min(feats.length, 8) ? " on" : ""), onClick: () => setI(di) }))));
+  return /* @__PURE__ */ React.createElement("div", { className: "lib-hero", onMouseEnter: () => hovRef.current = true, onMouseLeave: () => hovRef.current = false, onTouchStart: () => hovRef.current = true }, /* @__PURE__ */ React.createElement("div", { className: "lh-bg", style: { backgroundImage: `url("${encodeURI(BASE + b.coverImg)}")` } }), /* @__PURE__ */ React.createElement("div", { className: "lh-veil" }), /* @__PURE__ */ React.createElement("div", { className: "lh-in" }, /* @__PURE__ */ React.createElement("div", { className: "lh-cov" }, /* @__PURE__ */ React.createElement("img", { src: encodeURI(BASE + b.coverImg), alt: "" })), /* @__PURE__ */ React.createElement("div", { style: { flex: 1, minWidth: 0 } }, /* @__PURE__ */ React.createElement("div", { className: "lh-kick" }, b.series, " SERIES \xB7 ", /* @__PURE__ */ React.createElement("b", null, b.level.toUpperCase()), " \xB7 FEATURED"), /* @__PURE__ */ React.createElement("div", { className: "lh-title" }, b.title), /* @__PURE__ */ React.createElement("div", { className: "lh-cta" }, /* @__PURE__ */ React.createElement("button", { className: "lh-gold", onClick: () => onFocus(b) }, "\u25B6 \xA0Teach this now"), /* @__PURE__ */ React.createElement("button", { className: "lh-ghost", onClick: () => onOpen(b) }, "Details")))), /* @__PURE__ */ React.createElement("div", { className: "lh-dots" }, feats.slice(0, 8).map((_, di) => /* @__PURE__ */ React.createElement("button", { key: di, className: "lh-dot" + (di === i % Math.min(feats.length, 8) ? " on" : ""), onClick: () => setI(di) }))));
 }
 function Dashboard({ user, go, openBook, notices }) {
   const totalPapers = BOOKS.reduce((a, b) => a + b.paperCount, 0);
@@ -1242,9 +1280,9 @@ const SEED_TT = (() => {
 })();
 function AdminSMS({ students, setStudents, notices, setNotices, schoolName }) {
   const [tab, setTab] = useLS("sms:tab", "overview");
-  const [staff, setStaff] = useLS("sms:staff", SEED_STAFF);
-  const [payments, setPayments] = useLS("sms:payments", SEED_PAYMENTS);
-  const [timetables, setTimetables] = useLS("sms:timetables", SEED_TT);
+  const [staff, setStaff] = useLS("sms:staff", seedIfDemo(SEED_STAFF));
+  const [payments, setPayments] = useLS("sms:payments", seedIfDemo(SEED_PAYMENTS));
+  const [timetables, setTimetables] = useLS("sms:timetables", isDemo() ? SEED_TT : {});
   const [stuAttAll, setStuAttAll] = useLS("sms:stuAtt", {});
   const [staffAttAll, setStaffAttAll] = useLS("sms:staffAtt", {});
   const [attDate, setAttDate] = useState(todayISO());
@@ -1551,7 +1589,7 @@ ${n.body}
   };
   const shown = students.filter((s) => (clsFilter === "All" || s.cls === clsFilter) && (!stuQ.trim() || (s.name + " " + (s.guardian || "")).toLowerCase().includes(stuQ.toLowerCase().trim())));
   const stuShown = students.filter((s) => attCls === "All" || s.cls === attCls);
-  const chart = [...FEE_HISTORY, ["Jul", Math.round(collected / 1e3)]];
+  const chart = isDemo() ? [...FEE_HISTORY, ["Jul", Math.round(collected / 1e3)]] : [["Jul", Math.round(collected / 1e3)]];
   const barMax = Math.max(...chart.map((x) => x[1]), 1);
   const tabs = [["overview", "\u{1F4CA}", "Overview"], ["students", "\u{1F392}", "Students"], ["staff", "\u{1F469}\u200D\u{1F3EB}", "Staff"], ["fees", "\u{1F4B0}", "Fees"], ["attendance", "\u{1F5D3}\uFE0F", "Student Attendance"], ["staffatt", "\u{1F9D1}\u200D\u{1F3EB}", "Staff Attendance"], ["timetable", "\u{1F4C5}", "Timetable"], ["notices", "\u{1F4E2}", "Notices"], ["reports", "\u{1F4C4}", "Reports"]];
   return /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "page-head" }, /* @__PURE__ */ React.createElement("h2", null, "\u{1F3EB} School Management"), /* @__PURE__ */ React.createElement("p", null, schoolName, " \xB7 fees, attendance, students & staff \u2014 everything saves automatically on this device.")), /* @__PURE__ */ React.createElement("div", { className: "sms-tabs" }, tabs.map(([id, em, l]) => /* @__PURE__ */ React.createElement("div", { key: id, className: "sms-tab" + (tab === id ? " active" : ""), onClick: () => setTab(id) }, em, " ", t(l)))), tab === "overview" && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "kpi-grid" }, /* @__PURE__ */ React.createElement("div", { className: "kpi" }, /* @__PURE__ */ React.createElement("div", { className: "ic" }, "\u{1F392}"), /* @__PURE__ */ React.createElement("div", { className: "v" }, students.length), /* @__PURE__ */ React.createElement("div", { className: "l" }, "Students enrolled")), /* @__PURE__ */ React.createElement("div", { className: "kpi" }, /* @__PURE__ */ React.createElement("div", { className: "ic" }, "\u{1F469}\u200D\u{1F3EB}"), /* @__PURE__ */ React.createElement("div", { className: "v" }, staff.length), /* @__PURE__ */ React.createElement("div", { className: "l" }, "Staff members")), /* @__PURE__ */ React.createElement("div", { className: "kpi green" }, /* @__PURE__ */ React.createElement("div", { className: "ic" }, "\u{1F4B0}"), /* @__PURE__ */ React.createElement("div", { className: "v" }, rupee(collected)), /* @__PURE__ */ React.createElement("div", { className: "l" }, "Fees collected (Jul)")), /* @__PURE__ */ React.createElement("div", { className: "kpi red" }, /* @__PURE__ */ React.createElement("div", { className: "ic" }, "\u26A0\uFE0F"), /* @__PURE__ */ React.createElement("div", { className: "v" }, rupee(outstanding)), /* @__PURE__ */ React.createElement("div", { className: "l" }, "Outstanding dues")), /* @__PURE__ */ React.createElement("div", { className: "kpi gold" }, /* @__PURE__ */ React.createElement("div", { className: "ic" }, "\u2705"), /* @__PURE__ */ React.createElement("div", { className: "v" }, staffPresent, "/", staff.length), /* @__PURE__ */ React.createElement("div", { className: "l" }, "Staff present today")), /* @__PURE__ */ React.createElement("div", { className: "kpi" }, /* @__PURE__ */ React.createElement("div", { className: "ic" }, "\u{1F4E2}"), /* @__PURE__ */ React.createElement("div", { className: "v" }, notices.length), /* @__PURE__ */ React.createElement("div", { className: "l" }, "Active notices"))), /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("h3", null, "Fee collection \u2014 last 6 months (Rs \u2019000)"), /* @__PURE__ */ React.createElement("div", { className: "ring-row" }, chart.map(([m, v], i) => /* @__PURE__ */ React.createElement("div", { className: "ring-item", key: i }, /* @__PURE__ */ React.createElement(Ring, { pct: v / barMax * 100, size: 64, stroke: 6, label: v + "k", color: i === chart.length - 1 ? "var(--gold)" : "var(--green)" }), /* @__PURE__ */ React.createElement("div", { className: "bar-lbl" }, m, i === chart.length - 1 ? " \xB7 now" : "")))), /* @__PURE__ */ React.createElement("p", { className: "hint", style: { textAlign: "center", marginTop: 4 } }, "Each ring is that month's collection relative to the best month.")), /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("h3", null, "Recent notices"), notices.slice(0, 3).map((n) => /* @__PURE__ */ React.createElement("div", { key: n.id, className: "notice-item" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("b", null, n.title), /* @__PURE__ */ React.createElement("div", { className: "nd" }, n.body)), /* @__PURE__ */ React.createElement("span", { className: "nt" }, n.date))))), tab === "students" && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("details", { className: "disc", style: { marginBottom: 0, border: "none" }, open: false }, /* @__PURE__ */ React.createElement("summary", { style: { padding: "0 0 4px", fontSize: 15 } }, "\u{1F392} Enroll a student"), /* @__PURE__ */ React.createElement("div", { className: "disc-b", style: { padding: "12px 0 0" } }, /* @__PURE__ */ React.createElement("div", { className: "form-row", style: { display: "grid", gridTemplateColumns: "1.3fr .8fr .5fr 1.1fr 1fr .8fr auto", gap: 10, alignItems: "end" } }, /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Name"), /* @__PURE__ */ React.createElement("input", { value: sf.name, onChange: (e) => setSf({ ...sf, name: e.target.value }) })), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Class"), /* @__PURE__ */ React.createElement("select", { value: sf.cls, onChange: (e) => setSf({ ...sf, cls: e.target.value }) }, TT_CLASSES.map((c) => /* @__PURE__ */ React.createElement("option", { key: c, value: c }, c)))), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Sec"), /* @__PURE__ */ React.createElement("select", { value: sf.sec, onChange: (e) => setSf({ ...sf, sec: e.target.value }) }, TT_SECTIONS.map((c) => /* @__PURE__ */ React.createElement("option", { key: c }, c)))), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Guardian"), /* @__PURE__ */ React.createElement("input", { value: sf.guardian, onChange: (e) => setSf({ ...sf, guardian: e.target.value }) })), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Phone (03xx\u2026)"), /* @__PURE__ */ React.createElement("input", { value: sf.phone, onChange: (e) => setSf({ ...sf, phone: e.target.value }) })), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Monthly Fee"), /* @__PURE__ */ React.createElement("input", { type: "number", value: sf.fee, onChange: (e) => setSf({ ...sf, fee: e.target.value }) })), /* @__PURE__ */ React.createElement("button", { className: "btn btn-navy", onClick: addStudent }, "Enroll"))))), /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("div", { className: "card-flex" }, /* @__PURE__ */ React.createElement("h3", null, "Students \xB7 ", shown.length), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" } }, /* @__PURE__ */ React.createElement("input", { className: "date-inp", style: { fontWeight: 600, minWidth: 150 }, placeholder: "\u{1F50D} Search students\u2026", value: stuQ, onChange: (e) => setStuQ(e.target.value) }), /* @__PURE__ */ React.createElement("div", { className: "filter-bar", style: { margin: 0 } }, classes.map((c) => /* @__PURE__ */ React.createElement("span", { key: c, className: "fchip" + (clsFilter === c ? " active" : ""), onClick: () => setClsFilter(c) }, c))), /* @__PURE__ */ React.createElement("button", { className: "mini-btn ghost", onClick: importCSV, title: "Import students from a CSV file (Name, Class, Section, Guardian, Phone, Fee)" }, "\u{1F4E4} Import CSV"), /* @__PURE__ */ React.createElement("button", { className: "mini-btn ghost", onClick: exportStudents }, "\u{1F4E5} CSV"))), /* @__PURE__ */ React.createElement("table", { className: "gtable" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", null, "Name"), /* @__PURE__ */ React.createElement("th", null, "Class"), /* @__PURE__ */ React.createElement("th", null, "Roll"), /* @__PURE__ */ React.createElement("th", null, "Guardian"), /* @__PURE__ */ React.createElement("th", null, "Phone"), /* @__PURE__ */ React.createElement("th", null, "Monthly Fee"), /* @__PURE__ */ React.createElement("th", null, "Fee Status"), /* @__PURE__ */ React.createElement("th", null))), /* @__PURE__ */ React.createElement("tbody", null, shown.map((s) => /* @__PURE__ */ React.createElement("tr", { key: s.id }, /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement("div", { className: "tbl-name" }, /* @__PURE__ */ React.createElement("button", { className: "av-btn", title: s.photo ? "Change or remove photo" : "Add photo", onClick: () => avatarClick("student", s) }, /* @__PURE__ */ React.createElement(Avatar, { photo: s.photo, name: s.name })), s.name)), /* @__PURE__ */ React.createElement("td", null, s.cls, " ", s.sec), /* @__PURE__ */ React.createElement("td", null, s.roll), /* @__PURE__ */ React.createElement("td", null, s.guardian), /* @__PURE__ */ React.createElement("td", null, s.phone), /* @__PURE__ */ React.createElement("td", null, rupee(s.fee)), /* @__PURE__ */ React.createElement("td", null, /* @__PURE__ */ React.createElement("span", { className: "pill " + pillCls(statusOf(s)) }, statusOf(s))), /* @__PURE__ */ React.createElement("td", { style: { whiteSpace: "nowrap" } }, /* @__PURE__ */ React.createElement("button", { className: "mini-btn ghost", title: "Print ID card", onClick: () => idCard(s) }, "\u{1FAAA}"), " ", CLOUD.user && CLOUD.user.cloud && /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("button", { className: "mini-btn ghost", title: "Link a parent account (Family portal)", onClick: () => linkParent(s) }, "\u{1F46A}"), " "), /* @__PURE__ */ React.createElement("button", { className: "del-btn", onClick: () => removeStudent(s.id), title: "Remove student" }, "\u2715")))))), /* @__PURE__ */ React.createElement("p", { className: "hint" }, "\u{1F4F7} Click any student's picture to add a photo (auto-compressed) \xB7 \u{1FAAA} prints an ID card \xB7 \u{1F4E4} imports many students at once from a CSV file."))), tab === "staff" && /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("details", { className: "disc", style: { marginBottom: 0, border: "none" } }, /* @__PURE__ */ React.createElement("summary", { style: { padding: "0 0 4px", fontSize: 15 } }, "\u{1F9D1}\u200D\u{1F3EB} Add a staff member"), /* @__PURE__ */ React.createElement("div", { className: "disc-b", style: { padding: "12px 0 0" } }, /* @__PURE__ */ React.createElement("div", { className: "form-row", style: { display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr .9fr auto", gap: 10, alignItems: "end" } }, /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Name"), /* @__PURE__ */ React.createElement("input", { value: stf.name, onChange: (e) => setStf({ ...stf, name: e.target.value }) })), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Role"), /* @__PURE__ */ React.createElement("select", { value: stf.role, onChange: (e) => setStf({ ...stf, role: e.target.value }) }, ["Teacher", "Admin", "Support"].map((r) => /* @__PURE__ */ React.createElement("option", { key: r }, r)))), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Subject"), /* @__PURE__ */ React.createElement("input", { value: stf.subject, onChange: (e) => setStf({ ...stf, subject: e.target.value }) })), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Phone"), /* @__PURE__ */ React.createElement("input", { value: stf.phone, onChange: (e) => setStf({ ...stf, phone: e.target.value }) })), /* @__PURE__ */ React.createElement("div", { className: "field", style: { margin: 0 } }, /* @__PURE__ */ React.createElement("label", null, "Salary"), /* @__PURE__ */ React.createElement("input", { type: "number", value: stf.salary, onChange: (e) => setStf({ ...stf, salary: e.target.value }) })), /* @__PURE__ */ React.createElement("button", { className: "btn btn-navy", onClick: addStaff }, "Add"))))), /* @__PURE__ */ React.createElement("div", { className: "card" }, /* @__PURE__ */ React.createElement("h3", null, "Staff & teachers \xB7 ", staff.length), /* @__PURE__ */ React.createElement("table", { className: "gtable" }, /* @__PURE__ */ React.createElement("thead", null, /* @__PURE__ */ React.createElement("tr", null, /* @__PURE__ */ React.createElement("th", null, "Name"), /* @__PURE__ */ React.createElement("th", null, "Role"), /* @__PURE__ */ React.createElement("th", null, "Subject"), /* @__PURE__ */ React.createElement("th", null, "Phone"), /* @__PURE__ */ React.createElement("th", null, "Salary"), /* @__PURE__ */ React.createElement("th", null, "Today"), /* @__PURE__ */ React.createElement("th", null))), /* @__PURE__ */ React.createElement("tbody", null, staff.map((s) => {
@@ -1709,7 +1747,7 @@ function App() {
   const [focusBook, setFocusBook] = useState(null);
   const [rcPrefill, setRcPrefill] = useState(null);
   const [favs, setFavs] = useLS("favs", []);
-  const [students, setStudents] = useLS("sms:students", SEED_STUDENTS);
+  const [students, setStudents] = useLS("sms:students", seedIfDemo(SEED_STUDENTS));
   useEffect(() => {
     if (user && user.cloud) {
       Promise.all([cloudPullGradebook(), cloudPullAll()]).then(([gb, all]) => {
@@ -1725,8 +1763,8 @@ function App() {
   useEffect(() => {
     if (user && user.cloud) cloudPushStudents(students);
   }, [students]);
-  const [notices, setNotices] = useLS("sms:notices", SEED_NOTICES);
-  const [schoolName, setSchoolName] = useLS("schoolName", "Azhar Model School");
+  const [notices, setNotices] = useLS("sms:notices", seedIfDemo(SEED_NOTICES));
+  const [schoolName, setSchoolName] = useLS("schoolName", isDemo() ? "Azhar Model School" : "My School");
   const [lang, setLang] = useLS("lang", "en");
   LANGV = lang;
   useEffect(() => {
