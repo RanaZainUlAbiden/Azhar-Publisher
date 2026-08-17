@@ -1,7 +1,7 @@
 /* AzharEd service worker — offline support.
    Core app files are cached on install; books, papers and covers are cached
    the first time they are opened, then work offline. */
-const CACHE = "azhared-v3";
+const CACHE = "azhared-v4";
 const CORE = ["./", "index.html", "content_data.js", "question_bank.js",
   "manifest.json", "assets/azhar_logo.png", "assets/bookfactory_logo.png"];
 

@@ -48,7 +48,7 @@
   .hint{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;opacity:0;
     transition:opacity .4s;font-size:14px;background:rgba(0,0,0,.45);padding:10px 16px;border-radius:30px;pointer-events:none}
   @media (max-width:640px){ .brand small{display:none} .topbar{height:48px} .stage{padding:56px 6px 92px} }
-</style>
+#book{opacity:0}#book.ready{opacity:1}body::after{content:"Loading book...";position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font:700 20px system-ui,sans-serif;color:#94a3b8}body.ready::after{content:none}</style>
 <style id="rtl-flip">
   #book{transform:scaleX(-1);}
   #book .pg img{transform:scaleX(-1);}
@@ -274,7 +274,7 @@
       maxShadowOpacity:0.4, drawShadow:true,
       flippingTime:1100, swipeDistance:30, useMouseEvents:true, mobileScrollSupport:false
     });
-    pageFlip.loadFromHTML(book.querySelectorAll('.pg'));
+    try{pageFlip.loadFromHTML(book.querySelectorAll('.pg'))}finally{document.body.classList.add('ready');book.classList.add('ready')};
     const total=pageFlip.getPageCount();
     const counter=document.getElementById('counter');
     const slider=document.getElementById('slider');
