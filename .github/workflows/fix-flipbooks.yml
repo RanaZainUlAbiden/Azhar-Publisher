@@ -1,0 +1,43 @@
+name: Fix flipbook runaway page-flips
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply flipbook patch
+        run: |
+          python3 - <<'PYEOF'
+          import pathlib
+          OLD_KEY = "  document.addEventListener('keydown',e=>{\n    if(!pageFlip) return;\n    if(e.key==='ArrowRight') pageFlip.flipNext();\n    if(e.key==='ArrowLeft') pageFlip.flipPrev();\n  });"
+          NEW_KEY = "  let lastNav=0;\n  document.addEventListener('keydown',e=>{\n    if(!pageFlip) return;\n    if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return;\n    e.preventDefault();\n    if(e.repeat) return;\n    const now=Date.now(); if(now-lastNav<350) return; lastNav=now;\n    if(e.key==='ArrowRight') pageFlip.flipNext(); else pageFlip.flipPrev();\n  });"
+          OLD_SLIDER = "    slider.oninput=()=>pageFlip.flip(parseInt(slider.value));"
+          NEW_SLIDER = "    slider.oninput=()=>{ const v=parseInt(slider.value); counter.textContent=(v+1)+' / '+total; };\n    slider.onchange=()=>{ pageFlip.turnToPage(parseInt(slider.value)); slider.blur(); };"
+          root = pathlib.Path("AzharEd_Site/AzharEd_Site/AzharEd_Deploy")
+          patched = 0
+          for p in sorted(root.glob("*/Flipbooks/*.html")):
+              t = p.read_text(encoding="utf-8")
+              if "lastNav" in t:
+                  print("already-fixed:", p.name)
+                  continue
+              if t.count(OLD_KEY) == 1 and t.count(OLD_SLIDER) == 1:
+                  t = t.replace(OLD_KEY, NEW_KEY).replace(OLD_SLIDER, NEW_SLIDER)
+                  p.write_text(t, encoding="utf-8")
+                  patched += 1
+                  print("patched:", p.name)
+              else:
+                  print("NOMATCH:", p.name)
+          print("total patched:", patched)
+          PYEOF
+      - name: Remove stray robots.txt duplicate
+        run: rm -f AzharEd_Site/robots.txt
+      - name: Commit and push
+        run: |
+          git config user.name "flipbook-fix-bot"
+          git config user.email "actions@github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Fix flipbook runaway page-flips (all remaining books, server-side patch)"
+          git push
