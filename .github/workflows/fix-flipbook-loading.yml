@@ -20,9 +20,9 @@ jobs:
               t=open(p,encoding='utf-8').read()
               if '#book.ready' in t:
                   skipped+=1; continue
-              if t.count(CSS_OLD)!=1 or t.count(JS_OLD)!=1:
+              if t.count(CSS_OLD)<1 or t.count(JS_OLD)!=1:
                   print('ANCHOR MISMATCH', p, t.count(CSS_OLD), t.count(JS_OLD)); failed+=1; continue
-              t=t.replace(CSS_OLD,CSS_NEW).replace(JS_OLD,JS_NEW)
+              t=t.replace(CSS_OLD,CSS_NEW,1).replace(JS_OLD,JS_NEW)
               open(p,'w',encoding='utf-8').write(t); patched+=1
           swp='AzharEd_Site/AzharEd_Site/AzharEd_Deploy/sw.js'
           sw=open(swp,encoding='utf-8').read()
