@@ -1,0 +1,103 @@
+name: Add offline support across platform
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Write offline workers and register them
+        run: |
+          python3 - <<'EOF'
+          ROOT_SW = r'''// maktabedtech.com offline worker (shell-v1).
+          // Network-first: always serves fresh files when online, falls back to
+          // the saved copy when offline. Removes leftover caches from old versions.
+          const CACHE='azhared-shell-v1';
+          const CORE=['/','/index.html','/Maktab_Cloud/','/Maktab_Cloud/index.html','/Maktab_Cloud/app.js','/Maktab_Cloud/supabase_config.js','/AzharEd_Family_Portal/','/AzharEd_Family_Portal/index.html','/AzharEd_Family_Portal/children.js','/AzharEd_Family_Portal/supabase_config.js'];
+          self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(CORE.map(u=>c.add(u)))).then(()=>self.skipWaiting()))});
+          self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k==='azhared-v3'||(k.indexOf('azhared-shell-')===0&&k!==CACHE)).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+          self.addEventListener('fetch',e=>{
+            const req=e.request;
+            if(req.method!=='GET')return;
+            const url=new URL(req.url);
+            if(url.origin!==self.location.origin)return;
+            e.respondWith((async()=>{
+              try{
+                const res=await fetch(req);
+                if(res&&res.ok){const c=await caches.open(CACHE);c.put(req,res.clone());}
+                return res;
+              }catch(err){
+                const hit=await caches.match(req,{ignoreSearch:true});
+                if(hit)return hit;
+                if(req.mode==='navigate'){
+                  const dir=url.pathname.replace(/[^/]*$/,'');
+                  const idx=await caches.match(dir,{ignoreSearch:true});
+                  if(idx)return idx;
+                }
+                throw err;
+              }
+            })());
+          });
+          '''
+          TEACH_SW = r'''// AzharEd Teach offline worker.
+          // App shell: network-first (fresh when online, saved copy when offline).
+          // Books, interactives and papers: instant from the saved copy once
+          // opened, refreshed in the background.
+          const CACHE='azhared-v4';
+          const CORE=['index.html','content_data.js','question_bank.js','manifest.json','assets/azhar_logo.png','assets/bookfactory_logo.png'];
+          self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(CORE.map(u=>c.add(u)))).then(()=>self.skipWaiting()))});
+          self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.indexOf('azhared-')===0&&k!==CACHE&&k.indexOf('azhared-shell-')!==0).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+          self.addEventListener('fetch',e=>{
+            const req=e.request;
+            if(req.method!=='GET')return;
+            const url=new URL(req.url);
+            if(url.origin!==self.location.origin)return;
+            const p=decodeURIComponent(url.pathname);
+            const isContent=p.indexOf('/Flipbooks/')>-1||p.indexOf('/Interactives/')>-1||p.indexOf('/Papers & Books/')>-1;
+            e.respondWith((async()=>{
+              const c=await caches.open(CACHE);
+              if(isContent){
+                const hit=await c.match(req,{ignoreSearch:true});
+                const net=fetch(req).then(res=>{if(res&&res.ok)c.put(req,res.clone());return res}).catch(()=>hit);
+                return hit||net;
+              }
+              try{
+                const res=await fetch(req);
+                if(res&&res.ok)c.put(req,res.clone());
+                return res;
+              }catch(err){
+                const hit=await c.match(req,{ignoreSearch:true});
+                if(hit)return hit;
+                throw err;
+              }
+            })());
+          });
+          '''
+          import textwrap
+          ROOT_SW = textwrap.dedent(ROOT_SW)
+          TEACH_SW = textwrap.dedent(TEACH_SW)
+          SNIP = "<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('/sw.js').catch(function(){})}</script>"
+          base='AzharEd_Site/AzharEd_Site/'
+          open(base+'sw.js','w',encoding='utf-8').write(ROOT_SW)
+          open(base+'AzharEd_Deploy/sw.js','w',encoding='utf-8').write(TEACH_SW)
+          pages=[base+'index.html', base+'Maktab_Cloud/index.html', base+'AzharEd_Family_Portal/index.html']
+          done=0
+          for p in pages:
+              t=open(p,encoding='utf-8').read()
+              if "serviceWorker.register('/sw.js')" in t:
+                  print('already registered', p); done+=1; continue
+              if t.count('</body>')!=1:
+                  print('BODY ANCHOR ISSUE', p, t.count('</body>')); continue
+              open(p,'w',encoding='utf-8').write(t.replace('</body>', SNIP+'</body>'))
+              print('registered in', p); done+=1
+          print('pages done', done)
+          assert done>=2
+          EOF
+      - name: Commit and push
+        run: |
+          git config user.name "omerazharbhatti-design"
+          git config user.email "omerazharbhatti@gmail.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Add offline support across platform (network-first workers)"
+          git push
