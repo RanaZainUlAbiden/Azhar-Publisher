@@ -1,6 +1,7 @@
-// maktabedtech.com offline worker (shell-v1).
+// maktabedtech.com offline worker (shell-v2).
 // Network-first: always serves fresh files when online, falls back to
-// the saved copy when offline. Removes leftover caches from old versions.
+// the saved copy when offline. Book content under /AzharEd_Deploy/ is
+// stored by the Teach worker cache, not duplicated here.
 const CACHE='azhared-shell-v1';
 const CORE=['/','/index.html','/Maktab_Cloud/','/Maktab_Cloud/index.html','/Maktab_Cloud/app.js','/Maktab_Cloud/supabase_config.js','/AzharEd_Family_Portal/','/AzharEd_Family_Portal/index.html','/AzharEd_Family_Portal/children.js','/AzharEd_Family_Portal/supabase_config.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(CORE.map(u=>c.add(u)))).then(()=>self.skipWaiting()))});
@@ -10,10 +11,11 @@ self.addEventListener('fetch',e=>{
   if(req.method!=='GET')return;
   const url=new URL(req.url);
   if(url.origin!==self.location.origin)return;
+  const skipStore=url.pathname.indexOf('/AzharEd_Deploy/')===0;
   e.respondWith((async()=>{
     try{
       const res=await fetch(req);
-      if(res&&res.ok){const c=await caches.open(CACHE);c.put(req,res.clone());}
+      if(res&&res.ok&&!skipStore){const c=await caches.open(CACHE);c.put(req,res.clone());}
       return res;
     }catch(err){
       const hit=await caches.match(req,{ignoreSearch:true});
