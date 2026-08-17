@@ -571,5 +571,5 @@ if(SB){ SB.auth.getSession().then(async({data})=>{ if(data&&data.session){
   } render(); }).catch(()=>render()); }
 else render();
 </script>
-</body>
+<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('/sw.js').catch(function(){})}</script></body>
 </html>
