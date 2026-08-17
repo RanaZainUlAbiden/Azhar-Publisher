@@ -15,10 +15,10 @@ self.addEventListener('fetch',e=>{
   e.respondWith((async()=>{
     try{
       const res=await fetch(req);
-      if(res&&res.ok&&!skipStore){const c=await caches.open(CACHE);c.put(req,res.clone());}
+      if(res&&res.ok&&!skipStore){const c=await caches.open(CACHE);c.put(url.href,res.clone());}
       return res;
     }catch(err){
-      const hit=await caches.match(req,{ignoreSearch:true});
+      const hit=await caches.match(url.href,{ignoreSearch:true});
       if(hit)return hit;
       if(req.mode==='navigate'){
         const dir=url.pathname.replace(/[^/]*$/,'');
