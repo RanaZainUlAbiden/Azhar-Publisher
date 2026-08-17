@@ -182,9 +182,10 @@ jobs:
               t=open(p,encoding='utf-8').read()
               if 'offline_saver.js' in t:
                   print('already tagged',p); done+=1; continue
-              if t.count('</body>')!=1:
-                  print('BODY ANCHOR ISSUE',p,t.count('</body>')); continue
-              open(p,'w',encoding='utf-8').write(t.replace('</body>', tag+'</body>'))
+              i=t.rfind('</body>')
+              if i<0:
+                  print('BODY ANCHOR ISSUE',p); continue
+              open(p,'w',encoding='utf-8').write(t[:i]+tag+t[i:])
               print('tagged',p); done+=1
           print('pages done',done)
           assert done==2
