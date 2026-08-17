@@ -233,15 +233,20 @@
     document.getElementById('prev').onclick=()=>pageFlip.flipPrev();
     document.getElementById('first').onclick=()=>pageFlip.flip(0);
     document.getElementById('last').onclick=()=>pageFlip.flip(total-1);
-    slider.oninput=()=>pageFlip.flip(parseInt(slider.value));
+    slider.oninput=()=>{ const v=parseInt(slider.value); counter.textContent=(v+1)+' / '+total; };
+    slider.onchange=()=>{ pageFlip.turnToPage(parseInt(slider.value)); slider.blur(); };
     if(targetIdx>0) pageFlip.turnToPage(targetIdx);
     upd();
   }
 
+  let lastNav=0;
   document.addEventListener('keydown',e=>{
     if(!pageFlip) return;
-    if(e.key==='ArrowRight') pageFlip.flipNext();
-    if(e.key==='ArrowLeft') pageFlip.flipPrev();
+    if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return;
+    e.preventDefault();
+    if(e.repeat) return;
+    const now=Date.now(); if(now-lastNav<350) return; lastNav=now;
+    if(e.key==='ArrowRight') pageFlip.flipNext(); else pageFlip.flipPrev();
   });
   document.getElementById('mute').onclick=function(){
     muted=!muted; this.classList.toggle('muted',muted);

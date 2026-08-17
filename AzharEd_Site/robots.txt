@@ -1,7 +1,0 @@
-# maktabedtech.com - crawler rules
-# Books and app internals are not for search engines.
-User-agent: *
-Disallow: /AzharEd_Deploy/
-Disallow: /Maktab_Cloud/src/
-Disallow: /Maktab_Stage/
-Allow: /
