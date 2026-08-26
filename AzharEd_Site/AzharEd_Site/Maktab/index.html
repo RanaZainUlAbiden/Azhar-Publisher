@@ -690,8 +690,8 @@ function SearchModal({onClose,onOpenBook,go}){
 
 /* ---------- AUTH ---------- */
 const USERS = [
-  {id:1,email:"teacher@maktabedtech.com",password:"teacher@786",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School"},
-  {id:2,email:"admin@maktabedtech.com",password:"admin@786",name:"Mr. Omer ",role:"admin",school:"Azhar Model School"},
+  {id:1,email:"teacher@azhar.edu",password:"teacher123",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School"},
+  {id:2,email:"admin@azhar.edu",password:"Maktab@Azhar-1720",name:"Mr. Khalid",role:"admin",school:"Azhar Model School"},
 ];
 function Auth({onLogin}){
   const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState("");
@@ -723,7 +723,12 @@ function Auth({onLogin}){
         <div className="field"><label>Email</label><input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="you@azhar.edu"/></div>
         <div className="field"><label>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="••••••••"/></div>
         <button className="btn-primary" onClick={submit}>Sign In</button>
+        <div className="demo">
+          <p>Demo accounts — click to enter</p>
+          {USERS.filter(u=>u.role!=="admin").map(u=><span key={u.id} className="chip" onClick={()=>onLogin(u)}>
+            <span className="dot" style={{background:u.role==='admin'?'#e94560':'#00a884'}}></span>{u.role}: {u.email}</span>)}
         </div>
+      </div>
     </div>
    </div>
   );
@@ -2256,7 +2261,9 @@ function Profile({user,theme,setTheme,schoolName,setSchoolName}){
 
 /* ---------- APP ---------- */
 function App(){
+  const SESSION_V=2;   /* bump this number + redeploy to force-logout every existing session */
   const [user,setUser]=useLS("session",null);
+  useEffect(()=>{ if(user && user.sv!==SESSION_V) setUser(null); },[user]);
   const [page,setPage]=useState("dashboard");
   const [navOpen,setNavOpen]=useState(false);
   const [theme,setTheme]=useLS("theme","light");
@@ -2278,7 +2285,7 @@ function App(){
       if(e.key==="Escape") setSearchOpen(false); };
     window.addEventListener("keydown",h); return ()=>window.removeEventListener("keydown",h);
   },[]);
-  if(!user) return <div><Auth onLogin={u=>{setUser(u);setPage("dashboard");toast("Welcome, "+u.name.split(" ").slice(-1)+"!","👋");}}/><Toasts/></div>;
+  if(!user || user.sv!==SESSION_V) return <div><Auth onLogin={u=>{const {password,...safe}=u;setUser({...safe,sv:SESSION_V});setPage("dashboard");toast("Welcome, "+u.name.split(" ").slice(-1)+"!","👋");}}/><Toasts/></div>;
   const go=p=>{ setPage(p); setNavOpen(false); if(p!=="reportcards") setRcPrefill(null); };
   const goReport=data=>{ setRcPrefill(data); setPage("reportcards"); toast("Report card pre-filled for "+data.student,"🧾"); };
   const nav=[
