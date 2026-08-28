@@ -770,30 +770,65 @@ function SearchModal({onClose,onOpenBook,go}){
 function withTimeout(promise, ms){
   return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error("MAKTAB_TIMEOUT")), ms))]);
 }
+/* Offline grace: after a successful cloud sign-in on a device, that same person can
+   sign back in on that device even when the server is unreachable. Only a salted
+   one-way hash of the password is kept — never the password itself — and the
+   fallback is used ONLY when the server cannot be reached, never when it says
+   the password is wrong. */
+async function pwHash(salt, pw){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salt+"|"+pw));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function authCacheRead(){ try{ return JSON.parse(localStorage.getItem("azhared2:authcache")||"{}"); }catch(e){ return {}; } }
+async function authCacheSave(email, pw, user){
+  try{
+    const cache = authCacheRead();
+    const salt = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
+    cache[email] = { salt, hash: await pwHash(salt, pw), user: user, savedAt: Date.now() };
+    localStorage.setItem("azhared2:authcache", JSON.stringify(cache));
+  }catch(e){}
+}
+async function offlineSignIn(email, pw){
+  try{
+    const entry = authCacheRead()[email];
+    if(!entry || !entry.hash) return null;
+    if((await pwHash(entry.salt, pw)) !== entry.hash) return null;
+    return Object.assign({}, entry.user, {offline:true});
+  }catch(e){ return null; }
+}
 async function cloudSignIn(email, pw){
-  if(!navigator.onLine) return {err:"Internet is needed to sign in. Please connect and try again."};
-  if(!window.SB) return {err:"Cloud sign-in is not available in this browser. Please update your browser."};
+  const offline = async (msg) => {
+    const off = await offlineSignIn(email, pw);
+    if(off) return {user: off, offline:true};
+    return {err: msg};
+  };
+  if(!navigator.onLine) return offline("Internet is needed to sign in. Please connect and try again.");
+  if(!window.SB) return offline("Cloud sign-in is not available in this browser. Please update your browser.");
   let data, error;
   try{
     ({data,error} = await withTimeout(SB.auth.signInWithPassword({email, password: pw}), 15000));
   }catch(e){
-    if(e && e.message==="MAKTAB_TIMEOUT") return {err:"The server is taking too long to answer. Please close any other MAKTAB tabs and try again."};
-    throw e;
+    return offline("The server is taking too long to answer. Please try again in a few minutes.");
   }
-  if(error) return {err: /invalid/i.test(error.message||"") ? "Invalid email or password." : ("Could not sign in: "+(error.message||"connection problem."))};
+  if(error){
+    if(/invalid/i.test(error.message||"")) return {err:"Invalid email or password."};
+    return offline("Could not sign in: "+(error.message||"connection problem."));
+  }
   const uid = data && data.user && data.user.id;
   let prof;
   try{
     ({data:prof} = await withTimeout(SB.from("profiles").select("role,school_id,full_name").eq("id",uid).maybeSingle(), 15000));
   }catch(e){
-    return {err:"Signed in, but could not load your profile — please try again in a moment."};
+    return offline("Signed in, but could not load your profile — please try again in a moment.");
   }
   if(!prof || !prof.school_id){ await SB.auth.signOut(); return {err:"This account is not yet assigned to a school. Please contact Azhar Publishers."}; }
   let schoolName = "";
   const {data:sch} = await SB.from("schools").select("name,active").eq("id",prof.school_id).maybeSingle();
   if(sch && sch.active===false){ await SB.auth.signOut(); return {err:"This school's subscription is not active. Please contact Azhar Publishers."}; }
   if(sch) schoolName = sch.name;
-  return {user:{id:uid,email:(data.user.email||email),name:(prof.full_name||email),role:prof.role,school:schoolName,school_id:prof.school_id,cloud:true}};
+  const user = {id:uid,email:(data.user.email||email),name:(prof.full_name||email),role:prof.role,school:schoolName,school_id:prof.school_id,cloud:true};
+  await authCacheSave(email, pw, user);
+  return {user: user};
 }
 function Auth({onLogin}){
   const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState(""),[busy,setBusy]=useState(false);
@@ -801,8 +836,19 @@ function Auth({onLogin}){
     const em=email.toLowerCase().trim();
     if(!em||!pw){ setErr("Enter your email and password."); return; }
     setBusy(true); setErr("");
-    try{ const r=await cloudSignIn(em,pw); if(r.err) setErr(r.err); else onLogin(r.user); }
-    catch(e){ setErr("Could not reach the server — check your internet and try again."); }
+    try{
+      const r=await cloudSignIn(em,pw);
+      if(r.err) setErr(r.err);
+      else {
+        onLogin(r.user);
+        if(r.offline) setTimeout(()=>toast("Signed in offline — cloud backup will reconnect when the server is back.","📴"), 600);
+      }
+    }
+    catch(e){
+      const off = await offlineSignIn(em,pw);
+      if(off){ onLogin(off); setTimeout(()=>toast("Signed in offline — cloud backup will reconnect when the server is back.","📴"), 600); }
+      else setErr("Could not reach the server — check your internet and try again.");
+    }
     setBusy(false);
   };
   return (
