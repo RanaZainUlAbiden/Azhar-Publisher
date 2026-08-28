@@ -2510,5 +2510,15 @@ function App(){
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
+<script>
+/* Offline books: the site shell worker keeps the app itself openable offline;
+   the book-content worker serves flipbooks, interactives and papers that were
+   saved with the "Offline books" panel (offline_saver.js draws that panel). */
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+  navigator.serviceWorker.register('/AzharEd_Deploy/sw.js').catch(function(){});
+}
+</script>
+<script src="../AzharEd_Deploy/offline_saver.js"></script>
 </body>
 </html>
