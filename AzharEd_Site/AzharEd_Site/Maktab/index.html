@@ -9,6 +9,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+/* MAKTAB cloud connection — the publishable key is designed to be public;
+   every table is guarded by Row Level Security in the database itself. */
+window.MAKTAB_DB = { url: "https://pticimvedwrwuknqbfus.supabase.co",
+                     key: "sb_publishable_ZrdQYc81xO4-DLnS96vB6w_MYpRy5kU" };
+window.SB = null;
+try {
+  if (window.supabase && window.MAKTAB_DB.url) {
+    window.SB = window.supabase.createClient(window.MAKTAB_DB.url, window.MAKTAB_DB.key,
+      { auth: { persistSession: true, storageKey: "maktab-auth" } });
+  }
+} catch (e) { window.SB = null; }
+</script>
 <script src="../AzharEd_Deploy/content_data.js"></script>
 <script src="../AzharEd_Deploy/question_bank.js"></script>
 
@@ -606,6 +620,65 @@ function importBackup(file,done){
   r.readAsText(file);
 }
 
+/* ---------- CLOUD BACKUP (school account only) ---------- */
+function collectBackupData(){
+  const data={};
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
+    if(/^(azhared2:|azharedone:|azharedfam:|maktab:)/.test(k) && k!=="azhared2:session") data[k]=localStorage.getItem(k); }
+  return data;
+}
+async function cloudBackupPush(user){
+  if(!user||!user.cloud) return {err:"Cloud backup needs a school account — the demo saves on this device only."};
+  if(!navigator.onLine) return {err:"No internet — connect and try again."};
+  if(!window.SB) return {err:"Cloud is not available in this browser."};
+  const data=collectBackupData();
+  const bytes=JSON.stringify(data).length;
+  const {error}=await SB.from("cloud_backups").insert({school_id:user.school_id,data:data,bytes:bytes,device:navigator.platform||""});
+  if(error) return {err:"Backup failed: "+(error.message||"connection problem.")};
+  try{
+    const {data:rows}=await SB.from("cloud_backups").select("id,created_at").eq("school_id",user.school_id).order("created_at",{ascending:false});
+    if(rows&&rows.length>15){ await SB.from("cloud_backups").delete().in("id",rows.slice(15).map(r=>r.id)); }
+  }catch(e){}
+  try{localStorage.setItem("azhared2:lastBackup",JSON.stringify(Date.now()));}catch(e){}
+  return {ok:true,bytes:bytes};
+}
+async function cloudBackupRestore(user){
+  if(!user||!user.cloud) return {err:"Cloud restore needs a school account."};
+  if(!navigator.onLine) return {err:"No internet — connect and try again."};
+  if(!window.SB) return {err:"Cloud is not available in this browser."};
+  const {data:rows,error}=await SB.from("cloud_backups").select("data,created_at").eq("school_id",user.school_id).order("created_at",{ascending:false}).limit(1);
+  if(error) return {err:"Could not fetch the backup: "+(error.message||"connection problem.")};
+  if(!rows||!rows.length) return {err:"No cloud backup exists yet for this school."};
+  const data=rows[0].data||{};
+  Object.keys(data).forEach(k=>{ try{localStorage.setItem(k,data[k]);}catch(e){} });
+  return {ok:true,when:rows[0].created_at};
+}
+function CloudCard({user}){
+  const [busy,setBusy]=useState("");
+  const [arm,setArm]=useState(false);
+  if(!user||!user.cloud) return null;
+  const push=async()=>{ setBusy("push");
+    const r=await cloudBackupPush(user);
+    setBusy(""); if(r.err) toast(r.err,"⚠️"); else toast("Backed up to the cloud — "+(r.bytes/1024).toFixed(0)+" KB saved for "+user.school,"☁️"); };
+  const restore=async()=>{
+    if(!arm){ setArm(true); setTimeout(()=>setArm(false),6000); return; }
+    setArm(false); setBusy("restore");
+    const r=await cloudBackupRestore(user);
+    setBusy("");
+    if(r.err) toast(r.err,"⚠️");
+    else { toast("Cloud backup restored — reloading","☁️"); setTimeout(()=>location.reload(),900); } };
+  return (
+    <div className="card" style={{maxWidth:560}}>
+      <h3>☁️ Cloud backup — {user.school}</h3>
+      <p style={{fontSize:12.5,color:'var(--muted)',marginBottom:14,lineHeight:1.6}}>Back up this device's records to your school's private shelf in the cloud, and restore them on any computer where your school is signed in. Restoring <b>replaces</b> this device's records with the cloud copy.</p>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
+        <button className="btn btn-navy" onClick={push} disabled={busy!==""}>{busy==="push"?"Backing up…":"☁️⬆️ Back up to cloud"}</button>
+        <button className={"btn "+(arm?"btn-danger":"btn-outline")} onClick={restore} disabled={busy!==""}>{busy==="restore"?"Restoring…":(arm?"Press again to replace this device's records":"☁️⬇️ Restore from cloud")}</button>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- WhatsApp helper ---------- */
 function waLink(phone,msg){
   let digits=String(phone||"").replace(/[^0-9]/g,"");
@@ -689,14 +762,37 @@ function SearchModal({onClose,onOpenBook,go}){
 }
 
 /* ---------- AUTH ---------- */
+/* Demo account only — real school accounts live in the cloud (Supabase Auth);
+   no real passwords exist anywhere in this page. */
 const USERS = [
-  {id:1,email:"teacher@azhar.edu",password:"teacher123",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School"},
-  {id:2,email:"admin@azhar.edu",password:"Maktab@Azhar-1720",name:"Mr. Khalid",role:"admin",school:"Azhar Model School"},
+  {id:1,email:"teacher@azhar.edu",password:"teacher123",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School",demo:true},
 ];
+async function cloudSignIn(email, pw){
+  if(!navigator.onLine) return {err:"Internet is needed to sign in to a school account. The demo works offline."};
+  if(!window.SB) return {err:"Cloud sign-in is not available in this browser. Please try the demo, or update your browser."};
+  const {data,error} = await SB.auth.signInWithPassword({email, password: pw});
+  if(error) return {err: /invalid/i.test(error.message||"") ? "Invalid email or password." : ("Could not sign in: "+(error.message||"connection problem."))};
+  const uid = data && data.user && data.user.id;
+  const {data:prof} = await SB.from("profiles").select("role,school_id,full_name").eq("id",uid).maybeSingle();
+  if(!prof || !prof.school_id){ await SB.auth.signOut(); return {err:"This account is not yet assigned to a school. Please contact Azhar Publishers."}; }
+  let schoolName = "";
+  const {data:sch} = await SB.from("schools").select("name,active").eq("id",prof.school_id).maybeSingle();
+  if(sch && sch.active===false){ await SB.auth.signOut(); return {err:"This school's subscription is not active. Please contact Azhar Publishers."}; }
+  if(sch) schoolName = sch.name;
+  return {user:{id:uid,email:(data.user.email||email),name:(prof.full_name||email),role:prof.role,school:schoolName,school_id:prof.school_id,cloud:true}};
+}
 function Auth({onLogin}){
-  const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState("");
-  const submit=()=>{ const u=USERS.find(x=>x.email===email.toLowerCase().trim()&&x.password===pw);
-    if(u) onLogin(u); else setErr("Invalid email or password."); };
+  const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState(""),[busy,setBusy]=useState(false);
+  const submit=async()=>{
+    const em=email.toLowerCase().trim();
+    const demo=USERS.find(x=>x.email===em&&x.password===pw);
+    if(demo){ onLogin(demo); return; }
+    if(!em||!pw){ setErr("Enter your email and password."); return; }
+    setBusy(true); setErr("");
+    try{ const r=await cloudSignIn(em,pw); if(r.err) setErr(r.err); else onLogin(r.user); }
+    catch(e){ setErr("Could not reach the server — check your internet and try again."); }
+    setBusy(false);
+  };
   return (
    <div className="auth-wrap">
     <div className="auth-left">
@@ -722,7 +818,7 @@ function Auth({onLogin}){
         {err && <div className="err">{err}</div>}
         <div className="field"><label>Email</label><input value={email} onChange={e=>setEmail(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="you@azhar.edu"/></div>
         <div className="field"><label>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="••••••••"/></div>
-        <button className="btn-primary" onClick={submit}>Sign In</button>
+        <button className="btn-primary" onClick={submit} disabled={busy}>{busy?"Signing in…":"Sign In"}</button>
         <div className="demo">
           <p>Demo accounts — click to enter</p>
           {USERS.filter(u=>u.role!=="admin").map(u=><span key={u.id} className="chip" onClick={()=>onLogin(u)}>
@@ -2245,6 +2341,7 @@ function Profile({user,theme,setTheme,schoolName,setSchoolName}){
           <p className="hint">Records are tiny — there's room for <b>thousands of students and staff</b>. Photos are auto-compressed to roughly 8 KB each, so around <b>500+ people with photos</b> fit comfortably. If the bar ever fills up, download a backup and remove unused photos.</p>
         </div>); })()}
     </div>
+    <CloudCard user={user}/>
     <div className="card" style={{maxWidth:560}}>
       <h3>💾 Your data</h3>
       <p style={{fontSize:12.5,color:'var(--muted)',marginBottom:14,lineHeight:1.6}}>Gradebook marks, fees, attendance, timetables, favourites and progress are saved in this browser on this device. Download a backup regularly, and restore it on any other device to move your data across.</p>
@@ -2333,7 +2430,7 @@ function App(){
           <div className="avatar" style={{background:user.role==='admin'?'#e94560':'#00a884'}}>{initials(user.name)}</div>
           <div><div className="name">{user.name}</div><div className="role">{user.role}</div></div>
         </div>
-        <div className="sb-logout" onClick={()=>setUser(null)}>↩ {t("Sign out")}</div>
+        <div className="sb-logout" onClick={()=>{ if(user&&user.cloud&&window.SB){ try{SB.auth.signOut();}catch(e){} } setUser(null); }}>↩ {t("Sign out")}</div>
       </div>
     </div>
     <div className="content-area">
