@@ -19,7 +19,10 @@ window.SB = null;
 try {
   if (window.supabase && window.MAKTAB_DB.url) {
     window.SB = window.supabase.createClient(window.MAKTAB_DB.url, window.MAKTAB_DB.key,
-      { auth: { persistSession: true, storageKey: "maktab-auth" } });
+      { auth: { persistSession: true, storageKey: "maktab-auth",
+                /* no cross-tab lock — the built-in Web Locks wait can hang sign-in
+                   forever when the app is open in more than one tab */
+                lock: function(name, acquireTimeout, fn){ return fn(); } } });
   }
 } catch (e) { window.SB = null; }
 </script>
@@ -764,13 +767,27 @@ function SearchModal({onClose,onOpenBook,go}){
 /* ---------- AUTH ---------- */
 /* All accounts live in the cloud (Supabase Auth);
    no passwords exist anywhere in this page. */
+function withTimeout(promise, ms){
+  return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error("MAKTAB_TIMEOUT")), ms))]);
+}
 async function cloudSignIn(email, pw){
   if(!navigator.onLine) return {err:"Internet is needed to sign in. Please connect and try again."};
   if(!window.SB) return {err:"Cloud sign-in is not available in this browser. Please update your browser."};
-  const {data,error} = await SB.auth.signInWithPassword({email, password: pw});
+  let data, error;
+  try{
+    ({data,error} = await withTimeout(SB.auth.signInWithPassword({email, password: pw}), 15000));
+  }catch(e){
+    if(e && e.message==="MAKTAB_TIMEOUT") return {err:"The server is taking too long to answer. Please close any other MAKTAB tabs and try again."};
+    throw e;
+  }
   if(error) return {err: /invalid/i.test(error.message||"") ? "Invalid email or password." : ("Could not sign in: "+(error.message||"connection problem."))};
   const uid = data && data.user && data.user.id;
-  const {data:prof} = await SB.from("profiles").select("role,school_id,full_name").eq("id",uid).maybeSingle();
+  let prof;
+  try{
+    ({data:prof} = await withTimeout(SB.from("profiles").select("role,school_id,full_name").eq("id",uid).maybeSingle(), 15000));
+  }catch(e){
+    return {err:"Signed in, but could not load your profile — please try again in a moment."};
+  }
   if(!prof || !prof.school_id){ await SB.auth.signOut(); return {err:"This account is not yet assigned to a school. Please contact Azhar Publishers."}; }
   let schoolName = "";
   const {data:sch} = await SB.from("schools").select("name,active").eq("id",prof.school_id).maybeSingle();
