@@ -628,7 +628,7 @@ function collectBackupData(){
   return data;
 }
 async function cloudBackupPush(user){
-  if(!user||!user.cloud) return {err:"Cloud backup needs a school account — the demo saves on this device only."};
+  if(!user||!user.cloud) return {err:"Cloud backup needs a school account. Please sign out and sign in again."};
   if(!navigator.onLine) return {err:"No internet — connect and try again."};
   if(!window.SB) return {err:"Cloud is not available in this browser."};
   const data=collectBackupData();
@@ -762,14 +762,11 @@ function SearchModal({onClose,onOpenBook,go}){
 }
 
 /* ---------- AUTH ---------- */
-/* Demo account only — real school accounts live in the cloud (Supabase Auth);
-   no real passwords exist anywhere in this page. */
-const USERS = [
-  {id:1,email:"teacher@azhar.edu",password:"teacher123",name:"Mrs. Aisha Khan",role:"teacher",school:"Azhar Model School",demo:true},
-];
+/* All accounts live in the cloud (Supabase Auth);
+   no passwords exist anywhere in this page. */
 async function cloudSignIn(email, pw){
-  if(!navigator.onLine) return {err:"Internet is needed to sign in to a school account. The demo works offline."};
-  if(!window.SB) return {err:"Cloud sign-in is not available in this browser. Please try the demo, or update your browser."};
+  if(!navigator.onLine) return {err:"Internet is needed to sign in. Please connect and try again."};
+  if(!window.SB) return {err:"Cloud sign-in is not available in this browser. Please update your browser."};
   const {data,error} = await SB.auth.signInWithPassword({email, password: pw});
   if(error) return {err: /invalid/i.test(error.message||"") ? "Invalid email or password." : ("Could not sign in: "+(error.message||"connection problem."))};
   const uid = data && data.user && data.user.id;
@@ -785,8 +782,6 @@ function Auth({onLogin}){
   const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState(""),[busy,setBusy]=useState(false);
   const submit=async()=>{
     const em=email.toLowerCase().trim();
-    const demo=USERS.find(x=>x.email===em&&x.password===pw);
-    if(demo){ onLogin(demo); return; }
     if(!em||!pw){ setErr("Enter your email and password."); return; }
     setBusy(true); setErr("");
     try{ const r=await cloudSignIn(em,pw); if(r.err) setErr(r.err); else onLogin(r.user); }
@@ -820,9 +815,7 @@ function Auth({onLogin}){
         <div className="field"><label>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==='Enter'&&submit()} placeholder="••••••••"/></div>
         <button className="btn-primary" onClick={submit} disabled={busy}>{busy?"Signing in…":"Sign In"}</button>
         <div className="demo">
-          <p>Demo accounts — click to enter</p>
-          {USERS.filter(u=>u.role!=="admin").map(u=><span key={u.id} className="chip" onClick={()=>onLogin(u)}>
-            <span className="dot" style={{background:u.role==='admin'?'#e94560':'#00a884'}}></span>{u.role}: {u.email}</span>)}
+          <p>School accounts are issued by Azhar Publishers</p>
         </div>
       </div>
     </div>
@@ -2358,7 +2351,7 @@ function Profile({user,theme,setTheme,schoolName,setSchoolName}){
 
 /* ---------- APP ---------- */
 function App(){
-  const SESSION_V=2;   /* bump this number + redeploy to force-logout every existing session */
+  const SESSION_V=3;   /* bump this number + redeploy to force-logout every existing session */
   const [user,setUser]=useLS("session",null);
   useEffect(()=>{ if(user && user.sv!==SESSION_V) setUser(null); },[user]);
   const [page,setPage]=useState("dashboard");
