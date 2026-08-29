@@ -47,9 +47,9 @@ function el(t,css,txt){var e=document.createElement(t);if(css)e.style.cssText=cs
 function init(books){
   if(!books.length)return;
   var open=false;
-  var btn=el('button','position:fixed;bottom:14px;left:14px;z-index:2147483000;background:#0f3460;color:#fff;border:0;border-radius:24px;padding:10px 16px;font:700 13px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.4);cursor:pointer','Offline books');
+  var btn=el('button','position:fixed;bottom:18px;right:18px;z-index:2147483000;background:#0f3460;color:#fff;border:0;border-radius:24px;padding:10px 16px;font:700 13px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.4);cursor:pointer','Offline books');
   var wrap=el('div','display:none;position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483001;background:rgba(8,12,30,.55)');
-  var card=el('div','position:absolute;bottom:70px;left:14px;width:340px;max-width:92vw;max-height:70vh;overflow:auto;background:#101a33;color:#e8ecf7;border-radius:14px;padding:14px;font:13px/1.5 system-ui,sans-serif;box-shadow:0 10px 40px rgba(0,0,0,.5)');
+  var card=el('div','position:absolute;bottom:74px;right:18px;width:340px;max-width:92vw;max-height:70vh;overflow:auto;background:#101a33;color:#e8ecf7;border-radius:14px;padding:14px;font:13px/1.5 system-ui,sans-serif;box-shadow:0 10px 40px rgba(0,0,0,.5)');
   wrap.appendChild(card);
   wrap.onclick=function(ev){if(ev.target===wrap){wrap.style.display='none';open=false}};
   card.appendChild(el('div','font-weight:800;font-size:15px;margin-bottom:2px','Save books for offline'));
