@@ -630,14 +630,22 @@ function collectBackupData(){
     if(/^(azhared2:|azharedone:|azharedfam:|maktab:)/.test(k) && k!=="azhared2:session") data[k]=localStorage.getItem(k); }
   return data;
 }
+async function requireLiveSession(){
+  try{
+    const {data} = await withTimeout(SB.auth.getSession(), 8000);
+    return !!(data && data.session);
+  }catch(e){ return false; }
+}
+const OFFLINE_SESSION_MSG = "You signed in offline, so the cloud doesn't know this session yet. Sign out and sign in again (with internet) to reconnect cloud backup.";
 async function cloudBackupPush(user){
   if(!user||!user.cloud) return {err:"Cloud backup needs a school account. Please sign out and sign in again."};
   if(!navigator.onLine) return {err:"No internet — connect and try again."};
   if(!window.SB) return {err:"Cloud is not available in this browser."};
+  if(!(await requireLiveSession())) return {err: OFFLINE_SESSION_MSG};
   const data=collectBackupData();
   const bytes=JSON.stringify(data).length;
   const {error}=await SB.from("cloud_backups").insert({school_id:user.school_id,data:data,bytes:bytes,device:navigator.platform||""});
-  if(error) return {err:"Backup failed: "+(error.message||"connection problem.")};
+  if(error) return {err: /row.level security|policy/i.test(error.message||"") ? OFFLINE_SESSION_MSG : ("Backup failed: "+(error.message||"connection problem."))};
   try{
     const {data:rows}=await SB.from("cloud_backups").select("id,created_at").eq("school_id",user.school_id).order("created_at",{ascending:false});
     if(rows&&rows.length>15){ await SB.from("cloud_backups").delete().in("id",rows.slice(15).map(r=>r.id)); }
@@ -649,6 +657,7 @@ async function cloudBackupRestore(user){
   if(!user||!user.cloud) return {err:"Cloud restore needs a school account."};
   if(!navigator.onLine) return {err:"No internet — connect and try again."};
   if(!window.SB) return {err:"Cloud is not available in this browser."};
+  if(!(await requireLiveSession())) return {err: OFFLINE_SESSION_MSG};
   const {data:rows,error}=await SB.from("cloud_backups").select("data,created_at").eq("school_id",user.school_id).order("created_at",{ascending:false}).limit(1);
   if(error) return {err:"Could not fetch the backup: "+(error.message||"connection problem.")};
   if(!rows||!rows.length) return {err:"No cloud backup exists yet for this school."};
