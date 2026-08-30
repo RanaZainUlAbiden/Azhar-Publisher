@@ -3,21 +3,25 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>AzharEd Family — parent & student portal (demo)</title>
+<title>MAKTAB Family — read, play & practise at home</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="../AzharEd_Deploy/content_data.js"></script>
 <script src="../AzharEd_Deploy/question_bank.js"></script>
-<script src="children.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+/* MAKTAB Family — one simple access code per school (teachers give it to parents).
+   No student records live here: home is for reading, playing and practising.
+   The publishable key is designed to be public; the database is guarded by
+   Row Level Security and the code check runs through a locked-down function. */
+window.MAKTAB_DB = { url: "https://pticimvedwrwuknqbfus.supabase.co",
+                     key: "sb_publishable_ZrdQYc81xO4-DLnS96vB6w_MYpRy5kU" };
+window.SB = null;
+try{ if(window.supabase && window.MAKTAB_DB.url){
+  window.SB = window.supabase.createClient(window.MAKTAB_DB.url, window.MAKTAB_DB.key);
+}}catch(e){ window.SB = null; }
+</script>
 <style>
-/* ============================================================
-   AzharEd FAMILY — parent & student portal (viewable demo).
-   Phone-first: looks and works like an app, with a bottom tab
-   bar. Parents see their child's day; children get big friendly
-   practice from their real books.
-   DEMO: pick a child to "log in". The real version gets proper
-   per-family logins when a developer adds the backend.
-   ============================================================ */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#F0F6F4; --card:#FFFFFF; --ink:#173430; --soft:#6E8783;
@@ -33,24 +37,25 @@ button{font-family:inherit;cursor:pointer}
 .page.on{display:block;animation:slide .25s}
 @keyframes slide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 
-/* login */
+/* gate (the gateway look, kept) */
 .login{flex:1;display:flex;flex-direction:column;justify-content:center;padding:30px 24px 60px;text-align:center}
 .login .logo{font-family:'Baloo 2';font-size:34px;font-weight:800}
 .login .logo em{font-style:normal;color:var(--coral)}
 .login .tag{color:var(--soft);font-weight:700;font-size:14px;margin:6px 0 26px}
-.demo-note{background:#FFF7E3;border:1.5px solid #F2DFA8;border-radius:14px;padding:12px 16px;font-size:12.5px;font-weight:700;color:#7A5B00;margin-bottom:22px;line-height:1.6;text-align:left}
-.kid-pick{display:flex;flex-direction:column;gap:10px}
-.kid{display:flex;align-items:center;gap:14px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:13px 16px;text-align:left;transition:.18s;box-shadow:var(--shadow)}
-.kid:hover{transform:translateY(-2px);border-color:var(--green)}
-.kid .av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.kid b{font-size:15.5px;display:block}
-.kid small{color:var(--soft);font-weight:700;font-size:12px}
-.kid .go{margin-left:auto;color:var(--green);font-weight:900}
+.note{background:#FFF7E3;border:1.5px solid #F2DFA8;border-radius:14px;padding:12px 16px;font-size:12.5px;font-weight:700;color:#7A5B00;margin-bottom:18px;line-height:1.6;text-align:left}
+.code-in{width:100%;padding:15px 18px;border:2px solid var(--line);border-radius:16px;font:inherit;font-weight:800;font-size:17px;text-align:center;letter-spacing:2px;text-transform:uppercase;background:var(--card);margin-bottom:12px}
+.code-in:focus{outline:none;border-color:var(--green)}
+.gerr{color:var(--coral);font-weight:800;font-size:13px;min-height:20px;margin-bottom:8px}
+.bigbtn{width:100%;border:none;border-radius:16px;background:linear-gradient(135deg,var(--green),#28b48f);color:#fff;font-weight:900;font-size:15px;padding:14px;box-shadow:0 8px 20px rgba(14,138,109,.3);transition:.15s}
+.bigbtn:hover{transform:translateY(-2px)}
+.bigbtn:disabled{opacity:.6;transform:none}
+.foot-note{text-align:center;font-size:11px;color:var(--soft);font-weight:700;margin-top:18px;line-height:1.7}
 
 /* header */
 .head{padding:16px 18px 4px;display:flex;align-items:center;gap:12px}
-.head .av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:var(--shadow)}
+.head .av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:var(--shadow);background:var(--mint)}
 .head h1{font-size:19px;line-height:1.1}
+.head h1 em{font-style:normal;color:var(--coral)}
 .head p{font-size:12px;color:var(--soft);font-weight:800}
 .head .out{margin-left:auto;border:1.5px solid var(--line);background:var(--card);border-radius:12px;font-size:11px;font-weight:900;color:var(--soft);padding:7px 12px}
 
@@ -58,30 +63,30 @@ button{font-family:inherit;cursor:pointer}
 .c{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:17px 18px;box-shadow:var(--shadow);margin-bottom:14px}
 .c h2{font-size:16px;margin-bottom:3px;display:flex;align-items:center;gap:8px}
 .c .sub{font-size:12px;color:var(--soft);font-weight:700;margin-bottom:12px}
-.statrow{display:flex;gap:10px}
-.stat{flex:1;border-radius:16px;padding:13px 8px;text-align:center;border:1.5px solid var(--line)}
-.stat b{font-family:'Baloo 2';font-size:19px;display:block;line-height:1.1}
-.stat span{font-size:10.5px;color:var(--soft);font-weight:800;text-transform:uppercase;letter-spacing:.4px}
-.stat.g{background:var(--mint);border-color:transparent}
-.stat.y{background:#FEF3DC;border-color:transparent}
-.stat.r{background:#FDE8E3;border-color:transparent}
-.pillrow{display:flex;gap:7px;flex-wrap:wrap}
-.tlrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1.5px dashed var(--line);font-weight:800;font-size:13.5px}
-.tlrow:last-child{border:none}
-.tlrow .tm{color:var(--soft);font-size:11.5px;width:42px;font-weight:900}
-.tlrow.now{color:var(--green)}
-.tlrow.now::after{content:"now";background:var(--green);color:#fff;font-size:9px;font-weight:900;padding:2px 8px;border-radius:99px;margin-left:auto}
 
-/* learn */
-.bookrow{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px}
-.bcard{flex-shrink:0;width:108px;border:none;background:none;text-align:left}
-.bcard .cv{width:108px;aspect-ratio:3/4;border-radius:14px;overflow:hidden;box-shadow:0 8px 18px rgba(23,84,68,.2);background:linear-gradient(150deg,var(--sky),var(--green));display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid #fff}
-.bcard .cv img{width:100%;height:100%;object-fit:cover}
+/* class pick */
+.clsgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.clsbtn{border:2px solid var(--line);background:var(--card);border-radius:18px;padding:18px 10px;text-align:center;box-shadow:var(--shadow);transition:.18s}
+.clsbtn:hover{transform:translateY(-2px);border-color:var(--green)}
+.clsbtn .e{font-size:30px;display:block;margin-bottom:6px}
+.clsbtn b{font-size:14.5px}
+.clsbtn small{display:block;color:var(--soft);font-weight:800;font-size:11px;margin-top:2px}
+
+/* books */
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.bcard{border:none;background:none;text-align:left;padding:0}
+.bcard .cv{width:100%;aspect-ratio:3/4;border-radius:14px;overflow:hidden;box-shadow:0 8px 18px rgba(23,84,68,.2);background:linear-gradient(150deg,var(--sky),var(--green));display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid #fff;transition:.15s}
+.bcard:hover .cv{transform:translateY(-3px)}
+.bcard.sel .cv{outline:3px solid var(--green);outline-offset:2px}
 .bcard b{font-size:11.5px;display:block;margin-top:7px;line-height:1.25;color:var(--ink)}
+.bcard .cv img{width:100%;height:100%;object-fit:cover}
 .act-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}
-.abtn{border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:11px 8px;font-weight:800;font-size:12.5px;color:var(--ink);transition:.15s}
+.abtn{border:1.5px solid var(--line);background:var(--bg);border-radius:14px;padding:11px 8px;font-weight:800;font-size:12.5px;color:var(--ink);transition:.15s;text-align:center}
 .abtn:hover{border-color:var(--green);transform:translateY(-1px)}
 .abtn .e{font-size:18px;display:block;margin-bottom:3px}
+.chiprow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:99px;padding:7px 14px;font-size:12px;font-weight:800;color:var(--soft);transition:.15s}
+.chip.on,.chip:hover{border-color:var(--green);color:var(--green);background:var(--mint)}
 
 /* practice quiz — kid sized */
 .kq{border:2px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px;background:var(--bg)}
@@ -94,36 +99,6 @@ button{font-family:inherit;cursor:pointer}
 @keyframes pop{50%{transform:scale(1.15)}}
 @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .stars{font-size:22px;letter-spacing:3px;text-align:center;margin:6px 0 2px;min-height:28px}
-.bigbtn{width:100%;border:none;border-radius:16px;background:linear-gradient(135deg,var(--green),#28b48f);color:#fff;font-weight:900;font-size:15px;padding:14px;box-shadow:0 8px 20px rgba(14,138,109,.3);transition:.15s}
-.bigbtn:hover{transform:translateY(-2px)}
-
-/* report */
-.rc-table{width:100%;border-collapse:collapse;font-size:13px}
-.rc-table th,.rc-table td{border:1.5px solid var(--line);padding:8px 10px;text-align:left}
-.rc-table th{background:var(--green);color:#fff;font-weight:800}
-.rc-table td.c{text-align:center}
-.gr{font-weight:900;padding:2px 10px;border-radius:99px;font-size:12px}
-.skill{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1.5px dashed var(--line);font-weight:800;font-size:13px}
-.skill:last-child{border:none}
-.skill .rt{color:var(--green);font-size:12px}
-
-/* fees */
-.fee-hero{text-align:center;padding:8px 0 14px}
-.fee-hero b{font-family:'Baloo 2';font-size:34px;display:block}
-.fee-hero .ok{color:var(--green)}
-.fee-hero .due{color:var(--coral)}
-.fee-hero span{font-size:12px;color:var(--soft);font-weight:800}
-.frow{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1.5px dashed var(--line);font-weight:800;font-size:13.5px}
-.frow:last-child{border:none}
-.frow .ok{color:var(--green)}
-.paid-pill{background:var(--mint);color:var(--green);font-weight:900;font-size:11px;padding:3px 10px;border-radius:99px}
-
-/* notices */
-.ntc{padding:12px 0;border-bottom:1.5px dashed var(--line)}
-.ntc:last-child{border:none}
-.ntc b{font-size:14px}
-.ntc p{font-size:12.5px;color:var(--soft);font-weight:700;margin-top:3px;line-height:1.55}
-.ntc .dt{font-size:10.5px;color:var(--soft);font-weight:900;text-transform:uppercase;letter-spacing:.5px}
 
 /* tab bar */
 .tabs{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);background:var(--card);border-top:1.5px solid var(--line);display:flex;padding:8px 6px calc(10px + env(safe-area-inset-bottom));z-index:50;border-radius:22px 22px 0 0;box-shadow:0 -8px 30px rgba(23,84,68,.12)}
@@ -134,426 +109,214 @@ button{font-family:inherit;cursor:pointer}
 .tab.on::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--green);margin-top:1px}
 .toastz{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 .tz{background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:800;box-shadow:var(--shadow);animation:pop .25s;white-space:nowrap}
-.foot-note{text-align:center;font-size:11px;color:var(--soft);font-weight:700;margin-top:18px;line-height:1.7}
 </style>
 </head>
 <body>
 <div class="phone" id="app"></div>
 <div class="toastz" id="toastz"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase_config.js"></script>
 <script>
-/* AzharEd Family — viewable demo. Vanilla JS, content from ../AzharEd_Deploy.
-   Demo children stand in for real logins; marks/fees/attendance are sample data
-   showing exactly what a parent would see once the backend gives each family
-   its own login. */
+/* ============================================================
+   MAKTAB Family — vanilla JS, books from ../AzharEd_Deploy.
+   One access code per school. No names, no registers, no links
+   to the school's records — home is for reading & practising.
+   ============================================================ */
 const BASE="../AzharEd_Deploy/";
 const C=window.AZHAR_CONTENT||{books:[]};
 const QBK=window.AZHAR_QBANK||{};
-const BOOKS=C.books;
+const BOOKS=C.books||[];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-const rupee=n=>"Rs "+Number(n||0).toLocaleString("en-PK");
 function toast(m){const el=document.createElement("div");el.className="tz";el.textContent=m;$("#toastz").appendChild(el);setTimeout(()=>el.remove(),2300);}
 function openPath(p){if(p)window.open(encodeURI(BASE+p),"_blank");}
 
-/* Children come from children.js — edit that file to add more.
-   Anything missing gets friendly demo defaults here. */
-const COLS=["#FDE8E3","#E5EFFB","#E7F5EC","#FEF3DC","#F3E8FD","#E0F4F9"];
-const AVS=["🦁","🦋","🐼","🐯","🐰","🦊","🐨","🦉"];
-function loadCustomKids(){ try{return JSON.parse(localStorage.getItem("azharedfam:kids")||"[]");}catch(e){return [];} }
-function saveCustomKids(list){ try{localStorage.setItem("azharedfam:kids",JSON.stringify(list));}catch(e){} }
-/* ---------- MAKTAB cloud (real parent accounts) ---------- */
-const SB=(window.supabase&&window.MAKTAB_DB)?window.supabase.createClient(window.MAKTAB_DB.url,window.MAKTAB_DB.key):null;
-const CLOUD={on:false,kids:[],email:""};
-async function cloudLoad(){
-  const {data:stu}=await SB.from("students").select("*");     // RLS → only this parent's children
-  const kids=[];
-  if(stu&&stu.length){
-    const since=new Date(Date.now()-70*864e5).toISOString().slice(0,10);
-    const r=await Promise.all([
-      SB.from("attendance").select("student_id,day,status").gte("day",since),
-      SB.from("fees").select("student_id,month,amount"),
-      SB.from("gradebook").select("cls,sec,term,subjects,rows")
-    ]);
-    const att=r[0].data||[], fees=r[1].data||[], gb=r[2].data||[];
-    const mm=new Date().toISOString().slice(0,7);
-    stu.forEach((st,i)=>{
-      const mine=att.filter(a=>a.student_id===st.id);
-      const mAtt=mine.filter(a=>a.day.slice(0,7)===mm);
-      const use=mAtt.length?mAtt:mine;
-      const paid=fees.filter(f=>f.student_id===st.id&&f.month===mm).reduce((a,f)=>a+Number(f.amount),0);
-      const rank={"3rd Term":3,"2nd Term":2,"1st Term":1}; let best=null;
-      gb.forEach(sh=>{
-        if(sh.cls!==st.cls) return;
-        const row=(sh.rows||[]).find(x=>x.name&&x.name.toLowerCase()===st.name.toLowerCase());
-        if(!row) return;
-        if(!best||(rank[sh.term]||0)>(rank[best.term]||0))
-          best={term:sh.term,marks:(sh.subjects||[]).map(su=>[su,100,+(row.m&&row.m[su])||0]).filter(m=>m[2]>0)};
-      });
-      kids.push({
-        id:"cld"+i, cloud:true, name:st.name, cls:st.cls, roll:i+1,
-        av:AVS[i%AVS.length], col:COLS[i%COLS.length],
-        father:st.guardian||"Parent / Guardian",
-        att:{present:use.filter(a=>a.status==="P").length,total:use.length,label:mAtt.length?new Date().toLocaleDateString("en-GB",{month:"long"}):"overall"},
-        fee:{monthly:Number(st.monthly_fee)||0,paid:paid>=Number(st.monthly_fee)&&Number(st.monthly_fee)>0,history:[]},
-        cloudFee:{fee:Number(st.monthly_fee)||0,due:Math.max(0,Number(st.monthly_fee)-paid)},
-        cloudMarks:best&&best.marks.length?best:null,
-        marks:best&&best.marks.length?best.marks:[["English",100,0],["Urdu",100,0]],
-        skills:[["Live school record","☁"]],
-        remarks:"This information comes live from the school's database."
-      });
-    });
-  }
-  CLOUD.kids=kids; CLOUD.on=true;
+const LVL_ORDER=["Playgroup","Nursery","Prep","One","Two","Three","Four","Five"];
+const LVL_LABEL={One:"Class 1",Two:"Class 2",Three:"Class 3",Four:"Class 4",Five:"Class 5"};
+const LVL_EMOJI={Playgroup:"🧸",Nursery:"🐣",Prep:"✏️",One:"🌱",Two:"🚀",Three:"🔭",Four:"🌍",Five:"🏆"};
+function levels(){
+  const have={}; BOOKS.forEach(b=>{ if(b.level) have[b.level]=(have[b.level]||0)+1; });
+  return LVL_ORDER.filter(l=>have[l]).map(l=>({l, n:have[l]}));
 }
-async function cloudSignIn(email,pw){
-  const {error}=await SB.auth.signInWithPassword({email,password:pw});
-  if(error) return error.message;
-  const {data:{user}}=await SB.auth.getUser();
-  const {data:prof}=await SB.from("profiles").select("role").eq("id",user.id).maybeSingle();
-  if(!prof||prof.role!=="parent"){ await SB.auth.signOut(); return "This is a school staff account — please sign in on Maktab Teach instead."; }
-  CLOUD.email=email; await cloudLoad(); return null;
-}
-async function cloudSignUp(name,email,pw){
-  const {error}=await SB.auth.signUp({email,password:pw,options:{data:{role:"parent",full_name:name}}});
-  return error?error.message:null;
-}
-function buildKids(){
-  const custom=loadCustomKids();
-  return [...(window.FAMILY_KIDS||[]),...custom].map((k,i)=>({
-    id:k.id||i+1,
-    custom:!!k.id,
-    name:k.name||"Child "+(i+1),
-    cls:["Playgroup","Nursery","Prep"].indexOf(k.cls)>=0?k.cls:"Nursery",
-    roll:k.roll||i+1,
-    av:k.av||AVS[i%AVS.length],
-    col:k.col||COLS[i%COLS.length],
-    father:k.father||"Parent / Guardian",
-    att:k.att||{present:57,total:62},
-    fee:k.fee||{monthly:4500,paid:true,history:[["July","paid"],["June","paid"],["May","paid"]]},
-    marks:k.marks||[["English",100,78],["Urdu",100,74],["Counting",100,81]],
-    skills:k.skills||[["Listens attentively","Very Good"],["Follows instructions","Good"],["Class participation","Very Good"]],
-    remarks:k.remarks||"Settling in well and making steady progress. We are proud of the effort in class!"
-  }));
-}
-let KIDS=buildKids();
-const TIMES=["8:30","9:15","10:00","11:15","12:00"];
-const EY=["English","Urdu","Counting","G. Knowledge","Rhymes","Art","Story","Free Play"];
-const SUBJ_EMOJI={"English":"🔤","Urdu":"✍️","Counting":"🔢","G. Knowledge":"🌍","Rhymes":"🎵","Art":"🎨","Story":"📖","Free Play":"🪁"};
-const NOTICES=[
- {d:"6 Jul",t:"Parent–Teacher Meeting",b:"PTM for all classes this Friday, 10 July at 9:00 AM. Please bring your child's diary."},
- {d:"3 Jul",t:"Fee reminder",b:"July fees are due by the 10th. Pay at the school office — a receipt is always given."},
- {d:"1 Jul",t:"New term begins",b:"Welcome back! First term 2026–27 has started. School timing 8:00 AM – 1:00 PM."}
-];
-function periodsFor(cls){
-  const d=Math.min(Math.max(new Date().getDay()-1,0),4);
-  const row=[];for(let p=0;p<TIMES.length;p++)row.push(EY[(d*3+p*2+d)%EY.length]);
-  return row;
-}
-function nowPeriod(){const m=new Date().getHours()*60+new Date().getMinutes();
-  const st=TIMES.map(t=>{const[a,b]=t.split(":");return +a*60+ +b;});
-  for(let i=st.length-1;i>=0;i--){if(m>=st[i]&&m<st[i]+45)return i;}return -1;}
+const lvlName=l=>LVL_LABEL[l]||l;
 
-let kid=null, tab="home", quiz={qs:[],done:0,right:0,stars:""};
+/* ---------- device memory ---------- */
+const PASS_KEY="azfam2:pass", CLS_KEY="azfam2:cls";
+function passGet(){ try{return JSON.parse(localStorage.getItem(PASS_KEY)||"null");}catch(e){return null;} }
+function passSet(p){ try{ p?localStorage.setItem(PASS_KEY,JSON.stringify(p)):localStorage.removeItem(PASS_KEY); }catch(e){} }
+function clsGet(){ try{return localStorage.getItem(CLS_KEY)||"";}catch(e){return "";} }
+function clsSet(c){ try{ c?localStorage.setItem(CLS_KEY,c):localStorage.removeItem(CLS_KEY); }catch(e){} }
 
-/* ---------- LIVE LINK to the school's register ----------
-   If AzharEd One (the teacher platform) has been used in this same
-   browser, its register lives in shared storage. We match the child
-   by name + class and show the REAL attendance and fee status the
-   teacher entered. Otherwise we fall back to the demo numbers.
-   (Across different devices this needs the backend / server.) */
-function liveFor(k){
-  if(k.cloud) return {fee:k.cloudFee.fee,due:k.cloudFee.due,att:k.att.total?k.att:null};
+/* ---------- the code check ---------- */
+function withTimeout(promise,ms){return Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error("T")),ms))]);}
+/* returns {ok:true,school} | {ok:false,invalid:true} | {ok:false,offline:true} */
+async function checkCode(code){
+  if(!navigator.onLine||!window.SB) return {ok:false,offline:true};
   try{
-    const stu=JSON.parse(localStorage.getItem("azharedone:students")||"null");
-    if(!stu) return null;
-    const rec=stu.find(s=>s.name&&s.name.toLowerCase()===k.name.toLowerCase()&&s.cls===k.cls);
-    if(!rec) return null;
-    const mm=new Date().toISOString().slice(0,7);
-    let mP=0,mT=0,aP=0,aT=0;
-    for(let i=0;i<localStorage.length;i++){
-      const key=localStorage.key(i);
-      if(key&&key.indexOf("azharedone:att:")===0){
-        const day=JSON.parse(localStorage.getItem(key)||"{}");
-        const st=day[rec.id];
-        if(st){ aT++; if(st==="P")aP++;
-          if(key.slice("azharedone:att:".length,"azharedone:att:".length+7)===mm){ mT++; if(st==="P")mP++; } }
-      }
-    }
-    /* attendance shown = current month; falls back to all-time if the month is empty */
-    const att = mT ? {present:mP,total:mT,label:new Date().toLocaleDateString("en-GB",{month:"long"})}
-              : (aT ? {present:aP,total:aT,label:"overall"} : null);
-    return { fee:rec.fee, due:rec.fee-rec.paid, att };
-  }catch(e){ return null; }
+    const {data,error}=await withTimeout(SB.rpc("family_access",{p_code:code}),12000);
+    if(error) return {ok:false,offline:true};
+    if(data&&data.length) return {ok:true,school:data[0].school_name};
+    return {ok:false,invalid:true};
+  }catch(e){ return {ok:false,offline:true}; }
 }
 
-/* Marks come live from the AzharEd teacher platform's Gradebook
-   (same browser), matched by child name + class. Latest term wins.
-   Falls back to the demo marks otherwise. */
-function liveMarks(k){
-  if(k.cloud) return k.cloudMarks;
-  try{
-    const gb=JSON.parse(localStorage.getItem("azhared2:gradebook")||"null");
-    if(!gb) return null;
-    const termRank={"3rd Term":3,"2nd Term":2,"1st Term":1};
-    let best=null;
-    Object.keys(gb).forEach(key=>{
-      const parts=key.split("|"), clsSec=parts[0]||"", term=parts[1]||"";
-      if(clsSec.indexOf(k.cls)!==0) return;
-      const sheet=gb[key];
-      const row=(sheet.rows||[]).find(r=>r.name&&r.name.toLowerCase()===k.name.toLowerCase());
-      if(!row) return;
-      if(!best||(termRank[term]||0)>(termRank[best.term]||0))
-        best={term,marks:(sheet.subjects||[]).map(sub=>[sub,100,+(row.m&&row.m[sub])||0])};
-    });
-    return best&&best.marks.length?best:null;
-  }catch(e){ return null; }
-}
+/* ---------- state ---------- */
+let pass=passGet(), cls=clsGet(), tab="books", selBook=null, pbook=null,
+    quiz={qs:[],done:0,right:0,stars:""};
 
-/* ---------- login ---------- */
-function renderLogin(){
-  KIDS=CLOUD.on?CLOUD.kids:buildKids();
-  const cloudBlock = !SB ? "" : CLOUD.on ? `
-    <div class="demo-note" style="text-align:left">☁ <b>Signed in as ${esc(CLOUD.email||"parent")}</b> — showing your children from the school's live database.
-      ${CLOUD.kids.length===0?"<br/><br/>No children are linked to your account yet. Give this email to the school office — they link your child in one tap.":""}
-      <div style="margin-top:8px"><button class="abtn" id="cloudOut">Sign out</button></div></div>` : `
-    <div class="demo-note" style="text-align:left"><b>☁ Parent sign-in (live school data)</b>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-        <input id="cpEmail" placeholder="Email…" style="padding:11px 14px;border:1.5px solid #F2DFA8;border-radius:12px;font:inherit;font-weight:700"/>
-        <input id="cpPw" type="password" placeholder="Password…" style="padding:11px 14px;border:1.5px solid #F2DFA8;border-radius:12px;font:inherit;font-weight:700"/>
-        <button class="bigbtn" id="cloudIn">Sign in</button>
-        <button class="abtn" id="cloudNewBtn">New here? Create a parent account</button>
-        <div id="cloudNew" style="display:none;flex-direction:column;gap:8px">
-          <input id="cnName" placeholder="Your full name…" style="padding:11px 14px;border:1.5px solid #F2DFA8;border-radius:12px;font:inherit;font-weight:700"/>
-          <button class="bigbtn" id="cloudUp">Create account</button>
-          <small style="font-weight:700;color:#8A7657">You'll get a confirmation email — click its link, then ask the school office to connect your child to this email.</small>
-        </div>
-        <div id="cloudMsg" style="font-weight:800;font-size:13px"></div>
-      </div></div>`;
+/* ---------- gate (the gateway, kept) ---------- */
+function renderGate(msg){
   $("#app").innerHTML=`<div class="login">
-    <div class="logo">Azhar<em>Ed</em> Family</div>
-    <div class="tag">See your child's school day — books, marks, fees &amp; notices</div>
-    ${cloudBlock}
-    ${CLOUD.on?"":`<div class="demo-note">👋 <b>Demo preview.</b> Tap a child to see exactly what their family would see. In the live version every family gets its own private login — parents only ever see their own child.</div>`}
-    <div class="kid-pick">
-      ${KIDS.map(k=>`<button class="kid" data-kid="${k.id}">
-        <span class="av" style="background:${k.col}">${k.av}</span>
-        <span><b>${esc(k.name)}</b><small>Class ${esc(k.cls)} · Roll ${k.roll} · ${esc(k.father)}</small></span>
-        <span class="go" style="display:flex;gap:8px;align-items:center">${k.custom?`<span data-rmkid="${k.id}" title="Remove this child" style="color:var(--coral);font-size:13px">✕</span>`:""} →</span></button>`).join("")}
-    </div>
-    ${CLOUD.on?"":`<button class="bigbtn" id="addKidBtn" style="margin-top:14px">➕ Add a child</button>`}
-    <div id="addKidForm" style="display:none;margin-top:12px;text-align:left" class="demo-note">
-      <b>New child</b> — name and class are all that's needed; marks, fees and attendance get demo values you can change later in children.js.
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
-        <input id="nkName" placeholder="Child's name…" style="padding:11px 14px;border:1.5px solid #F2DFA8;border-radius:12px;font:inherit;font-weight:700"/>
-        <div style="display:flex;gap:8px">
-          ${["Playgroup","Nursery","Prep"].map((c,i)=>`<button class="abtn nkCls${i===1?" onx":""}" data-nkcls="${c}" style="flex:1${i===1?";border-color:var(--green);background:var(--mint)":""}">${c}</button>`).join("")}
-        </div>
-        <input id="nkFather" placeholder="Guardian's name (optional)…" style="padding:11px 14px;border:1.5px solid #F2DFA8;border-radius:12px;font:inherit;font-weight:700"/>
-        <button class="bigbtn" id="nkSave">Save child</button>
-      </div>
-    </div>
-    <div class="foot-note">AzharEd Family · Azhar Publishers — same books and papers as the teacher platform.<br/>Children added here are saved on this device; children.js holds the shared demo list.</div>
+    <div class="logo">MAKTA<em>B</em> Family</div>
+    <div class="tag">Your school's books at home — read, play &amp; practise</div>
+    <div class="note">🔑 <b>One code for the whole school.</b> Ask your child's teacher for the school's family code — type it once and this device stays signed in.</div>
+    <input class="code-in" id="codeIn" placeholder="SCHOOL CODE" autocomplete="off" autocapitalize="characters"/>
+    <div class="gerr" id="gerr">${esc(msg||"")}</div>
+    <button class="bigbtn" id="goBtn">Enter</button>
+    <div class="foot-note">MAKTAB Family · Azhar Publishers — the same books used in class.<br/>No school records live here — just reading, playing and practising.</div>
   </div>`;
-  document.querySelectorAll("[data-kid]").forEach(b=>b.onclick=e=>{
-    if(e.target.dataset.rmkid) return;
-    kid=KIDS.find(k=>String(k.id)===b.dataset.kid); tab="home"; makeQuiz(); render();
-  });
-  document.querySelectorAll("[data-rmkid]").forEach(x=>x.onclick=e=>{
-    e.stopPropagation();
-    const id=x.dataset.rmkid;
-    const k=KIDS.find(kk=>String(kk.id)===id);
-    if(confirm("Remove "+k.name+" from this device?")){
-      saveCustomKids(loadCustomKids().filter(c=>String(c.id)!==id)); renderLogin();
+  const go=$("#goBtn"), inp=$("#codeIn");
+  inp.onkeydown=e=>{ if(e.key==="Enter") go.click(); };
+  go.onclick=async()=>{
+    const code=(inp.value||"").trim().toUpperCase();
+    if(!code){ $("#gerr").textContent="Type the school code first."; return; }
+    go.disabled=true; go.textContent="Checking…";
+    const r=await checkCode(code);
+    if(r.ok){
+      pass={code,school:r.school,at:Date.now()}; passSet(pass);
+      toast("Welcome, "+r.school+" families! 🎒");
+      route();
+    }else if(r.invalid){
+      go.disabled=false; go.textContent="Enter";
+      $("#gerr").textContent="That code isn't active — please check with the school.";
+    }else{
+      const stored=passGet();
+      if(stored&&stored.code===code){ pass=stored; toast("Signed in offline 📴"); route(); }
+      else{ go.disabled=false; go.textContent="Enter";
+        $("#gerr").textContent="Internet is needed the first time — please connect and try again."; }
     }
-  });
-  let nkCls="Nursery";
-  const _ak=$("#addKidBtn"); if(_ak) _ak.onclick=()=>{ const f=$("#addKidForm"); f.style.display=f.style.display==="none"?"block":"none"; };
-  const co=$("#cloudOut"); if(co) co.onclick=async()=>{ await SB.auth.signOut(); CLOUD.on=false; CLOUD.kids=[]; renderLogin(); };
-  const ci=$("#cloudIn"); if(ci) ci.onclick=async()=>{
-    const em=$("#cpEmail").value.trim(), pw=$("#cpPw").value;
-    if(!em||!pw){$("#cloudMsg").textContent="Enter email and password.";return;}
-    ci.textContent="Signing in…";
-    const err=await cloudSignIn(em,pw);
-    if(err){ ci.textContent="Sign in"; $("#cloudMsg").textContent="✗ "+err; }
-    else renderLogin();
-  };
-  const cnb=$("#cloudNewBtn"); if(cnb) cnb.onclick=()=>{ const f=$("#cloudNew"); f.style.display=f.style.display==="none"?"flex":"none"; };
-  const cu=$("#cloudUp"); if(cu) cu.onclick=async()=>{
-    const nm=$("#cnName").value.trim(), em=$("#cpEmail").value.trim(), pw=$("#cpPw").value;
-    if(!nm||!em||pw.length<6){$("#cloudMsg").textContent="Fill your name, email (above) and a password of 6+ characters.";return;}
-    cu.textContent="Creating…";
-    const err=await cloudSignUp(nm,em,pw);
-    cu.textContent="Create account";
-    $("#cloudMsg").textContent=err?("✗ "+err):"✓ Account created! Check your email for the confirmation link, then sign in here.";
-  };
-  document.querySelectorAll("[data-nkcls]").forEach(b=>b.onclick=()=>{
-    nkCls=b.dataset.nkcls;
-    document.querySelectorAll("[data-nkcls]").forEach(o=>{o.style.borderColor="";o.style.background="";});
-    b.style.borderColor="var(--green)"; b.style.background="var(--mint)";
-  });
-  $("#nkSave").onclick=()=>{
-    const name=$("#nkName").value.trim();
-    if(!name){ toast("Type the child's name first"); return; }
-    const list=loadCustomKids();
-    list.push({id:"c"+Date.now(),name,cls:nkCls,father:$("#nkFather").value.trim()||undefined});
-    saveCustomKids(list);
-    toast(name+" added 🎒");
-    renderLogin();
   };
 }
 
-/* ---------- shared ---------- *//* ---------- shared ---------- */
+/* ---------- class pick ---------- */
+function renderCls(){
+  $("#app").innerHTML=`<div class="login" style="justify-content:flex-start;padding-top:46px">
+    <div class="logo" style="font-size:26px">MAKTA<em>B</em> Family</div>
+    <div class="tag">${esc(pass.school)}</div>
+    <div class="c" style="text-align:left"><h2>🎒 Which class is your child in?</h2>
+      <div class="sub">You can change this any time from the top of the screen.</div>
+      <div class="clsgrid">
+        ${levels().map(x=>`<button class="clsbtn" data-cls="${x.l}">
+          <span class="e">${LVL_EMOJI[x.l]||"📘"}</span><b>${esc(lvlName(x.l))}</b>
+          <small>${x.n} book${x.n>1?"s":""}</small></button>`).join("")}
+      </div></div>
+  </div>`;
+  document.querySelectorAll("[data-cls]").forEach(b=>b.onclick=()=>{
+    cls=b.dataset.cls; clsSet(cls); selBook=null; pbook=null; makeQuiz(); route();
+  });
+}
+
+/* ---------- app shell ---------- */
 function head(){
   return `<div class="head">
-    <span class="av" style="background:${kid.col}">${kid.av}</span>
-    <div><h1>${esc(kid.name)}</h1><p>Class ${esc(kid.cls)} · Roll ${kid.roll} · Azhar Model School</p></div>
-    <button class="out" id="outBtn">Switch child</button>
+    <span class="av">🏫</span>
+    <div><h1>MAKTA<em>B</em> Family</h1><p>${esc(pass.school)} · ${esc(lvlName(cls))}</p></div>
+    <button class="out" id="clsBtn">Change class</button>
   </div>`;
 }
-function kidBooks(){ return BOOKS.filter(b=>b.level===kid.cls); }
+const clsBooks=()=>BOOKS.filter(b=>b.level===cls);
 
-/* ---------- home ---------- */
-function pgHome(){
-  const live=liveFor(kid);
-  const att=(live&&live.att)||kid.att, pct=Math.round(att.present/att.total*100);
-  const per=periodsFor(kid.cls), ni=nowPeriod();
-  const feeOK=live?live.due<=0:kid.fee.paid;
-  const dueAmt=live?live.due:kid.fee.due;
+/* ---------- books ---------- */
+function pgBooks(){
+  const books=clsBooks();
+  const sel=books.find(b=>b.id===selBook);
   return `<div class="page on">
-   <div class="c"><h2>📊 ${esc(kid.name.split(" ")[0])} at a glance</h2>
-    <div class="sub">${live?"🟢 Live from the school register — exactly what the teacher has marked":"Demo data — goes live once the school register is used in this browser (or via the backend)"}</div>
-    <div class="statrow">
-      <div class="stat g"><b>${pct}%</b><span>attendance${live&&live.att&&live.att.label?" · "+live.att.label:""}</span></div>
-      <div class="stat ${feeOK?"g":"r"}"><b>${feeOK?"Paid ✓":rupee(dueAmt)}</b><span>${feeOK?"fees clear":"fees due"}</span></div>
-      <div class="stat y"><b>${kidBooks().length}</b><span>books</span></div>
+   ${sel?`<div class="c"><h2>${sel.icon||"📘"} ${esc(sel.title)}</h2>
+     <div class="sub">${esc(sel.subject||"")} · ${esc(lvlName(cls))}</div>
+     <div class="act-row">
+       ${sel.flipbook?`<button class="abtn" data-open="${esc(sel.flipbook)}"><span class="e">📖</span>Read the flipbook</button>`:""}
+       ${sel.interactive?`<button class="abtn" data-open="${esc(sel.interactive)}"><span class="e">🎯</span>Play the lesson</button>`:""}
+       ${QBK[sel.id]?`<button class="abtn" id="quizJump"><span class="e">⭐</span>Practise questions</button>`:""}
+     </div></div>`:""}
+   <div class="c"><h2>📚 ${esc(lvlName(cls))} books</h2>
+    <div class="sub">Tap a book, then read the flipbook together or let your child play the lesson.</div>
+    <div class="bgrid">${books.map(b=>`
+      <button class="bcard${b.id===selBook?" sel":""}" data-book="${b.id}">
+        <span class="cv">${b.coverImg?`<img src="${encodeURI(BASE+b.coverImg)}" loading="lazy"/>`:(b.icon||"📘")}</span>
+        <b>${esc(b.title)}</b></button>`).join("")}
     </div></div>
-   <div class="c"><h2>⏰ Today at school</h2>
-    <div class="sub">Class ${esc(kid.cls)}'s timetable — so you know what to ask about at pick-up!</div>
-    ${per.map((s,i)=>`<div class="tlrow${i===ni?" now":""}"><span class="tm">${TIMES[i]}</span> ${SUBJ_EMOJI[s]||"📘"} ${esc(s)}</div>`).join("")}
-   </div>
-   <div class="c"><h2>📢 Latest from school</h2>
-    <div class="sub">Tap the Notices tab for all announcements.</div>
-    <div class="ntc"><span class="dt">${esc(NOTICES[0].d)}</span><br><b>${esc(NOTICES[0].t)}</b><p>${esc(NOTICES[0].b)}</p></div>
-   </div>
-   <div class="foot-note">Demo data — the live version shows your child's real attendance, marked daily by the teacher.</div>
+   <div class="foot-note">Reading together for 10 minutes a day makes the biggest difference of all. 💚</div>
   </div>`;
 }
 
-/* ---------- learn ---------- */
-function makeQuiz(){
-  const withQ=kidBooks().filter(b=>QBK[b.id]);
+/* ---------- practice ---------- */
+function qBooks(){ return clsBooks().filter(b=>QBK[b.id]); }
+function makeQuiz(bookId){
+  const withQ=qBooks();
   quiz={qs:[],done:0,right:0,stars:"",book:null};
   if(!withQ.length) return;
-  quiz.book=withQ[Math.floor(Math.random()*withQ.length)];
-  const items=QBK[quiz.book.id].items.filter(q=>q.k==="mcq"&&q.options.length<=4);
+  quiz.book=withQ.find(b=>b.id===bookId)||withQ[Math.floor(Math.random()*withQ.length)];
+  pbook=quiz.book.id;
+  const items=(QBK[quiz.book.id].items||[]).filter(q=>q.k==="mcq"&&q.options&&q.options.length<=4);
   const used={};
   while(quiz.qs.length<3&&quiz.qs.length<items.length){
     const q=items[Math.floor(Math.random()*items.length)];
     if(!used[q.text]){used[q.text]=1;quiz.qs.push(q);}
   }
 }
-function pgLearn(){
-  const books=kidBooks();
+function pgPractice(){
+  const withQ=qBooks();
+  if(!withQ.length) return `<div class="page on"><div class="c"><h2>⭐ Practice time!</h2>
+    <div class="sub">No practice questions for ${esc(lvlName(cls))} yet — try the flipbooks and lessons in Books!</div></div></div>`;
+  if(!quiz.qs.length) makeQuiz(pbook);
   return `<div class="page on">
-   <div class="c"><h2>📚 ${esc(kid.name.split(" ")[0])}'s books</h2>
-    <div class="sub">The same books used in class — read the flipbook together, or let your child play the interactive lesson.</div>
-    <div class="bookrow">${books.map(b=>`
-      <button class="bcard" data-sheet="${b.id}">
-        <span class="cv">${b.coverImg?`<img src="${encodeURI(BASE+b.coverImg)}" loading="lazy"/>`:b.icon}</span>
-        <b>${esc(b.title)}</b></button>`).join("")}
-    </div>
-    <div id="bkActs"></div>
-   </div>
-   ${quiz.qs.length?`<div class="c"><h2>⭐ Practice time!</h2>
-    <div class="sub">From <b>${esc(quiz.book.title)}</b> — real questions from the pages taught in class. Tap the answer!</div>
-    <div class="stars" id="qStars"></div>
+   <div class="c"><h2>⭐ Practice time!</h2>
+    <div class="sub">Real questions from the pages taught in class. Tap the answer!</div>
+    <div class="chiprow">${withQ.map(b=>`<button class="chip${quiz.book&&b.id===quiz.book.id?" on":""}" data-qb="${b.id}">${b.icon||"📘"} ${esc(b.title)}</button>`).join("")}</div>
+    <div class="stars" id="qStars">${quiz.stars}</div>
     ${quiz.qs.map((q,qi)=>`
       <div class="kq"><div class="qt"><span class="pg">p. ${q.pg}</span>${esc(q.text)}</div>
         <div class="kops">${q.options.map((o,oi)=>`<button class="kop" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join("")}</div>
       </div>`).join("")}
     <button class="bigbtn" id="newQuiz">🔄 More questions</button>
-   </div>`:""}
-   <div class="foot-note">Reading together for 10 minutes a day makes the biggest difference of all. 💚</div>
+   </div>
   </div>`;
 }
 
-/* ---------- report ---------- */
-function pgReport(){
-  const lm=liveMarks(kid);
-  const marks=lm?lm.marks:kid.marks;
-  const termName=lm?lm.term:"1st Term";
-  const totMax=marks.reduce((a,m)=>a+m[1],0), totGot=marks.reduce((a,m)=>a+m[2],0);
-  const pct=Math.round(totGot/totMax*100);
-  const grade=p=>p>=80?["A","#0E8A6D"]:p>=65?["B","#2E7CD6"]:p>=50?["C","#F5A623"]:["D","#F4593B"];
-  const [g,gc]=grade(pct);
+/* ---------- help ---------- */
+function pgHelp(){
   return `<div class="page on">
-   <div class="c"><h2>🧾 Progress report — ${esc(termName)}</h2>
-    <div class="sub">${lm?"🟢 Live from the teacher's gradebook — updates as marks are entered":"Session 2026–27 · demo marks (goes live once the gradebook is used in this browser or via the backend)"}</div>
-    <table class="rc-table">
-     <tr><th>Subject</th><th style="text-align:center">Max</th><th style="text-align:center">Got</th><th style="text-align:center">Grade</th></tr>
-     ${marks.map(m=>{const[mg,mc]=grade(m[2]/m[1]*100);
-       return `<tr><td>${esc(m[0])}</td><td class="c">${m[1]}</td><td class="c"><b>${m[2]}</b></td><td class="c"><span class="gr" style="background:${mc}22;color:${mc}">${mg}</span></td></tr>`;}).join("")}
-     <tr><td><b>Total</b></td><td class="c"><b>${totMax}</b></td><td class="c"><b>${totGot}</b></td><td class="c"><span class="gr" style="background:${gc}22;color:${gc}">${pct}% · ${g}</span></td></tr>
-    </table></div>
-   <div class="c"><h2>🌱 Skills &amp; development</h2>
-    ${kid.skills.map(s=>`<div class="skill">${esc(s[0])}<span class="rt">${esc(s[1])} ✓</span></div>`).join("")}
-   </div>
-   <div class="c"><h2>💬 Teacher's note</h2>
-    <div class="sub" style="margin:0;font-size:13px;line-height:1.7;color:var(--ink)">"${esc(kid.remarks)}"<br><span style="color:var(--soft)">— Class teacher, ${esc(kid.cls)}</span></div>
-   </div>
+   <div class="c"><h2>💡 How MAKTAB Family works</h2>
+    <div class="sub">${esc(pass.school)}</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.9;color:var(--ink)">
+      📚 <b>Books</b> — open your child's class books: read the flipbook together, or let them play the interactive lesson.<br/>
+      ⭐ <b>Practice</b> — quick friendly questions from the same books, with stars for right answers.<br/>
+      🎒 <b>Change class</b> any time from the button at the top.<br/>
+      🔑 One family code works for the whole school — if it ever stops working, ask the school for the new code.
+    </div></div>
+   <div class="c"><h2>🏫 About school records</h2>
+    <div class="sub" style="margin:0;line-height:1.7">Attendance, fees and report cards are kept safely at the school — please contact the school office for those. This portal is just for learning at home.</div></div>
+   <div class="c"><button class="bigbtn" id="outBtn" style="background:var(--card);color:var(--coral);border:2px solid var(--line);box-shadow:none">Sign out of this device</button></div>
+   <div class="foot-note">MAKTAB Family · Azhar Publishers · Lahore — since 1972</div>
   </div>`;
 }
 
-/* ---------- fees ---------- */
-function pgFees(){
-  const live=liveFor(kid);
-  const f=live?{monthly:live.fee,paid:live.due<=0,due:live.due,history:kid.fee.history}:kid.fee;
-  return `<div class="page on">
-   <div class="c">
-    <div class="fee-hero">${f.paid
-      ?`<b class="ok">All clear ✓</b><span>Monthly fee ${rupee(f.monthly)} — received, thank you!${live?" (live)":""}</span>`
-      :`<b class="due">${rupee(f.due)}</b><span>due (monthly fee ${rupee(f.monthly)})${live?" · live from the school register":""}</span>`}
-    </div>
-    ${f.paid?"":`<button class="bigbtn" id="payHow">💳 How to pay</button>`}
-   </div>
-   <div class="c"><h2>🗂️ Fee history</h2>
-    ${f.history.map(h=>`<div class="frow">${esc(h[0])} 2026 <span class="${h[1]==="paid"?"ok":""}">${h[1]==="paid"?`<span class="paid-pill">PAID ✓</span>`:esc(h[1])}</span></div>`).join("")}
-   </div>
-   <div class="foot-note">Receipts are issued at the school office for every payment.<br>In the live version this updates the moment the school records your payment.</div>
-  </div>`;
-}
-
-/* ---------- notices ---------- */
-function pgNotices(){
-  return `<div class="page on">
-   <div class="c"><h2>📢 School noticeboard</h2>
-    <div class="sub">Announcements from Azhar Model School.</div>
-    ${NOTICES.map(n=>`<div class="ntc"><span class="dt">${esc(n.d)}</span><br><b>${esc(n.t)}</b><p>${esc(n.b)}</p></div>`).join("")}
-   </div>
-  </div>`;
-}
-
-/* ---------- shell ---------- */
-const TABS=[["home","🏠","Home"],["learn","📚","Learn"],["report","🧾","Report"],["fees","💰","Fees"],["notices","📢","Notices"]];
+/* ---------- render ---------- */
 function render(){
-  if(!kid){renderLogin();return;}
-  const pages={home:pgHome,learn:pgLearn,report:pgReport,fees:pgFees,notices:pgNotices};
-  $("#app").innerHTML = head()+pages[tab]()+
-   `<div class="tabs">${TABS.map(([id,e,l])=>`<button class="tab${tab===id?" on":""}" data-tab="${id}"><span class="e">${e}</span>${l}</button>`).join("")}</div>`;
-  $("#outBtn").onclick=()=>{kid=null;render();};
-  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();window.scrollTo(0,0);});
-  document.querySelectorAll("[data-sheet]").forEach(b=>b.onclick=()=>{
-    const bk=BOOKS.find(x=>x.id===b.dataset.sheet);
-    $("#bkActs").innerHTML=`<div class="sub" style="margin:10px 0 6px"><b>${esc(bk.title)}</b> — open together:</div>
-     <div class="act-row">
-       ${bk.flipbook?`<button class="abtn" data-open="${esc(bk.flipbook)}"><span class="e">📖</span>Read the flipbook</button>`:""}
-       ${bk.interactive?`<button class="abtn" data-open="${esc(bk.interactive)}"><span class="e">🎯</span>Play the lesson</button>`:""}
-     </div>`;
-    document.querySelectorAll("#bkActs [data-open]").forEach(x=>x.onclick=()=>openPath(x.dataset.open));
+  $("#app").innerHTML=head()+
+    (tab==="books"?pgBooks():tab==="practice"?pgPractice():pgHelp())+
+    `<div class="tabs">
+      ${[["books","📚","Books"],["practice","⭐","Practice"],["help","💡","Help"]].map(t=>
+        `<button class="tab${tab===t[0]?" on":""}" data-tab="${t[0]}"><span class="e">${t[1]}</span>${t[2]}</button>`).join("")}
+    </div>`;
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});
+  const cb=$("#clsBtn"); if(cb) cb.onclick=()=>{ renderCls(); };
+  document.querySelectorAll("[data-book]").forEach(b=>b.onclick=()=>{
+    selBook=(selBook===b.dataset.book)?null:b.dataset.book; render();
+    if(selBook) window.scrollTo({top:0,behavior:"smooth"});
   });
-  const nq=$("#newQuiz"); if(nq) nq.onclick=()=>{makeQuiz();render();};
+  document.querySelectorAll("[data-open]").forEach(x=>x.onclick=()=>openPath(x.dataset.open));
+  const qj=$("#quizJump"); if(qj) qj.onclick=()=>{ makeQuiz(selBook); tab="practice"; render(); };
+  document.querySelectorAll("[data-qb]").forEach(b=>b.onclick=()=>{ makeQuiz(b.dataset.qb); render(); });
+  const nq=$("#newQuiz"); if(nq) nq.onclick=()=>{ makeQuiz(pbook); render(); };
   document.querySelectorAll(".kop").forEach(b=>b.onclick=()=>{
     const q=quiz.qs[+b.dataset.q];
     if(b.parentElement.querySelector(".yes,.no"))return;
@@ -563,13 +326,27 @@ function render(){
     $("#qStars").textContent=quiz.stars;
     if(quiz.done===quiz.qs.length) toast(quiz.right===quiz.qs.length?"🌟 Perfect! Great job!":"Well done — "+quiz.right+" out of "+quiz.qs.length+"!");
   });
-  const ph=$("#payHow"); if(ph) ph.onclick=()=>toast("Pay at the school office, or JazzCash / bank transfer — receipt always given 🧾");
+  const ob=$("#outBtn"); if(ob) ob.onclick=()=>{
+    if(confirm("Sign this device out of MAKTAB Family?")){ pass=null; passSet(null); cls=""; clsSet(""); route(); }
+  };
 }
-if(SB){ SB.auth.getSession().then(async({data})=>{ if(data&&data.session){
-    const {data:prof}=await SB.from("profiles").select("role").eq("id",data.session.user.id).maybeSingle();
-    if(prof&&prof.role==="parent"){ CLOUD.email=(data.session.user||{}).email||""; await cloudLoad(); }
-  } render(); }).catch(()=>render()); }
-else render();
+
+/* ---------- routing + background re-check ---------- */
+function route(){
+  if(!pass) return renderGate();
+  if(!cls) return renderCls();
+  render();
+}
+route();
+/* quiet revalidation: if the school's code was changed or the school was
+   suspended, the pass stops working on the next online visit. */
+if(pass&&navigator.onLine&&window.SB){
+  checkCode(pass.code).then(r=>{
+    if(r.invalid){ pass=null; passSet(null); renderGate("This code is no longer active — ask the school for the new code."); }
+    else if(r.ok&&r.school!==pass.school){ pass.school=r.school; passSet(pass); }
+  }).catch(()=>{});
+}
 </script>
-<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('/sw.js').catch(function(){})}</script></body>
+<script>if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){navigator.serviceWorker.register('/sw.js').catch(function(){})}</script>
+</body>
 </html>
