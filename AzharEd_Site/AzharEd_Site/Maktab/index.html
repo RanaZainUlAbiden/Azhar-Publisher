@@ -417,11 +417,16 @@ input,select,textarea,button{font-family:inherit}
 /* report-card row controls — quiet until you reach for them */
 .rc-gut{border-left:none!important;border-top:none!important;border-bottom:none!important;border-right:none!important;background:transparent;width:30px;padding:0!important}
 .rc-x{width:22px;height:22px;border-radius:50%;border:none;background:transparent;color:#a8b0c0;font-size:15px;line-height:1;cursor:pointer;opacity:0;transition:.15s;display:inline-flex;align-items:center;justify-content:center}
-.rc-table tbody tr:hover .rc-x,.rc-table tbody tr:focus-within .rc-x{opacity:.75}
+.rc-table tbody tr:hover .rc-x,.rc-table tbody tr:focus-within .rc-x,
+.gtable tbody tr:hover .rc-x,.gtable tbody tr:focus-within .rc-x{opacity:.75}
 .rc-x:hover{opacity:1!important;background:#fdecef;color:#e94560}
-@media (hover:none){.rc-table .rc-x{opacity:.5}}
+@media (hover:none){.rc-table .rc-x,.gtable .rc-x{opacity:.5}}
 .rc-add td{border:1px dashed #cfd6e4!important;color:#8a93a6;font-weight:700;cursor:pointer;transition:.15s;background:transparent}
 .rc-add:hover td{color:#0f3460;background:#f4f7fd;border-color:#0f3460!important}
+.gtable .rc-add td{border:1px dashed var(--border)!important;color:var(--muted);background:transparent}
+.gtable .rc-add:hover td{color:var(--brand);background:var(--surface2);border-color:var(--navy)!important}
+.sub-add{border:none;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;width:100%;padding:0}
+.sub-add::placeholder{color:inherit;opacity:.85}
 .rc-total td{font-weight:800;background:#eef2fb}
 .rc-key{font-size:11px;color:#8a90a0;margin:6px 0 18px;line-height:1.5}
 .rc-sel{border:1px solid #d8dce6;border-radius:6px;padding:4px 8px;font-size:12.5px;background:#fff;color:#17203a}
@@ -1646,7 +1651,15 @@ function Planner({schoolName,openBook}){
   const [term,setTerm]=useLS("pl:term","1st Term");
   const [week,setWeek]=useLS("pl:week",1);
   const [plans,setPlans]=useLS("planner",{});
-  const subs=isEarly(cls)?SUBJECT_POOL.early:SUBJECT_POOL.primary;
+  /* the school's own planning subjects — add or remove per age group */
+  const [plSubs,setPlSubs]=useLS("pl:subjects",{early:SUBJECT_POOL.early,primary:SUBJECT_POOL.primary});
+  const [newSub,setNewSub]=useState("");
+  const poolKey=isEarly(cls)?"early":"primary";
+  const subs=plSubs[poolKey]||[];
+  const addSubject=()=>{ const s=newSub.trim(); if(!s) return;
+    if(subs.some(x=>x.toLowerCase()===s.toLowerCase())){toast("That subject is already listed","⚠️");setNewSub("");return;}
+    setPlSubs({...plSubs,[poolKey]:[...subs,s]}); setNewSub(""); };
+  const removeSubject=s2=>setPlSubs({...plSubs,[poolKey]:subs.filter(x=>x!==s2)});
   const key=cls+" "+sec+"|"+term+"|W"+week;
   const plan=plans[key]||{rows:{},notes:""};
   const setRow=(s2,v)=>setPlans({...plans,[key]:{rows:{...plan.rows,[s2]:v},notes:plan.notes}});
@@ -1676,9 +1689,18 @@ function Planner({schoolName,openBook}){
         <button className="mini-btn ghost" onClick={printWeek}>🖨️ Print this week</button>
         <span style={{fontSize:12,fontWeight:800,color:filled===subs.length&&filled>0?'var(--green)':'var(--muted)'}}>{filled}/{subs.length} planned · 💾 auto-saves</span>
       </div>
-      <table className="gtable"><thead><tr><th style={{width:170}}>Subject</th><th>What will you teach? (topic · book pages · activity)</th></tr></thead>
+      <table className="gtable"><thead><tr><th style={{width:170}}>Subject</th><th>What will you teach? (topic · book pages · activity)</th><th className="rc-gut no-print"></th></tr></thead>
         <tbody>{subs.map(s2=><tr key={s2}><td><b>{s2}</b></td>
-          <td><input className="tt-inp" style={{textAlign:'left',minWidth:220}} placeholder={"e.g. "+(isEarly(cls)?"Counting book p. 12–15 · numbers 6–10":"Unit 3 · exercise Q1–5")} value={plan.rows[s2]||""} onChange={e=>setRow(s2,e.target.value)}/></td></tr>)}</tbody>
+          <td><input className="tt-inp" style={{textAlign:'left',minWidth:220}} placeholder={"e.g. "+(isEarly(cls)?"Counting book p. 12–15 · numbers 6–10":"Unit 3 · exercise Q1–5")} value={plan.rows[s2]||""} onChange={e=>setRow(s2,e.target.value)}/></td>
+          <td className="rc-gut no-print">{subs.length>1 &&
+            <button className="rc-x" title={"Remove "+s2+" from this list"} onClick={()=>removeSubject(s2)}>−</button>}</td></tr>)}
+          <tr className="rc-add no-print">
+            <td colSpan={2} onClick={()=>{const el=document.getElementById("plNewSub");el&&el.focus();}}>
+              ＋&nbsp; <input id="plNewSub" className="sub-add" placeholder="Add a subject — type a name and press Enter"
+                value={newSub} onChange={e=>setNewSub(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter')addSubject();}} onBlur={addSubject}/></td>
+            <td className="rc-gut"></td></tr>
+        </tbody>
       </table>
       <div className="field" style={{marginTop:14}}><label>Notes for the week (optional)</label>
         <input value={plan.notes} onChange={e=>setNotes(e.target.value)} placeholder="e.g. Monthly Test 2 on Friday · PTM Saturday"/></div>
@@ -1789,8 +1811,16 @@ function Diary({schoolName}){
   const [sec,setSec]=useLS("dy:sec","A");
   const [date,setDate]=useState(todayISO());
   const [diary,setDiary]=useLS("diary",{});
+  /* the school's own homework subjects — add or remove per age group */
+  const [dySubs,setDySubs]=useLS("dy:subjects",{early:SUBJECT_POOL.early,primary:SUBJECT_POOL.primary});
+  const [newSub,setNewSub]=useState("");
   const key=cls+" "+sec+"|"+date;
-  const subs=isEarly(cls)?SUBJECT_POOL.early:SUBJECT_POOL.primary;
+  const poolKey=isEarly(cls)?"early":"primary";
+  const subs=dySubs[poolKey]||[];
+  const addSubject=()=>{ const s=newSub.trim(); if(!s) return;
+    if(subs.some(x=>x.toLowerCase()===s.toLowerCase())){toast("That subject is already listed","⚠️");setNewSub("");return;}
+    setDySubs({...dySubs,[poolKey]:[...subs,s]}); setNewSub(""); };
+  const removeSubject=su=>setDySubs({...dySubs,[poolKey]:subs.filter(x=>x!==su)});
   const entry=diary[key]||{rows:{},note:""};
   const setRow=(su,v)=>setDiary({...diary,[key]:{rows:{...entry.rows,[su]:v},note:entry.note}});
   const setNote=v=>setDiary({...diary,[key]:{rows:entry.rows,note:v}});
@@ -1821,9 +1851,18 @@ function Diary({schoolName}){
     <div className="card">
       <div className="card-flex"><h3>{cls} {sec} · {niceDate(date)}</h3>
         <span style={{fontSize:12,fontWeight:800,color:filled.length?'var(--green)':'var(--muted)'}}>{filled.length} of {subs.length} subjects · 💾 saves automatically</span></div>
-      <table className="gtable"><thead><tr><th style={{width:170}}>Subject</th><th>Homework</th></tr></thead>
+      <table className="gtable"><thead><tr><th style={{width:170}}>Subject</th><th>Homework</th><th className="rc-gut no-print"></th></tr></thead>
         <tbody>{subs.map(su=><tr key={su}><td><b>{su}</b></td>
-          <td><input className="tt-inp" style={{textAlign:'left',minWidth:220}} placeholder={"e.g. "+(isEarly(cls)?"Trace numbers 1–5 · colour the apple":"Ex 4.2 Q1–5 · learn definitions")} value={entry.rows[su]||""} onChange={e=>setRow(su,e.target.value)}/></td></tr>)}</tbody>
+          <td><input className="tt-inp" style={{textAlign:'left',minWidth:220}} placeholder={"e.g. "+(isEarly(cls)?"Trace numbers 1–5 · colour the apple":"Ex 4.2 Q1–5 · learn definitions")} value={entry.rows[su]||""} onChange={e=>setRow(su,e.target.value)}/></td>
+          <td className="rc-gut no-print">{subs.length>1 &&
+            <button className="rc-x" title={"Remove "+su+" from this list"} onClick={()=>removeSubject(su)}>−</button>}</td></tr>)}
+          <tr className="rc-add no-print">
+            <td colSpan={2} onClick={()=>{const el=document.getElementById("dyNewSub");el&&el.focus();}}>
+              ＋&nbsp; <input id="dyNewSub" className="sub-add" placeholder="Add a subject — type a name and press Enter"
+                value={newSub} onChange={e=>setNewSub(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter')addSubject();}} onBlur={addSubject}/></td>
+            <td className="rc-gut"></td></tr>
+        </tbody>
       </table>
       <div className="field" style={{marginTop:14}}><label>Note for parents (optional)</label>
         <input value={entry.note} onChange={e=>setNote(e.target.value)} placeholder="e.g. Please send colour pencils tomorrow"/></div>
