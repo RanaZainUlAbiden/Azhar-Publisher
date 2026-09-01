@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-01-c student details, empty roll, teacher limits -->
+<!-- build: maktab-2026-09-01-d staff details -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -2061,7 +2061,10 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const [attDate,setAttDate]=useState(todayISO());
   const [nf,setNf]=useState({title:"",body:"",on:"",urgent:false});
   const [sf,setSf]=useState({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,...BLANK_DETAILS});
-  const [stf,setStf]=useState({name:"",role:"Teacher",subject:"",phone:"",salary:40000});
+  const [stf,setStf]=useState({name:"",role:"Teacher",subject:"",phone:"",salary:40000,cnic:"",qual:"",joined:"",...BLANK_DETAILS});
+  const [stfDetFor,setStfDetFor]=useState(null);
+  const [stfDet,setStfDet]=useState(BLANK_DETAILS);
+  const [showLeftStaff,setShowLeftStaff]=useState(false);
   const [clsFilter,setClsFilter]=useState("All");
   const [attCls,setAttCls]=useState("All");
   const [payFor,setPayFor]=useState(null);
@@ -2168,6 +2171,94 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     </body></html>`);
     w.document.close();
   };
+  /* staff ID card — same card as the children's, in the staff colour */
+  const staffCard=x=>{
+    const w=window.open("","_blank","width=430,height=640"); if(!w) return;
+    const esc=q=>String(q==null?"":q).replace(/</g,"&lt;");
+    const av=x.photo
+      ? `<img src="${x.photo}" style="width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.3)">`
+      : `<div style="width:92px;height:92px;border-radius:50%;background:#8d1f36;color:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;border:3px solid #fff">${initials(x.name)}</div>`;
+    w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Staff Card — ${esc(x.name)}</title>
+    <style>body{font-family:-apple-system,Segoe UI,Arial,sans-serif;background:#eef1f6;display:flex;flex-direction:column;align-items:center;padding:26px;margin:0}
+    .card{width:320px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 14px 40px rgba(0,0,0,.22)}
+    .top{background:linear-gradient(135deg,#8d1f36,#b23048);color:#fff;padding:20px;text-align:center}
+    .top .sch{font-size:16px;font-weight:800}.top .sub{font-size:10px;opacity:.8;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px}
+    .ph{display:flex;justify-content:center;margin:16px 0 6px}
+    .nm{text-align:center;font-size:19px;font-weight:800;color:#8d1f36;margin:12px 16px 2px}
+    .cl{text-align:center;font-size:13px;color:#0f3460;font-weight:800;margin-bottom:12px}
+    .rows{padding:0 22px 18px}
+    .r{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dashed #e2e6f0}
+    .r span{color:#78809a}.r b{color:#17203a}
+    .med{background:#fdecef;color:#c1223c;font-size:11px;padding:8px 22px;border-top:1px dashed #f3c3ce;line-height:1.45}
+    .ft{background:#f7f3f4;text-align:center;font-size:10px;color:#9aa3b8;padding:9px;letter-spacing:.5px}
+    .btn{display:block;width:320px;padding:11px;background:#8d1f36;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;margin-top:18px;cursor:pointer}
+    @media print{body{background:#fff}.btn{display:none}}</style></head><body>
+    <div class="card">
+      <div class="top"><div class="sch">${esc(schoolName)}</div><div class="sub">Staff Identity Card</div></div>
+      <div class="ph">${av}</div>
+      <div class="nm">${esc(x.name)}</div><div class="cl">${esc(x.role)}${x.subject&&x.subject!=="—"?" · "+esc(x.subject):""}</div>
+      <div class="rows">
+        ${x.cnic?`<div class="r"><span>CNIC</span><b>${esc(x.cnic)}</b></div>`:""}
+        ${ageOf(x)?`<div class="r"><span>Age</span><b>${ageOf(x)} yrs${x.gender?" · "+esc(x.gender):""}${x.blood?" · "+esc(x.blood):""}</b></div>`:""}
+        <div class="r"><span>Contact</span><b>${esc(x.phone)||"—"}</b></div>
+        <div class="r"><span>Emergency</span><b>${esc(emgOf(x))||esc(x.phone)||"—"}</b></div>
+        ${x.joined?`<div class="r"><span>Joined</span><b>${niceDate(x.joined)}</b></div>`:""}
+        <div class="r"><span>Session</span><b>2026–27</b></div>
+      </div>
+      ${x.health?`<div class="med"><b>⚕ Health note:</b> ${esc(x.health)}</div>`:""}
+      <div class="ft">AzharEd · Azhar Publishers · Book Factory</div>
+    </div>
+    <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+    </body></html>`);
+    w.document.close();
+  };
+  const printStaffProfile=x=>{
+    const esc=q=>String(q==null?"":q).replace(/</g,"&lt;");
+    const row=(l,v)=>`<tr><td class="lb">${l}</td><td>${esc(v)||"—"}</td></tr>`;
+    printHTML("Staff profile — "+x.name,
+     `<style>.pf table{margin-bottom:16px}.pf td.lb{width:210px;background:#f4f7fc;color:#5b657e;font-weight:700}
+      .warn{border:1.5px solid #e94560;background:#fdecef;border-radius:9px;padding:11px 14px;font-size:13px;margin-bottom:16px}
+      .warn b{color:#c1223c}</style>
+      <div class="pf"><h1>${esc(schoolName)}</h1><div class="sub">Staff Profile · ${esc(x.name)}</div>
+      ${x.health?`<div class="warn"><b>⚕ Known health issues:</b> ${esc(x.health)}</div>`:""}
+      <table>
+        ${row("Name",x.name)}${row("Role",x.role)}${row("Subject",x.subject)}
+        ${row("Qualification",x.qual)}${row("CNIC",x.cnic)}${row("Date joined",x.joined?niceDate(x.joined):"")}
+      </table>
+      <table>
+        ${row("Gender",x.gender)}${row("Date of birth",x.dob?niceDate(x.dob):"")}${row("Age",ageOf(x)?ageOf(x)+" years":"")}
+        ${row("Blood group",x.blood)}${row("Phone",x.phone)}
+        ${row("Emergency contact",x.emgName)}${row("Emergency number",x.emgPhone)}${row("Home address",x.address)}
+      </table>
+      <table>${row("Monthly salary",rupee(x.salary))}${row("On the staff",x.left?("Left "+niceDate(x.left)):"Active")}</table>
+      <p style="font-size:11px;color:#98a1b5">Confidential — for school office use only. Printed ${niceDate(todayISO())}.</p></div>`);
+  };
+  const exportStaff=()=>downloadCSV("Staff_"+todayISO()+".csv",
+    [["Name","Role","Subject","Phone","Monthly Salary","Qualification","CNIC","Date Joined",
+      "Gender","Date of Birth","Age","Home Address","Known Health Issues","Emergency Contact","Emergency Number","Blood Group","On Staff"],
+     ...staff.map(x=>[x.name,x.role,x.subject,x.phone,x.salary,x.qual||"",x.cnic||"",x.joined||"",
+       x.gender||"",x.dob||"",ageOf(x),x.address||"",x.health||"",x.emgName||"",x.emgPhone||"",x.blood||"",
+       x.left?("Left "+niceDate(x.left)):"Active"])]);
+  const importStaffCSV=()=>{
+    const inp=document.createElement("input"); inp.type="file"; inp.accept=".csv,text/csv";
+    inp.onchange=()=>{ const f=inp.files[0]; if(!f)return;
+      const r=new FileReader();
+      r.onload=()=>{
+        const out=[];
+        String(r.result).split(/\r?\n/).forEach(line=>{
+          const c=line.split(",").map(q=>q.trim().replace(/^"|"$/g,""));
+          if(!c[0]||/^name$/i.test(c[0])) return;
+          out.push({id:Date.now()+out.length,name:c[0],role:["Teacher","Admin","Support"].indexOf(c[1])>=0?c[1]:"Teacher",
+            subject:c[2]||"—",phone:c[3]||"",salary:+c[4]||0,qual:c[5]||"",cnic:c[6]||"",joined:c[7]||"",
+            gender:c[8]||"",dob:c[9]||"",address:c[10]||"",health:c[11]||"",emgName:c[12]||"",emgPhone:c[13]||"",blood:c[14]||""});
+        });
+        if(out.length){ setStaff(p=>[...p,...out]); toast(out.length+" staff imported","📥"); }
+        else toast("No rows found. Columns: Name, Role, Subject, Phone, Salary (then optionally Qualification, CNIC, Date joined, Gender, Date of birth, Address, Health notes, Emergency contact, Emergency number, Blood group)","⚠️");
+      };
+      r.readAsText(f);
+    };
+    inp.click();
+  };
   const importCSV=()=>{
     const inp=document.createElement("input"); inp.type="file"; inp.accept=".csv,text/csv";
     inp.onchange=()=>{ const f=inp.files[0]; if(!f)return;
@@ -2194,6 +2285,8 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   /* children still on the roll — anyone marked as "left" keeps their record but drops out of daily lists */
   const activeStudents=students.filter(s=>!s.left);
   const leftCount=students.length-activeStudents.length;
+  const activeStaff=staff.filter(x=>!x.left);
+  const staffLeftCount=staff.length-activeStaff.length;
   const dueOf=s=>Math.max(0,(+s.fee||0)-(+s.discount||0)-(+s.paid||0));
   const netFee=s=>Math.max(0,(+s.fee||0)-(+s.discount||0));
   const statusOf=s=>s.paid>=netFee(s)?"Paid":s.paid>0?"Partial":"Pending";
@@ -2213,7 +2306,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const monthPct=(all,id)=>{ const mm=attDate.slice(0,7); let p=0,t=0;
     Object.keys(all).forEach(d=>{ if(d.slice(0,7)===mm && all[d][id]!=null){t++; if(all[d][id]==="Present")p++;} });
     return t?Math.round(p/t*100)+"% ("+p+"/"+t+")":"—"; };
-  const staffPresent=staff.filter(s=>(staffAtt[s.id]||"Present")==="Present").length;
+  const staffPresent=activeStaff.filter(s=>(staffAtt[s.id]||"Present")==="Present").length;
 
   const openPay=s=>{setPayFor(s);setPayAmt(dueOf(s));setPayMethod("Cash");};
   const confirmPay=()=>{
@@ -2251,8 +2344,34 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       health:clean(sf.health), emgName:clean(sf.emgName), emgPhone:clean(sf.emgPhone)}]);
     setSf({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,...BLANK_DETAILS}); toast("Student enrolled","🎒");};
   const addStaff=()=>{if(!stf.name.trim())return;
-    setStaff(p=>[...p,{id:Date.now(),name:stf.name.trim(),role:stf.role,subject:stf.subject||"—",phone:stf.phone,salary:+stf.salary||0}]);
-    setStf({name:"",role:"Teacher",subject:"",phone:"",salary:40000}); toast("Staff member added","👩‍🏫");};
+    const clean=v=>String(v||"").trim(), pick=v=>(v==="—"?"":v);
+    setStaff(p=>[...p,{id:Date.now(),name:stf.name.trim(),role:stf.role,subject:stf.subject||"—",phone:stf.phone,salary:+stf.salary||0,
+      cnic:clean(stf.cnic), qual:clean(stf.qual), joined:clean(stf.joined),
+      gender:pick(stf.gender), dob:clean(stf.dob), blood:pick(stf.blood), address:clean(stf.address),
+      health:clean(stf.health), emgName:clean(stf.emgName), emgPhone:clean(stf.emgPhone)}]);
+    setStf({name:"",role:"Teacher",subject:"",phone:"",salary:40000,cnic:"",qual:"",joined:"",...BLANK_DETAILS});
+    toast("Staff member added","👩‍🏫");};
+  /* a teacher who leaves keeps their record — the same idea as students */
+  const setStaffLeft=(id,left)=>{ setStaff(p=>p.map(x=>x.id===id?{...x,left:left?todayISO():""}:x));
+    toast(left?"Marked as left the school":"Welcome back — back on the staff list", left?"👋":"👩‍🏫"); };
+  const openStaffDetails=x=>{
+    setStfDet({gender:x.gender||"—",dob:x.dob||"",blood:x.blood||"—",address:x.address||"",health:x.health||"",
+               emgName:x.emgName||"",emgPhone:x.emgPhone||"",
+               cnic:x.cnic||"",qual:x.qual||"",joined:x.joined||"",
+               role:x.role||"Teacher",subject:x.subject||"",phone:x.phone||"",salary:x.salary==null?"":String(x.salary)});
+    setStfDetFor(x);
+  };
+  const saveStaffDetails=()=>{
+    if(!stfDetFor) return; const id=stfDetFor.id;
+    const clean=v=>String(v||"").trim(), pick=v=>(v==="—"?"":v);
+    setStaff(p=>p.map(x=>x.id===id?{...x,
+      gender:pick(stfDet.gender), dob:clean(stfDet.dob), blood:pick(stfDet.blood),
+      address:clean(stfDet.address), health:clean(stfDet.health),
+      emgName:clean(stfDet.emgName), emgPhone:clean(stfDet.emgPhone),
+      cnic:clean(stfDet.cnic), qual:clean(stfDet.qual), joined:clean(stfDet.joined),
+      role:stfDet.role, subject:clean(stfDet.subject)||"—", phone:clean(stfDet.phone), salary:+stfDet.salary||0}:x));
+    setStfDetFor(null); toast("Details saved","📝");
+  };
   const removeStudent=id=>{setStudents(p=>p.filter(s=>s.id!==id));toast("Student removed","🗑️");};
   /* A child who leaves keeps their record — marking them "Left" hides them from day-to-day lists. */
   const setLeft=(id,left)=>{ setStudents(p=>p.map(s=>s.id===id?{...s,left:left?todayISO():""}:s));
@@ -2308,11 +2427,11 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     const mm=attDate.slice(0,7);
     const month=new Date(attDate+"T00:00:00").toLocaleDateString("en-GB",{month:"long",year:"numeric"});
     const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
-    const total=staff.reduce((a,s)=>a+(+s.salary||0),0);
+    const total=activeStaff.reduce((a,s)=>a+(+s.salary||0),0);
     printHTML("Salary register "+mm,
-     `<h1>${esc(schoolName)}</h1><div class="sub">Salary Register — ${month} · ${staff.length} staff</div>
+     `<h1>${esc(schoolName)}</h1><div class="sub">Salary Register — ${month} · ${activeStaff.length} staff</div>
       <table><tr><th>Name</th><th>Role</th><th>Salary</th><th>Absent</th><th>Leave</th><th>Signature</th></tr>
-      ${staff.map(s=>{
+      ${activeStaff.map(s=>{
         const absent=Object.keys(staffAttAll).filter(d=>d.slice(0,7)===mm && staffAttAll[d][s.id]==="Absent").length;
         return `<tr><td>${esc(s.name)}</td><td>${esc(s.role)}</td><td>${rupee(s.salary)}</td><td>${absent}</td><td>${leaveTaken(s.id,mm)}</td><td style="width:150px"></td></tr>`;}).join("")}
       <tr><th>Total</th><th></th><th>${rupee(total)}</th><th></th><th></th><th></th></tr></table>`);
@@ -2348,7 +2467,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   /* Teacher-wise view: subjects are matched to the teacher who teaches them (Staff → Subject). */
   const teacherOf=subj=>{ const q=String(subj||"").toLowerCase().trim();
     if(!q||q==="—"||q==="break") return null;
-    return staff.find(t=>(t.subject||"").toLowerCase().trim()===q)||null; };
+    return activeStaff.find(t=>(t.subject||"").toLowerCase().trim()===q)||null; };
   /* only class-sections that actually have children in them count towards a teacher's week */
   const sectionsInUse=Array.from(new Set(activeStudents.map(s=>s.cls+"-"+s.sec)));
   const teacherGrids=(()=>{
@@ -2366,7 +2485,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     });
     return out;
   })();
-  const teachers=staff.filter(t=>t.role==="Teacher");
+  const teachers=activeStaff.filter(t=>t.role==="Teacher");
   const clashes=(()=>{ const list=[];
     teachers.forEach(t=>{ const g=teacherGrids[t.id]; if(!g) return;
       TT_DAYS.forEach((day,d)=>ttTimes.forEach((time,p)=>{
@@ -2470,6 +2589,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     w.document.close();
   };
 
+  const staffShown=showLeftStaff?staff.filter(x=>!!x.left):activeStaff;
   const shown=(showLeft?students.filter(s=>!!s.left):activeStudents)
     .filter(s=>(clsFilter==="All"||s.cls===clsFilter)
     &&(!stuQ.trim()||(s.name+" "+(s.guardian||"")).toLowerCase().includes(stuQ.toLowerCase().trim())));
@@ -2570,18 +2690,53 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <div className="field" style={{margin:0}}><label>Salary</label><input type="number" value={stf.salary} onChange={e=>setStf({...stf,salary:e.target.value})}/></div>
           <button className="btn btn-navy" onClick={addStaff}>Add</button>
         </div>
+        <div className="det-grid" style={{marginTop:16,gridTemplateColumns:"repeat(4,1fr)"}}>
+          <div className="field"><label>Qualification</label>
+            <input data-fqual placeholder="e.g. B.Ed, M.A. English" value={stf.qual} onChange={e=>setStf({...stf,qual:e.target.value})}/></div>
+          <div className="field"><label>CNIC</label>
+            <input data-fcnic placeholder="35202-xxxxxxx-x" value={stf.cnic} onChange={e=>setStf({...stf,cnic:e.target.value})}/></div>
+          <div className="field"><label>Date joined</label>
+            <input type="date" data-fjoined value={stf.joined} onChange={e=>setStf({...stf,joined:e.target.value})}/></div>
+          <div className="field"><label>Gender</label>
+            <select data-fgender value={stf.gender} onChange={e=>setStf({...stf,gender:e.target.value})}>{["—","Male","Female"].map(g=><option key={g}>{g}</option>)}</select></div>
+          <div className="field"><label>Date of birth</label>
+            <input type="date" data-fdob value={stf.dob} onChange={e=>setStf({...stf,dob:e.target.value})}/>
+            <div className="det-age">{ageFrom(stf.dob)?("Age "+ageFrom(stf.dob)+" years"):"Age is worked out from this."}</div></div>
+          <div className="field"><label>Blood group</label>
+            <select value={stf.blood} onChange={e=>setStf({...stf,blood:e.target.value})}>{BLOODS.map(g=><option key={g}>{g}</option>)}</select></div>
+          <div className="field"><label>Emergency contact name</label>
+            <input data-femgname placeholder="e.g. Husband — Mr. Asif" value={stf.emgName} onChange={e=>setStf({...stf,emgName:e.target.value})}/></div>
+          <div className="field"><label>Emergency contact number</label>
+            <input data-femgphone placeholder="03xx-xxxxxxx" value={stf.emgPhone} onChange={e=>setStf({...stf,emgPhone:e.target.value})}/></div>
+          <div className="field" style={{gridColumn:"span 2"}}><label>Home address</label>
+            <input data-faddress placeholder="House / street / area / city" value={stf.address} onChange={e=>setStf({...stf,address:e.target.value})}/></div>
+          <div className="field" style={{gridColumn:"span 2"}}><label>Known health issues or allergies</label>
+            <input data-fhealth placeholder="e.g. Diabetic — keeps medication in the staff room" value={stf.health} onChange={e=>setStf({...stf,health:e.target.value})}/></div>
+        </div>
+        <p className="hint" style={{marginTop:10}}>Only the name is required — everything else can be filled in later by clicking ✎ on the staff member's row. Health notes and the emergency number are printed on their staff card.</p>
       </div></details></div>
       <div className="card">
-        <div className="card-flex"><h3>Staff &amp; teachers · {staff.length}</h3>
-          <button className="mini-btn ghost" data-salreg onClick={printSalaryRegister}>🧾 Salary register</button></div>
-        <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Phone</th><th>Salary</th><th>Leave this month</th><th>Today</th><th></th></tr></thead>
-          <tbody>{staff.map(s=>{const st=staffAtt[s.id]||"Present";return <tr key={s.id}>
-            <td><div className="tbl-name"><button className="av-btn" title={s.photo?"Change or remove photo":"Add photo"} onClick={()=>avatarClick("staff",s)}><Avatar photo={s.photo} name={s.name} bg="#b23048"/></button>{s.name}</div></td>
-            <td>{s.role}</td><td>{s.subject}</td><td>{s.phone}</td><td>{rupee(s.salary)}</td><td>{leaveTaken(s.id,attDate.slice(0,7))}</td><td><span className={"pill "+pillCls(st)}>{st}</span></td>
-            <td style={{whiteSpace:'nowrap'}}><button className="mini-btn ghost" data-payslip title="Print this month's salary slip" onClick={()=>payslip(s)}>🧾</button>{" "}<button className="del-btn" onClick={()=>removeStaff(s.id)} title="Remove staff">✕</button></td></tr>;})}
-            {staff.length===0 && <tr><td colSpan={8} className="empty-row">No staff yet — open “🧑‍🏫 Add a staff member” above to add your teachers.</td></tr>}</tbody>
+        <div className="card-flex"><h3>{showLeftStaff?"Staff who have left":"Staff & teachers"} · {staffShown.length}</h3>
+          <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+            {staffLeftCount>0 && <button className={"mini-btn"+(showLeftStaff?"":" ghost")} data-showleftstaff onClick={()=>setShowLeftStaff(!showLeftStaff)}>👋 Left · {staffLeftCount}</button>}
+            <button className="mini-btn ghost" data-salreg onClick={printSalaryRegister}>🧾 Salary register</button>
+            <button className="mini-btn ghost" data-staffimport onClick={importStaffCSV} title="Import staff from a CSV file">📤 Import CSV</button>
+            <button className="mini-btn ghost" data-staffcsv onClick={exportStaff}>📥 CSV</button>
+          </div></div>
+        <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Age</th><th>Phone</th><th>Salary</th><th>Leave this month</th><th>Today</th><th></th></tr></thead>
+          <tbody>{staffShown.map(s=>{const st=staffAtt[s.id]||"Present";return <tr key={s.id}>
+            <td><div className="tbl-name"><button className="av-btn" title={s.photo?"Change or remove photo":"Add photo"} onClick={()=>avatarClick("staff",s)}><Avatar photo={s.photo} name={s.name} bg="#b23048"/></button>{s.name}
+              {s.health?<span className="med-flag" title={"Health note: "+s.health}>⚕</span>:null}</div></td>
+            <td>{s.role}</td><td>{s.subject}</td><td>{ageOf(s)?ageOf(s):"—"}</td><td>{s.phone}</td><td>{rupee(s.salary)}</td><td>{leaveTaken(s.id,attDate.slice(0,7))}</td><td><span className={"pill "+pillCls(st)}>{st}</span></td>
+            <td style={{whiteSpace:'nowrap'}}>
+              <button className="mini-btn ghost" data-staffedit title="Details — qualification, CNIC, gender, age, address, health, emergency contact" onClick={()=>openStaffDetails(s)}>✎</button>{" "}
+              <button className="mini-btn ghost" data-staffcard title="Print staff card" onClick={()=>staffCard(s)}>🪪</button>{" "}
+              <button className="mini-btn ghost" data-payslip title="Print this month's salary slip" onClick={()=>payslip(s)}>🧾</button>{" "}
+              <button className="mini-btn ghost" title={s.left?"Bring back onto the staff list":"Mark as left — the record is kept"} onClick={()=>setStaffLeft(s.id,!s.left)}>{s.left?"↩":"👋"}</button>{" "}
+              <button className="del-btn" onClick={()=>removeStaff(s.id)} title="Delete this record completely">✕</button></td></tr>;})}
+            {staffShown.length===0 && <tr><td colSpan={9} className="empty-row">{staff.length===0?"No staff yet — open “🧑‍🏫 Add a staff member” above to add your teachers.":"Nobody here."}</td></tr>}</tbody>
         </table>
-        <p className="hint">🧾 prints one person's salary slip for the month shown on the Staff Attendance tab · “Salary register” prints the whole month's sheet with a signature column.</p>
+        <p className="hint">📷 Click a photo to add one · ✎ opens the full record — qualification, CNIC, date joined, gender, date of birth, home address, health notes and an emergency contact · 🪪 prints a staff card · 🧾 prints that person's salary slip for the month shown on the Staff Attendance tab · 👋 marks someone as having left (the record is kept) · “Salary register” prints the whole month's sheet with a signature column.</p>
       </div>
     </div>}
 
@@ -2654,15 +2809,15 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
 
     {tab==="staffatt" && <div>
       <div className="kpi-grid">
-        <div className="kpi green"><div className="stat-flex"><div><div className="ic">✅</div><div className="v">{staffPresent}</div><div className="l">Present</div></div><Ring pct={staff.length?staffPresent/staff.length*100:0} size={52}/></div></div>
-        <div className="kpi red"><div className="ic">❌</div><div className="v">{staff.filter(s=>(staffAtt[s.id]||"Present")==="Absent").length}</div><div className="l">Absent</div></div>
-        <div className="kpi gold"><div className="ic">🌴</div><div className="v">{staff.filter(s=>(staffAtt[s.id]||"Present")==="Leave").length}</div><div className="l">On leave</div></div>
+        <div className="kpi green"><div className="stat-flex"><div><div className="ic">✅</div><div className="v">{staffPresent}</div><div className="l">Present</div></div><Ring pct={activeStaff.length?staffPresent/activeStaff.length*100:0} size={52}/></div></div>
+        <div className="kpi red"><div className="ic">❌</div><div className="v">{activeStaff.filter(s=>(staffAtt[s.id]||"Present")==="Absent").length}</div><div className="l">Absent</div></div>
+        <div className="kpi gold"><div className="ic">🌴</div><div className="v">{activeStaff.filter(s=>(staffAtt[s.id]||"Present")==="Leave").length}</div><div className="l">On leave</div></div>
       </div>
       <div className="card">
         <div className="card-flex"><h3>Teacher &amp; staff attendance</h3>
           <input type="date" className="date-inp" value={attDate} max={todayISO()} onChange={e=>setAttDate(e.target.value)}/></div>
         <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Mark</th><th>This month</th></tr></thead>
-          <tbody>{staff.map(s=>{const st=staffAtt[s.id]||"Present";return <tr key={s.id}><td><div className="tbl-name"><Avatar photo={s.photo} name={s.name} size={26} bg="#b23048"/>{s.name}</div></td><td>{s.role}</td><td>{s.subject}</td>
+          <tbody>{activeStaff.map(s=>{const st=staffAtt[s.id]||"Present";return <tr key={s.id}><td><div className="tbl-name"><Avatar photo={s.photo} name={s.name} size={26} bg="#b23048"/>{s.name}</div></td><td>{s.role}</td><td>{s.subject}</td>
             <td><span className="att-btns">{["Present","Absent","Leave"].map(x=><button key={x} className={"att-b"+(st===x?" on-"+x.toLowerCase():"")} onClick={()=>markStaffAtt(s.id,x)}>{x[0]}</button>)}</span></td>
             <td>{monthPct(staffAttAll,s.id)}</td></tr>;})}
             {staff.length===0 && <tr><td colSpan={5} className="empty-row">No staff yet — add your teachers under the Staff tab.</td></tr>}</tbody>
@@ -2805,9 +2960,13 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       const printEmergency=()=>printHTML("Emergency contacts",
         `<style>tr.hl td{background:#fdecef}</style>
          <h1>${esc(schoolName)}</h1><div class="sub">Emergency Contact &amp; Health Sheet — printed ${niceDate(todayISO())} · keep in the office and take on trips</div>
+         <h1 style="font-size:15px">Students</h1>
          <table><tr><th>Student</th><th>Class</th><th>Age</th><th>Guardian phone</th><th>Emergency contact</th><th>Known health issues</th></tr>
          ${activeStudents.map(s=>`<tr class="${(s.health||"").trim()?"hl":""}"><td>${esc(s.name)}</td><td>${s.cls} ${s.sec}</td><td>${ageOf(s)||"—"}</td><td>${esc(s.phone||"—")}</td><td>${esc(emgOf(s)||"—")}</td><td>${esc(s.health||"—")}</td></tr>`).join("")}</table>
-         <p style="font-size:11.5px;color:#98a1b5;margin-top:12px">Shaded rows have a health note. ${withHealth.length} of ${activeStudents.length} students have one recorded. Confidential — school use only.</p>`);
+         <h1 style="font-size:15px;margin-top:20px">Staff</h1>
+         <table><tr><th>Name</th><th>Role</th><th>Age</th><th>Phone</th><th>Emergency contact</th><th>Known health issues</th></tr>
+         ${activeStaff.map(x=>`<tr class="${(x.health||"").trim()?"hl":""}"><td>${esc(x.name)}</td><td>${esc(x.role)}</td><td>${ageOf(x)||"—"}</td><td>${esc(x.phone||"—")}</td><td>${esc(emgOf(x)||"—")}</td><td>${esc(x.health||"—")}</td></tr>`).join("")}</table>
+         <p style="font-size:11.5px;color:#98a1b5;margin-top:12px">Shaded rows have a health note. ${withHealth.length} of ${activeStudents.length} students and ${activeStaff.filter(x=>(x.health||"").trim()).length} of ${activeStaff.length} staff have one recorded. Confidential — school use only.</p>`);
       return <div>
         <div className="card-flex" style={{marginBottom:16}}>
           <h3 style={{marginBottom:0,color:'var(--brand)',fontSize:15,fontWeight:800}}>Monthly reports</h3>
@@ -2882,6 +3041,58 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <div className="det-foot">
             <button className="btn-primary" data-dsave onClick={saveDetails}>Save details</button>
             <button className="mini-btn ghost" title="Print the full student profile" onClick={()=>printProfile(detFor)}>🖨 Profile</button>
+          </div>
+          <p className="hint" style={{textAlign:'center'}}>Kept on this laptop and in your cloud backup — never shared with anyone else.</p>
+        </div>
+      </div>
+    </div>}
+
+    {stfDetFor && <div className="overlay" onClick={()=>setStfDetFor(null)}>
+      <div className="modal" style={{maxWidth:620}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-top">
+          <div className="modal-hero" style={{background:"linear-gradient(135deg,#8d1f36,#b23048)",height:110}}>
+            <Avatar photo={stfDetFor.photo} name={stfDetFor.name} size={62} bg="#6f1729"/>
+            <div><h3>{stfDetFor.name}</h3><p>{stfDetFor.role}{stfDetFor.subject&&stfDetFor.subject!=="—"?" · "+stfDetFor.subject:""}</p></div>
+          </div>
+          <button className="modal-x" onClick={()=>setStfDetFor(null)}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="det-grid">
+            <div className="field"><label>Role</label>
+              <select data-krole value={stfDet.role} onChange={e=>setStfDet({...stfDet,role:e.target.value})}>{["Teacher","Admin","Support"].map(r=><option key={r}>{r}</option>)}</select></div>
+            <div className="field"><label>Subject taught</label>
+              <input data-ksubject placeholder="e.g. English" value={stfDet.subject} onChange={e=>setStfDet({...stfDet,subject:e.target.value})}/>
+              <div className="det-age">Used to build this teacher's own timetable.</div></div>
+            <div className="field"><label>Qualification</label>
+              <input data-kqual placeholder="e.g. B.Ed, M.A. English" value={stfDet.qual} onChange={e=>setStfDet({...stfDet,qual:e.target.value})}/></div>
+            <div className="field"><label>CNIC</label>
+              <input data-kcnic placeholder="35202-xxxxxxx-x" value={stfDet.cnic} onChange={e=>setStfDet({...stfDet,cnic:e.target.value})}/></div>
+            <div className="field"><label>Date joined</label>
+              <input type="date" data-kjoined value={stfDet.joined} onChange={e=>setStfDet({...stfDet,joined:e.target.value})}/></div>
+            <div className="field"><label>Gender</label>
+              <select data-kgender value={stfDet.gender} onChange={e=>setStfDet({...stfDet,gender:e.target.value})}>{["—","Male","Female"].map(g=><option key={g}>{g}</option>)}</select></div>
+            <div className="field"><label>Date of birth</label>
+              <input type="date" data-kdob value={stfDet.dob} onChange={e=>setStfDet({...stfDet,dob:e.target.value})}/>
+              <div className="det-age">{ageFrom(stfDet.dob)?("Age today: "+ageFrom(stfDet.dob)+" years"):"Age is worked out automatically."}</div></div>
+            <div className="field"><label>Blood group</label>
+              <select value={stfDet.blood} onChange={e=>setStfDet({...stfDet,blood:e.target.value})}>{BLOODS.map(g=><option key={g}>{g}</option>)}</select></div>
+            <div className="field"><label>Phone</label>
+              <input data-kphone value={stfDet.phone} onChange={e=>setStfDet({...stfDet,phone:e.target.value})}/></div>
+            <div className="field"><label>Monthly salary (Rs)</label>
+              <input type="number" data-ksalary value={stfDet.salary} onChange={e=>setStfDet({...stfDet,salary:e.target.value})}/></div>
+            <div className="field"><label>Emergency contact — name</label>
+              <input data-kemgname placeholder="e.g. Husband — Mr. Asif" value={stfDet.emgName} onChange={e=>setStfDet({...stfDet,emgName:e.target.value})}/></div>
+            <div className="field"><label>Emergency contact — number</label>
+              <input data-kemgphone placeholder="03xx-xxxxxxx" value={stfDet.emgPhone} onChange={e=>setStfDet({...stfDet,emgPhone:e.target.value})}/></div>
+            <div className="field full"><label>Home address</label>
+              <textarea data-kaddress rows={2} style={{width:'100%'}} placeholder="House / street / area / city" value={stfDet.address} onChange={e=>setStfDet({...stfDet,address:e.target.value})}/></div>
+            <div className="field full"><label>Known health issues or allergies</label>
+              <textarea data-khealth rows={2} style={{width:'100%'}} placeholder="e.g. Diabetic — keeps medication in the staff room" value={stfDet.health} onChange={e=>setStfDet({...stfDet,health:e.target.value})}/>
+              {stfDet.health.trim()?<div className="det-note">⚕ This note is printed on the staff card and profile so colleagues can see it in an emergency.</div>:null}</div>
+          </div>
+          <div className="det-foot">
+            <button className="btn-primary" data-ksave onClick={saveStaffDetails}>Save details</button>
+            <button className="mini-btn ghost" title="Print the full staff profile" onClick={()=>printStaffProfile(stfDetFor)}>🖨 Profile</button>
           </div>
           <p className="hint" style={{textAlign:'center'}}>Kept on this laptop and in your cloud backup — never shared with anyone else.</p>
         </div>
