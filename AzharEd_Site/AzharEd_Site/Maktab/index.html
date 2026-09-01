@@ -428,6 +428,7 @@ input,select,textarea,button{font-family:inherit}
   .rc-inp{border-bottom-color:transparent!important}
   .rc-sel,.rc-remarks{border-color:transparent!important}
   .rc-nophoto{display:none!important}
+  .no-print{display:none!important}
   @page{margin:14mm}
 }
 
@@ -1380,6 +1381,9 @@ function ReportCard({prefill,students}){
   const ratings=["Excellent","Very Good","Good","Satisfactory","Needs Support"];
   const upd=(k,v)=>setInfo(p=>({...p,[k]:v}));
   const setSub=(i,k,v)=>setSubs(p=>p.map((s,idx)=>idx===i?{...s,[k]:k==='name'?v:(+v||0)}:s));
+  /* subjects on a report card are a free list — add as many rows as the school teaches */
+  const addSub=()=>setSubs(p=>[...p,{name:"",total:100,got:0}]);
+  const removeSub=i=>setSubs(p=>p.length<=1?p:p.filter((_,idx)=>idx!==i));
   const setSkill=(i,v)=>setSkills(p=>p.map((s,idx)=>idx===i?[s[0],v]:s));
   const grade=p=>p>=80?"A":p>=65?"B":p>=50?"C":p>0?"D":"—";
   const totGot=subs.reduce((a,s)=>a+(+s.got||0),0), totMax=subs.reduce((a,s)=>a+(+s.total||0),0);
@@ -1457,17 +1461,22 @@ function ReportCard({prefill,students}){
           <span style={{fontSize:11,color:'#8a90a0'}}>days</span></div>
       </div>
       <table className="rc-table">
-        <thead><tr><th>Subject</th><th className="c">Max Marks</th><th className="c">Obtained</th><th className="c">Grade</th></tr></thead>
+        <thead><tr><th>Subject</th><th className="c">Max Marks</th><th className="c">Obtained</th><th className="c">Grade</th><th className="c no-print" style={{width:34}}></th></tr></thead>
         <tbody>
           {subs.map((s,i)=>(<tr key={i}>
-            <td><input className="rc-inp" value={s.name} onChange={e=>setSub(i,'name',e.target.value)}/></td>
+            <td><input className="rc-inp" placeholder="Subject name…" value={s.name} onChange={e=>setSub(i,'name',e.target.value)}/></td>
             <td className="c"><input className="rc-inp" style={{width:52,textAlign:'center',flex:'none'}} type="number" value={s.total} onChange={e=>setSub(i,'total',e.target.value)}/></td>
             <td className="c"><input className="rc-inp" style={{width:52,textAlign:'center',flex:'none'}} type="number" value={s.got} onChange={e=>setSub(i,'got',e.target.value)}/></td>
             <td className="c"><b>{grade(s.total?s.got/s.total*100:0)}</b></td>
+            <td className="c no-print">{subs.length>1 && <span className="del-btn" title="Remove this subject" style={{cursor:'pointer'}} onClick={()=>removeSub(i)}>✕</span>}</td>
           </tr>))}
-          <tr className="rc-total"><td>Total</td><td className="c">{totMax}</td><td className="c">{totGot}</td><td className="c">{pct}% · {grade(pct)}</td></tr>
+          <tr className="rc-total"><td>Total</td><td className="c">{totMax}</td><td className="c">{totGot}</td><td className="c">{pct}% · {grade(pct)}</td><td className="no-print"></td></tr>
         </tbody>
       </table>
+      <div className="no-print" style={{margin:'8px 0 4px',display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
+        <button className="mini-btn" onClick={addSub}>➕ Add subject</button>
+        <span style={{fontSize:11.5,color:'var(--muted)'}}>{subs.length} subject{subs.length===1?"":"s"} on this card — add as many as the class studies; max marks can differ per subject. These buttons don't print.</span>
+      </div>
       <div className="rc-key">Grading key: A = 80–100% (Outstanding) · B = 65–79% (Good) · C = 50–64% (Satisfactory) · D = below 50% (Needs improvement)</div>
       <div style={{fontSize:13,fontWeight:800,color:'#0f3460',margin:'4px 0 8px'}}>Skills &amp; Personal Development</div>
       <table className="rc-table">
