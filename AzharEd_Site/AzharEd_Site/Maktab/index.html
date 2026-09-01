@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
+<!-- build: maktab-2026-09-01-c student details, empty roll, teacher limits -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -63,9 +64,10 @@ input,select,textarea,button{font-family:inherit}
 .auth-card .sub{color:#8a90a0;font-size:13px;text-align:center;margin:4px 0 22px}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:11px;font-weight:800;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
-.field input,.field select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;outline:none;transition:border .2s;background:var(--input);color:var(--text)}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;outline:none;transition:border .2s;background:var(--input);color:var(--text)}
+.field textarea{resize:vertical;line-height:1.5}
 .auth-card .field input{background:#fff;color:#17203a;border-color:#e8e8e8}
-.field input:focus,.field select:focus{border-color:var(--navy)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--navy)}
 .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#0f3460,#1a4a8a);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s}
 .btn-primary:hover{filter:brightness(1.15);transform:translateY(-1px)}
 .demo{margin-top:16px;background:#f6f8fd;border-radius:10px;padding:12px}
@@ -182,6 +184,23 @@ input,select,textarea,button{font-family:inherit}
 .modal-hero p{font-size:13px;opacity:.9;margin-top:3px}
 .modal-x{position:absolute;top:14px;right:16px;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;border:none;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .modal-body{padding:22px 26px 26px}
+.med-flag{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin-left:6px;border-radius:50%;background:#fdecef;color:#e94560;font-size:11px;font-weight:800;cursor:help;flex:none}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.det-grid .full{grid-column:1 / -1}
+.det-grid .field{margin:0}
+.det-note{background:#fdecef;border:1px solid #f7ccd6;border-radius:9px;padding:9px 12px;font-size:12px;color:#a82340;line-height:1.5;margin-top:2px}
+.det-age{font-size:11.5px;color:var(--muted);margin-top:4px}
+.det-foot{display:flex;gap:9px;margin-top:18px;align-items:center}
+.det-foot .btn-primary{flex:1}
+.empty-row{text-align:center;color:var(--muted);font-size:13px;padding:26px 14px!important;line-height:1.6}
+.alert-card{border-left:4px solid var(--red)}
+.tt-clash{background:#fdecef!important;color:#c1223c;font-weight:800}
+.tt-free{color:#b6bccb}
+.notice-item.urgent{border-left:3px solid var(--red);padding-left:10px}
+.sched-tag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:20px;background:#eef2fb;color:#5b657e;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.disc-tag{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:20px;background:#e8f7f0;color:#00875f;font-size:10.5px;font-weight:800;vertical-align:middle}
+.streak-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px dashed var(--border);font-size:13.5px;flex-wrap:wrap}
+.streak-row:last-child{border-bottom:none}
 .act-list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
 .act2{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:13px;border:1px solid var(--border);border-left:4px solid #ccc;background:var(--surface);cursor:pointer;text-align:left;transition:all .16s;width:100%;color:var(--text)}
 .act2:hover{box-shadow:0 8px 20px var(--shadow);transform:translateY(-1px)}
@@ -679,10 +698,29 @@ async function cloudBackupRestore(user){
   Object.keys(data).forEach(k=>{ try{localStorage.setItem(k,data[k]);}catch(e){} });
   return {ok:true,when:rows[0].created_at};
 }
+/* Once a day, quietly back this device up so nobody has to remember to press the button. */
+const AUTO_KEY="azhared2:autoBackupOn", AUTO_LAST="azhared2:autoBackupAt";
+function autoBackupOn(){ try{ return localStorage.getItem(AUTO_KEY)!=="0"; }catch(e){ return true; } }
+async function maybeAutoBackup(user){
+  try{
+    if(!user||!user.cloud||!autoBackupOn()||!navigator.onLine) return;
+    const last=+(localStorage.getItem(AUTO_LAST)||0);
+    if(Date.now()-last < 20*60*60*1000) return;          /* once every 20 hours is plenty */
+    localStorage.setItem(AUTO_LAST,String(Date.now()));  /* stamp first so two tabs don't both push */
+    const r=await cloudBackupPush(user);
+    if(r&&r.err) localStorage.setItem(AUTO_LAST,String(last));  /* failed — let it try again later */
+  }catch(e){}
+}
 function CloudCard({user}){
   const [busy,setBusy]=useState("");
   const [arm,setArm]=useState(false);
+  const [auto,setAuto]=useState(autoBackupOn());
+  const toggleAuto=()=>{ const v=!auto; setAuto(v);
+    try{ localStorage.setItem(AUTO_KEY, v?"1":"0"); }catch(e){}
+    toast(v?"Automatic daily backup is on":"Automatic backup turned off", v?"☁️":"⏸️"); };
   if(!user||!user.cloud) return null;
+  /* Only the school's admin account may replace a device's records. Teachers can back up, never restore. */
+  const canRestore = user.role==="admin";
   const push=async()=>{ setBusy("push");
     const r=await cloudBackupPush(user);
     setBusy(""); if(r.err) toast(r.err,"⚠️"); else toast("Backed up to the cloud — "+(r.bytes/1024).toFixed(0)+" KB saved for "+user.school,"☁️"); };
@@ -699,8 +737,13 @@ function CloudCard({user}){
       <p style={{fontSize:12.5,color:'var(--muted)',marginBottom:14,lineHeight:1.6}}>Back up this device's records to your school's private shelf in the cloud, and restore them on any computer where your school is signed in. Restoring <b>replaces</b> this device's records with the cloud copy.</p>
       <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
         <button className="btn btn-navy" onClick={push} disabled={busy!==""}>{busy==="push"?"Backing up…":"☁️⬆️ Back up to cloud"}</button>
-        <button className={"btn "+(arm?"btn-danger":"btn-outline")} onClick={restore} disabled={busy!==""}>{busy==="restore"?"Restoring…":(arm?"Press again to replace this device's records":"☁️⬇️ Restore from cloud")}</button>
+        {canRestore && <button className={"btn "+(arm?"btn-danger":"btn-outline")} data-restore onClick={restore} disabled={busy!==""}>{busy==="restore"?"Restoring…":(arm?"Press again to replace this device's records":"☁️⬇️ Restore from cloud")}</button>}
       </div>
+      <div className="setting-row" style={{marginTop:16}}>
+        <div><div className="st">🔁 Automatic daily backup</div><div className="sd">Backs this laptop up once a day on its own, whenever it is online — so a lost laptop never means lost records.</div></div>
+        <div className={"switch"+(auto?" on":"")} data-autobk onClick={toggleAuto}><div className="knob"></div></div>
+      </div>
+      {!canRestore && <p className="hint" style={{marginTop:12}}>🔒 Restoring replaces every record on this laptop, so it is limited to the school's admin account. You can back up as often as you like.</p>}
     </div>
   );
 }
@@ -760,8 +803,22 @@ function SearchModal({onClose,onOpenBook,go}){
     if(!ql) return [];
     const toks=ql.split(/\s+/);
     const pages=PAGE_LINKS.filter(([id,ic,l])=>toks.every(t=>l.toLowerCase().includes(t))).map(([id,ic,l])=>({type:"page",icon:ic,label:l,sub:"Go to page",page:id}));
+    /* people first — searching a child's or teacher's name should find them, not a book */
+    const people=[];
+    try{
+      LS.get("sms:students",[]).forEach(st=>{
+        const hay=(st.name+" "+(st.guardian||"")+" "+(st.phone||"")+" "+st.cls+" "+st.sec).toLowerCase();
+        if(toks.every(t=>hay.includes(t))) people.push({type:"page",icon:"🎒",label:st.name,
+          sub:"Student · "+st.cls+" "+st.sec+" · Roll "+st.roll+(st.left?" · has left":""),page:"admin"});
+      });
+      LS.get("sms:staff",[]).forEach(sf=>{
+        const hay=(sf.name+" "+(sf.subject||"")+" "+(sf.phone||"")+" "+(sf.role||"")).toLowerCase();
+        if(toks.every(t=>hay.includes(t))) people.push({type:"page",icon:"👩‍🏫",label:sf.name,
+          sub:(sf.role||"Staff")+(sf.subject&&sf.subject!=="—"?" · "+sf.subject:""),page:"admin"});
+      });
+    }catch(e){}
     const items=SEARCH_INDEX.filter(it=>{const hay=(it.label+" "+it.sub+" "+(it.book?it.book.series+" "+it.book.subject:"")).toLowerCase();return toks.every(t=>hay.includes(t));});
-    return [...pages,...items].slice(0,14);
+    return [...people.slice(0,8),...pages,...items].slice(0,16);
   },[ql]);
   const pick=it=>{
     onClose();
@@ -772,9 +829,9 @@ function SearchModal({onClose,onOpenBook,go}){
   return (
    <div className="cmdk" onClick={onClose}>
     <div className="cmdk-box" onClick={e=>e.stopPropagation()}>
-      <div className="cmdk-inp">🔍<input ref={inpRef} value={q} placeholder="Search books, papers, flipbooks, pages…" onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==="Escape")onClose(); if(e.key==="Enter"&&results[0])pick(results[0]);}}/></div>
+      <div className="cmdk-inp">🔍<input ref={inpRef} value={q} placeholder="Search students, staff, books, papers, pages…" onChange={e=>setQ(e.target.value)} onKeyDown={e=>{if(e.key==="Escape")onClose(); if(e.key==="Enter"&&results[0])pick(results[0]);}}/></div>
       <div className="cmdk-list">
-        {!ql && <div className="cmdk-empty">Type to search all {BOOKS.length} books, {SEARCH_INDEX.filter(i=>i.type==="paper").length} exam papers and every page.<br/><span style={{fontSize:11.5}}>Tip: try “panda urdu”, “monthly test prep” or “gradebook”.</span></div>}
+        {!ql && <div className="cmdk-empty">Type to search your students and staff, all {BOOKS.length} books, {SEARCH_INDEX.filter(i=>i.type==="paper").length} exam papers and every page.<br/><span style={{fontSize:11.5}}>Tip: try a child\u2019s name, a guardian\u2019s name, \u201cpanda urdu\u201d or \u201cgradebook\u201d.</span></div>}
         {ql && results.length===0 && <div className="cmdk-empty">No matches for “{q}”.</div>}
         {results.map((it,i)=>(
           <div key={i} className={"cmdk-item"+(i===0?" hl":"")} onClick={()=>pick(it)}>
@@ -1069,7 +1126,7 @@ function Dashboard({user,go,openBook,notices}){
             </div>
           : null; })()}
       <div className="card-flex"><h3>📢 {t("Latest notices")}</h3>{user.role==='admin' && <button className="link-btn" onClick={()=>go('admin')}>Manage →</button>}</div>
-      {notices.slice(0,3).map(n=><div key={n.id} className="notice-item"><div><b>{n.title}</b><div className="nd">{n.body}</div></div><span className="nt">{n.date}</span></div>)}
+      {notices.filter(n=>!n.on||n.on<=todayISO()).sort((a,b)=>((a.urgent?0:1)-(b.urgent?0:1))||(b.id-a.id)).slice(0,3).map(n=><div key={n.id} className={"notice-item"+(n.urgent?" urgent":"")}><div><b>{n.urgent?"🚩 ":""}{n.title}</b><div className="nd">{n.body}</div></div><span className="nt">{n.date}</span></div>)}
     </div>}
    </div>
   );
@@ -1337,8 +1394,12 @@ function Gradebook({students,goReport}){
   const removeBand=i=>{ if(gscale.length<=1){toast("Keep at least one grade","⚠️");return;} setGscale(gscale.filter((_,idx)=>idx!==i)); };
   const resetScale=()=>{ setGscale(GRADE_DEFAULT); toast("Grading key reset","↩️"); };
   const exportCSV=()=>downloadCSV("Gradebook_"+cls+"_"+sec+"_"+term.replace(/ /g,"_")+".csv",
-    [["Student",...sheet.subjects,"Total","%","Grade"],...sheet.rows.map(r=>[r.name,...sheet.subjects.map(s=>r.m[s]||0),total(r),pct(r)+"%",grade(pct(r))[0]])]);
+    [["Student",...sheet.subjects,"Total","%","Grade","Position","Class Average"],...sheet.rows.map(r=>[r.name,...sheet.subjects.map(s=>r.m[s]||0),total(r),pct(r)+"%",grade(pct(r))[0],rankOf(r),classAvg+"%"])]);
   const classAvg=sheet.rows.length?Math.round(sheet.rows.reduce((a,r)=>a+pct(r),0)/sheet.rows.length):0;
+  /* class position — equal totals share a position, the way schools actually rank */
+  const rankOf=(()=>{ const sorted=[...sheet.rows].map(r=>total(r)).sort((a,b)=>b-a);
+    return r=>{ const t=total(r); if(!sheet.subjects.length) return "—";
+      const i=sorted.indexOf(t); return i<0?"—":String(i+1); }; })();
   return (
    <div>
     <div className="page-head"><h2>📊 Class Gradebook</h2>
@@ -1393,13 +1454,14 @@ function Gradebook({students,goReport}){
       </details>
       {sheet.rows.length===0 && <div className="empty"><div className="ei">📝</div>No students yet. Add them above, or click “Import class students” to pull the {cls} {sec} list from School Management.</div>}
       {sheet.rows.length>0 && <table className="gtable">
-        <thead><tr><th>Student</th>{sheet.subjects.map(s=><th key={s}>{s} /100 <span style={{cursor:'pointer',opacity:.7}} title="Remove subject" onClick={()=>removeSubject(s)}>✕</span></th>)}<th>Total</th><th>%</th><th>Grade</th><th></th></tr></thead>
+        <thead><tr><th>Student</th>{sheet.subjects.map(s=><th key={s}>{s} /100 <span style={{cursor:'pointer',opacity:.7}} title="Remove subject" onClick={()=>removeSubject(s)}>✕</span></th>)}<th>Total</th><th>%</th><th>Grade</th><th>Position</th><th></th></tr></thead>
         <tbody>
           {sheet.rows.map((r,ri)=>{const p=pct(r),[g,gc]=grade(p);return(
             <tr key={ri}><td><div className="tbl-name"><Avatar photo={photoOf(r.name)} name={r.name} size={26}/>{r.name}</div></td>
               {sheet.subjects.map(s=><td key={s}><input type="number" value={r.m[s]||""} onChange={e=>setMark(ri,s,e.target.value)}/></td>)}
               <td><b>{total(r)}</b></td><td>{p}%</td>
               <td><span className="grade-pill" style={{background:gc+'22',color:gc}}>{g}</span></td>
+              <td data-pos style={{fontWeight:800,color:rankOf(r)==="1"?"#00875f":"var(--muted)"}}>{rankOf(r)}{rankOf(r)==="1"?" 🥇":""}</td>
               <td style={{whiteSpace:'nowrap'}}>
                 <button className="mini-btn ghost" title="Open report card" onClick={()=>goReport({student:r.name,cls:cls+" "+sec,term,subs:sheet.subjects.map(s=>({name:s,total:100,got:+r.m[s]||0}))})}>🧾</button>{" "}
                 <button className="del-btn" title="Remove student" onClick={()=>removeRow(ri)}>✕</button></td>
@@ -1413,14 +1475,14 @@ function Gradebook({students,goReport}){
 }
 
 /* ---------- REPORT CARD ---------- */
-function ReportCard({prefill,students}){
+function ReportCard({prefill,students,schoolName}){
   const [saved,setSaved]=useLS("reportcard",null);
   const base=prefill?{
-    info:{school:"Azhar Model School",student:prefill.student,father:"",cls:prefill.cls,roll:"",term:prefill.term,session:"2026–27",present:"",total:""},
+    info:{school:schoolName||"",student:prefill.student,father:"",cls:prefill.cls,roll:"",term:prefill.term,session:"2026–27",present:"",total:""},
     subs:prefill.subs
   }:(saved||{
-    info:{school:"Azhar Model School",student:"Ahmed Ali",father:"Mr. Ali Raza",cls:"Nursery A",roll:"12",term:"First Term",session:"2026–27",present:"58",total:"60"},
-    subs:[{name:"English",total:100,got:82},{name:"Urdu",total:100,got:75},{name:"Counting / Maths",total:100,got:88},{name:"General Knowledge",total:50,got:41},{name:"Rhymes & Drawing",total:50,got:45}]
+    info:{school:schoolName||"",student:"",father:"",cls:"",roll:"",term:"First Term",session:"2026–27",present:"",total:""},
+    subs:[{name:"English",total:100,got:0},{name:"Urdu",total:100,got:0},{name:"Counting / Maths",total:100,got:0},{name:"General Knowledge",total:50,got:0},{name:"Rhymes & Drawing",total:50,got:0}]
   });
   const [info,setInfo]=useState(base.info);
   const [subs,setSubs]=useState(base.subs);
@@ -1445,16 +1507,25 @@ function ReportCard({prefill,students}){
   const grade=p=>gradeFor(gscale,p)[0];
   const totGot=subs.reduce((a,s)=>a+(+s.got||0),0), totMax=subs.reduce((a,s)=>a+(+s.total||0),0);
   const pct=totMax?Math.round(totGot/totMax*100):0;
+  /* days present / days marked, straight out of the attendance register for this session */
+  const attFor=id=>{ const all=LS.get("sms:stuAtt",{}); let present=0,total=0;
+    Object.keys(all).forEach(d=>{ const st=all[d][id]; if(st==null) return; total++; if(st==="Present") present++; });
+    return {present,total}; };
   const pickStudent=name=>{ const s=students.find(x=>x.name===name); if(!s)return;
-    setInfo(p=>({...p,student:s.name,father:s.guardian?("Mr. "+s.guardian):p.father,cls:s.cls+" "+s.sec,roll:String(s.roll),photo:s.photo||null})); };
+    const a=attFor(s.id);
+    setInfo(p=>({...p,student:s.name,father:s.guardian?("Mr. "+s.guardian):p.father,cls:s.cls+" "+s.sec,roll:String(s.roll),photo:s.photo||null,
+      present:a.total?String(a.present):p.present, total:a.total?String(a.total):p.total})); };
   const gbAll=LS.get("gradebook",{});
   const bulkKeys=Object.keys(gbAll).filter(k=>gbAll[k].rows&&gbAll[k].rows.length>0);
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
   const printBulk=bk=>{ const sheet=gbAll[bk]; if(!sheet)return;
     const parts=bk.split("|"),clsSec=parts[0],termN=parts[1]||"";
+    const totalsSorted=sheet.rows.map(x=>sheet.subjects.reduce((a,s)=>a+(+x.m[s]||0),0)).sort((a,b)=>b-a);
+    const clsAvg=sheet.rows.length?Math.round(sheet.rows.reduce((a,x)=>a+sheet.subjects.reduce((q,s)=>q+(+x.m[s]||0),0),0)/sheet.rows.length):0;
     const cards=sheet.rows.map(r=>{
       const stu=students.find(x=>x.name===r.name);
       const tot=sheet.subjects.reduce((a,s)=>a+(+r.m[s]||0),0),max=sheet.subjects.length*100,p=max?Math.round(tot/max*100):0;
+      const pos=totalsSorted.indexOf(tot)+1;
       const av=stu&&stu.photo?`<img src="${stu.photo}" style="width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid #0f3460">`:"";
       const rowsH=sheet.subjects.map(s=>`<tr><td>${esc(s)}</td><td style="text-align:center">100</td><td style="text-align:center">${+r.m[s]||0}</td><td style="text-align:center"><b>${grade(+r.m[s]||0)}</b></td></tr>`).join("");
       return `<div style="page-break-after:always;padding:4px 0">
@@ -1462,7 +1533,7 @@ function ReportCard({prefill,students}){
          <div><div style="font-size:19px;font-weight:800;color:#0f3460">${esc(info.school)}</div>
            <div style="font-size:11.5px;color:#889">Progress Report Card · ${esc(termN)} · Session ${esc(info.session)}</div></div>
          <div style="display:flex;align-items:center;gap:12px">${av}<div style="font-weight:800;color:#0f3460;font-size:16px">Azhar<span style="color:#e94560">Ed</span></div></div></div>
-       <p style="font-size:13.5px;margin-bottom:12px"><b>Student:</b> ${esc(r.name)} &nbsp;&nbsp; <b>Class:</b> ${esc(clsSec)} ${stu?"&nbsp;&nbsp; <b>Roll:</b> "+stu.roll:""}</p>
+       <p style="font-size:13.5px;margin-bottom:12px"><b>Student:</b> ${esc(r.name)} &nbsp;&nbsp; <b>Class:</b> ${esc(clsSec)} ${stu?"&nbsp;&nbsp; <b>Roll:</b> "+stu.roll:""} &nbsp;&nbsp; <b>Position:</b> ${pos} of ${sheet.rows.length} &nbsp;&nbsp; <b>Class average:</b> ${max?Math.round(clsAvg/max*100):0}%</p>
        <table><tr><th>Subject</th><th>Max</th><th>Obtained</th><th>Grade</th></tr>${rowsH}
        <tr style="background:#eef2fb"><td><b>Total</b></td><td style="text-align:center"><b>${max}</b></td><td style="text-align:center"><b>${tot}</b></td><td style="text-align:center"><b>${p}% · ${grade(p)}</b></td></tr></table>
        <p style="font-size:12.5px;margin-top:16px"><b>Teacher's Remarks:</b> ___________________________________________________</p>
@@ -1917,38 +1988,48 @@ function Diary({schoolName}){
 
 /* ---------- SCHOOL MANAGEMENT ---------- */
 
-const SEED_STUDENTS = [
-  {id:1,name:"Ahmed Ali",cls:"Nursery",sec:"A",roll:1,guardian:"Ali Raza",phone:"0300-1234501",fee:4500,paid:4500},
-  {id:2,name:"Fatima Noor",cls:"Nursery",sec:"A",roll:2,guardian:"Noor Ahmed",phone:"0300-1234502",fee:4500,paid:0},
-  {id:3,name:"Hassan Raza",cls:"Prep",sec:"A",roll:1,guardian:"Raza Khan",phone:"0300-1234503",fee:5000,paid:5000},
-  {id:4,name:"Zoya Khan",cls:"Prep",sec:"B",roll:2,guardian:"Imran Khan",phone:"0300-1234504",fee:5000,paid:2500},
-  {id:5,name:"Bilal Aslam",cls:"Playgroup",sec:"A",roll:1,guardian:"Aslam Butt",phone:"0300-1234505",fee:4000,paid:4000},
-  {id:6,name:"Ayesha Tariq",cls:"Playgroup",sec:"A",roll:2,guardian:"Tariq Mehmood",phone:"0300-1234506",fee:4000,paid:0},
-  {id:7,name:"Usman Ghani",cls:"One",sec:"A",roll:1,guardian:"Ghani Sheikh",phone:"0300-1234507",fee:5500,paid:5500},
-  {id:8,name:"Maryam Iqbal",cls:"One",sec:"A",roll:2,guardian:"Iqbal Ahmed",phone:"0300-1234508",fee:5500,paid:5500},
-  {id:9,name:"Hamza Sheikh",cls:"Two",sec:"A",roll:1,guardian:"Sheikh Riaz",phone:"0300-1234509",fee:6000,paid:3000},
-  {id:10,name:"Sara Malik",cls:"Two",sec:"A",roll:2,guardian:"Malik Zubair",phone:"0300-1234510",fee:6000,paid:0},
-  {id:11,name:"Ali Hamza",cls:"Prep",sec:"A",roll:3,guardian:"Hamza Gul",phone:"0300-1234511",fee:5000,paid:5000},
-  {id:12,name:"Hina Shah",cls:"Nursery",sec:"B",roll:3,guardian:"Shah Nawaz",phone:"0300-1234512",fee:4500,paid:4500},
-];
-const SEED_STAFF = [
-  {id:1,name:"Mrs. Aisha Khan",role:"Teacher",subject:"English",phone:"0300-1112201",salary:45000},
-  {id:2,name:"Ms. Sana Tariq",role:"Teacher",subject:"Urdu",phone:"0300-1112202",salary:42000},
-  {id:3,name:"Mr. Bilal Ahmed",role:"Teacher",subject:"Maths",phone:"0300-1112203",salary:44000},
-  {id:4,name:"Ms. Nadia Aslam",role:"Teacher",subject:"Counting",phone:"0300-1112204",salary:40000},
-  {id:5,name:"Mr. Khalid Mehmood",role:"Admin",subject:"—",phone:"0300-1112205",salary:55000},
-  {id:6,name:"Mr. Rashid Ali",role:"Support",subject:"—",phone:"0300-1112206",salary:25000},
-];
-const SEED_NOTICES = [
-  {id:1,date:"6 Jul 2026",title:"Parent–Teacher Meeting",body:"PTM for all classes this Friday, 10 July at 9:00 AM."},
-  {id:2,date:"3 Jul 2026",title:"Fee Due Reminder",body:"July fees are due by the 10th. Please clear outstanding dues."},
-  {id:3,date:"1 Jul 2026",title:"New Term Begins",body:"First term 2026–27 has started. Welcome back!"},
-];
-const SEED_PAYMENTS = [
-  {id:1,student:"Ahmed Ali",cls:"Nursery",amount:4500,method:"Cash",date:"5 Jul 2026"},
-  {id:2,student:"Hassan Raza",cls:"Prep",amount:5000,method:"Bank Transfer",date:"4 Jul 2026"},
-  {id:3,student:"Zoya Khan",cls:"Prep",amount:2500,method:"JazzCash",date:"4 Jul 2026"},
-];
+/* extra student details — gender, age, address, health notes, emergency contact */
+const GENDERS=["—","Boy","Girl"];
+const BLOODS=["—","A+","A−","B+","B−","AB+","AB−","O+","O−"];
+const BLANK_DETAILS={gender:"—",dob:"",blood:"—",address:"",health:"",emgName:"",emgPhone:""};
+function ageFrom(dob){
+  if(!dob) return "";
+  const d=new Date(dob); if(isNaN(d.getTime())) return "";
+  const t=new Date(); let a=t.getFullYear()-d.getFullYear();
+  const m=t.getMonth()-d.getMonth();
+  if(m<0||(m===0&&t.getDate()<d.getDate())) a--;
+  return (a>=0&&a<120)?String(a):"";
+}
+const ageOf=s=>ageFrom(s&&s.dob);
+const emgOf=s=>!s?"":[s.emgName,s.emgPhone].filter(Boolean).join(" · ");
+
+/* A brand-new school starts completely empty — no sample children, no sample teachers. */
+const SEED_STUDENTS = [];
+const SEED_STAFF = [];
+const SEED_NOTICES = [];
+const SEED_PAYMENTS = [];
+/* Laptops set up before this change still hold the old sample rows; clear them once. */
+const DEMO_STUDENTS = ["Ahmed Ali","Fatima Noor","Hassan Raza","Zoya Khan","Bilal Aslam","Ayesha Tariq",
+  "Usman Ghani","Maryam Iqbal","Hamza Sheikh","Sara Malik","Ali Hamza","Hina Shah"];
+const DEMO_STAFF = ["Mrs. Aisha Khan","Ms. Sana Tariq","Mr. Bilal Ahmed","Ms. Nadia Aslam","Mr. Khalid Mehmood","Mr. Rashid Ali"];
+const DEMO_NOTICES = ["Parent–Teacher Meeting","Fee Due Reminder","New Term Begins"];
+(function clearDemoDataOnce(){
+  try{
+    if(localStorage.getItem(NS+"demoCleared")) return;
+    const prune=(key,names)=>{
+      const raw=localStorage.getItem(NS+key); if(!raw) return;
+      let arr; try{ arr=JSON.parse(raw); }catch(e){ return; }
+      if(!Array.isArray(arr)) return;
+      const left=arr.filter(x=>!x||names.indexOf(x.name||x.student||x.title)<0);
+      if(left.length!==arr.length) localStorage.setItem(NS+key, JSON.stringify(left));
+    };
+    prune("sms:students",DEMO_STUDENTS);
+    prune("sms:staff",DEMO_STAFF);
+    prune("sms:payments",DEMO_STUDENTS);
+    prune("sms:notices",DEMO_NOTICES);
+    localStorage.setItem(NS+"demoCleared","1");
+  }catch(e){}
+})();
 const FEE_HISTORY = [["Feb",312],["Mar",298],["Apr",335],["May",321],["Jun",348]];
 const TT_TIMES = ["8:30","9:15","10:00","11:15","12:00"];
 const TT_DAYS = ["Mon","Tue","Wed","Thu","Fri"];
@@ -1978,8 +2059,8 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const [stuAttAll,setStuAttAll]=useLS("sms:stuAtt",{});
   const [staffAttAll,setStaffAttAll]=useLS("sms:staffAtt",{});
   const [attDate,setAttDate]=useState(todayISO());
-  const [nf,setNf]=useState({title:"",body:""});
-  const [sf,setSf]=useState({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000});
+  const [nf,setNf]=useState({title:"",body:"",on:"",urgent:false});
+  const [sf,setSf]=useState({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,...BLANK_DETAILS});
   const [stf,setStf]=useState({name:"",role:"Teacher",subject:"",phone:"",salary:40000});
   const [clsFilter,setClsFilter]=useState("All");
   const [attCls,setAttCls]=useState("All");
@@ -1988,8 +2069,12 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const [payMethod,setPayMethod]=useState("Cash");
   const [ttClass,setTtClass]=useState("Nursery");
   const [ttSec,setTtSec]=useState("A");
+  const [ttView,setTtView]=useState("class");
   const [photoMenu,setPhotoMenu]=useState(null);
+  const [detFor,setDetFor]=useState(null);
+  const [det,setDet]=useState(BLANK_DETAILS);
   const [stuQ,setStuQ]=useState("");
+  const [showLeft,setShowLeft]=useState(false);
   const [repMonth,setRepMonth]=useState(todayISO().slice(0,7));
 
   /* photos */
@@ -2001,6 +2086,48 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const avatarClick=(kind,rec)=>{
     if(rec.photo) setPhotoMenu({kind,rec});
     else pickPhoto(d=>setPhoto(kind,rec.id,d));
+  };
+  /* extra details — gender, age, address, health, emergency contact */
+  const openDetails=s=>{
+    setDet({gender:s.gender||"—",dob:s.dob||"",blood:s.blood||"—",
+            address:s.address||"",health:s.health||"",
+            emgName:s.emgName||"",emgPhone:s.emgPhone||"",
+            fee:s.fee==null?"":String(s.fee), discount:s.discount?String(s.discount):""});
+    setDetFor(s);
+  };
+  const saveDetails=()=>{
+    if(!detFor) return; const id=detFor.id;
+    const clean=v=>String(v||"").trim(), pick=v=>(v==="—"?"":v);
+    setStudents(p=>p.map(s=>s.id===id?{...s,
+      gender:pick(det.gender), dob:clean(det.dob), blood:pick(det.blood),
+      address:clean(det.address), health:clean(det.health),
+      emgName:clean(det.emgName), emgPhone:clean(det.emgPhone),
+      fee:+det.fee||0, discount:+det.discount||0}:s));
+    setDetFor(null); toast("Details saved","📝");
+  };
+  const printProfile=s=>{
+    const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
+    const age=ageOf(s), row=(l,v)=>`<tr><td class="lb">${l}</td><td>${esc(v)||"—"}</td></tr>`;
+    printHTML("Student profile — "+s.name,
+     `<style>.pf table{margin-bottom:16px}.pf td.lb{width:200px;background:#f4f7fc;color:#5b657e;font-weight:700}
+      .warn{border:1.5px solid #e94560;background:#fdecef;border-radius:9px;padding:11px 14px;font-size:13px;margin-bottom:16px}
+      .warn b{color:#c1223c}</style>
+      <div class="pf"><h1>${esc(schoolName)}</h1><div class="sub">Student Profile · ${esc(s.name)}</div>
+      ${s.health?`<div class="warn"><b>⚕ Known health issues:</b> ${esc(s.health)}</div>`:""}
+      <table>
+        ${row("Name",s.name)}${row("Class / Section",s.cls+" "+s.sec)}${row("Roll No",s.roll)}
+        ${row("Gender",s.gender)}${row("Date of birth",s.dob?niceDate(s.dob):"")}${row("Age",age?age+" years":"")}
+        ${row("Blood group",s.blood)}
+      </table>
+      <table>
+        ${row("Guardian",s.guardian)}${row("Guardian phone",s.phone)}
+        ${row("Emergency contact",s.emgName)}${row("Emergency number",s.emgPhone)}
+        ${row("Home address",s.address)}
+      </table>
+      <table>
+        ${row("Monthly fee",rupee(s.fee))}${row("Paid",rupee(s.paid))}${row("Outstanding",rupee(dueOf(s)))}
+      </table>
+      <p style="font-size:11px;color:#98a1b5">Confidential — for school office use only. Printed ${niceDate(todayISO())}.</p></div>`);
   };
   const idCard=s=>{
     const w=window.open("","_blank","width=430,height=640"); if(!w) return;
@@ -2019,6 +2146,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     .r{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px dashed #e2e6f0}
     .r span{color:#78809a}.r b{color:#17203a}
     .ft{background:#f3f6fc;text-align:center;font-size:10px;color:#9aa3b8;padding:9px;letter-spacing:.5px}
+    .med{background:#fdecef;color:#c1223c;font-size:11px;padding:8px 22px;border-top:1px dashed #f3c3ce;line-height:1.45}
     .btn{display:block;width:320px;padding:11px;background:#0f3460;color:#fff;border:none;border-radius:9px;font-size:14px;font-weight:700;margin-top:18px;cursor:pointer}
     @media print{body{background:#fff}.btn{display:none}}</style></head><body>
     <div class="card">
@@ -2027,10 +2155,13 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       <div class="nm">${s.name}</div><div class="cl">Class ${s.cls} · Section ${s.sec}</div>
       <div class="rows">
         <div class="r"><span>Roll No</span><b>${s.roll}</b></div>
+        ${ageOf(s)?`<div class="r"><span>Age</span><b>${ageOf(s)} yrs${s.gender?" · "+s.gender:""}${s.blood?" · "+s.blood:""}</b></div>`:(s.gender||s.blood?`<div class="r"><span>Student</span><b>${[s.gender,s.blood].filter(Boolean).join(" · ")}</b></div>`:"")}
         <div class="r"><span>Guardian</span><b>${s.guardian||"—"}</b></div>
         <div class="r"><span>Contact</span><b>${s.phone||"—"}</b></div>
+        <div class="r"><span>Emergency</span><b>${emgOf(s)||s.phone||"—"}</b></div>
         <div class="r"><span>Session</span><b>2026–27</b></div>
       </div>
+      ${s.health?`<div class="med"><b>⚕ Health note:</b> ${String(s.health).replace(/</g,"&lt;")}</div>`:""}
       <div class="ft">AzharEd · Azhar Publishers · Book Factory</div>
     </div>
     <button class="btn" onclick="window.print()">Print / Save as PDF</button>
@@ -2049,21 +2180,28 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           if(!c[0]||/^name$/i.test(c[0])) return;
           const cls=TT_CLASSES.indexOf(c[1])>=0?c[1]:"Playgroup", sec=TT_SECTIONS.indexOf(c[2])>=0?c[2]:"A";
           const k=cls+"-"+sec; counters[k]=(counters[k]||0)+1;
-          out.push({id:Date.now()+out.length,name:c[0],cls,sec,roll:counters[k],guardian:c[3]||"",phone:c[4]||"",fee:+c[5]||0,paid:0});
+          out.push({id:Date.now()+out.length,name:c[0],cls,sec,roll:counters[k],guardian:c[3]||"",phone:c[4]||"",fee:+c[5]||0,paid:0,
+            gender:c[6]||"",dob:c[7]||"",address:c[8]||"",health:c[9]||"",emgName:c[10]||"",emgPhone:c[11]||"",blood:c[12]||""});
         });
         if(out.length){ setStudents(p=>[...p,...out]); toast(out.length+" students imported","📥"); }
-        else toast("No rows found. Columns: Name, Class, Section, Guardian, Phone, Fee","⚠️");
+        else toast("No rows found. Columns: Name, Class, Section, Guardian, Phone, Fee (then optionally Gender, Date of birth, Address, Health notes, Emergency contact, Emergency number, Blood group)","⚠️");
       };
       r.readAsText(f);
     };
     inp.click();
   };
 
-  const dueOf=s=>s.fee-s.paid;
-  const statusOf=s=>s.paid>=s.fee?"Paid":s.paid>0?"Partial":"Pending";
-  const collected=students.reduce((a,s)=>a+s.paid,0);
-  const outstanding=students.reduce((a,s)=>a+dueOf(s),0);
+  /* children still on the roll — anyone marked as "left" keeps their record but drops out of daily lists */
+  const activeStudents=students.filter(s=>!s.left);
+  const leftCount=students.length-activeStudents.length;
+  const dueOf=s=>Math.max(0,(+s.fee||0)-(+s.discount||0)-(+s.paid||0));
+  const netFee=s=>Math.max(0,(+s.fee||0)-(+s.discount||0));
+  const statusOf=s=>s.paid>=netFee(s)?"Paid":s.paid>0?"Partial":"Pending";
+  const collected=activeStudents.reduce((a,s)=>a+(+s.paid||0),0);
+  const outstanding=activeStudents.reduce((a,s)=>a+dueOf(s),0);
   const classes=["All",...Array.from(new Set(students.map(s=>s.cls)))];
+  /* fees are due by the 10th of each month */
+  const overdue=new Date().getDate()>10;
   const pillCls=st=>({Paid:"paid",Pending:"pending",Partial:"partial",Present:"present",Absent:"absent",Leave:"leave"}[st]||"pending");
 
   /* attendance for chosen date */
@@ -2071,7 +2209,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const staffAtt=staffAttAll[attDate]||{};
   const markStuAtt=(id,st)=>{ setStuAttAll(p=>({...p,[attDate]:{...(p[attDate]||{}),[id]:st}})); };
   const markStaffAtt=(id,st)=>{ setStaffAttAll(p=>({...p,[attDate]:{...(p[attDate]||{}),[id]:st}})); };
-  const markAllStu=st=>{ setStuAttAll(p=>({...p,[attDate]:Object.fromEntries(students.map(s=>[s.id,st]))})); toast("All marked "+st); };
+  const markAllStu=st=>{ setStuAttAll(p=>({...p,[attDate]:Object.fromEntries(activeStudents.map(s=>[s.id,st]))})); toast("All marked "+st); };
   const monthPct=(all,id)=>{ const mm=attDate.slice(0,7); let p=0,t=0;
     Object.keys(all).forEach(d=>{ if(d.slice(0,7)===mm && all[d][id]!=null){t++; if(all[d][id]==="Present")p++;} });
     return t?Math.round(p/t*100)+"% ("+p+"/"+t+")":"—"; };
@@ -2085,20 +2223,109 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     setPayments(p=>[{id:Date.now(),student:payFor.name,cls:payFor.cls,amount:amt,method:payMethod,date:niceDate(todayISO())},...p]);
     setPayFor(null); toast("Payment recorded — "+rupee(amt),"💰");
   };
+  /* who has been absent several school days in a row, counting back from the chosen date */
+  const consecutiveAbsent=id=>{
+    const days=Object.keys(stuAttAll).filter(d=>d<=attDate).sort().reverse();
+    let n=0;
+    for(const d of days){ const st=stuAttAll[d][id]; if(st==null) continue; if(st==="Absent") n++; else break; }
+    return n;
+  };
+  const absentStreaks=activeStudents.map(s=>({s,n:consecutiveAbsent(s.id)})).filter(x=>x.n>=3);
+  const absentToday=s=>(stuAtt[s.id]||"Present")==="Absent";
+  const absentMsg=s=>{
+    const link=waLink(s.phone,`Assalam-o-alaikum ${s.guardian||"Parent"}, ${s.name} (${s.cls} ${s.sec}) was marked absent today, ${niceDate(attDate)}. Please let the school office know if everything is alright. — ${schoolName}`);
+    if(link){ window.open(link,"_blank"); } else toast("No phone number saved for "+s.name,"⚠️");
+  };
+  const streakMsg=(s,n)=>{
+    const link=waLink(s.phone,`Assalam-o-alaikum ${s.guardian||"Parent"}, ${s.name} (${s.cls} ${s.sec}) has now been absent ${n} school days in a row. We are concerned and would like to hear from you. Please contact the school office. — ${schoolName}`);
+    if(link){ window.open(link,"_blank"); } else toast("No phone number saved for "+s.name,"⚠️");
+  };
   const feeReminder=s=>{
     const link=waLink(s.phone,`Dear ${s.guardian||"Parent"}, this is a friendly reminder from ${schoolName} that ${rupee(dueOf(s))} in fees is outstanding for ${s.name} (${s.cls} ${s.sec}). Kindly clear the dues at your earliest convenience. Thank you! — ${schoolName}`);
     if(link){window.open(link,"_blank");} else toast("No phone number saved for "+s.name,"⚠️");
   };
-  const addStudent=()=>{if(!sf.name.trim())return;const cnt=students.filter(s=>s.cls===sf.cls&&s.sec===sf.sec).length+1;
-    setStudents(p=>[...p,{id:Date.now(),name:sf.name.trim(),cls:sf.cls,sec:sf.sec,roll:cnt,guardian:sf.guardian,phone:sf.phone,fee:+sf.fee||0,paid:0}]);
-    setSf({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000}); toast("Student enrolled","🎒");};
+  const addStudent=()=>{if(!sf.name.trim())return;const cnt=activeStudents.filter(s=>s.cls===sf.cls&&s.sec===sf.sec).length+1;
+    const clean=v=>String(v||"").trim(), pick=v=>(v==="—"?"":v);
+    setStudents(p=>[...p,{id:Date.now(),name:sf.name.trim(),cls:sf.cls,sec:sf.sec,roll:cnt,guardian:sf.guardian,phone:sf.phone,fee:+sf.fee||0,paid:0,
+      gender:pick(sf.gender), dob:clean(sf.dob), blood:pick(sf.blood), address:clean(sf.address),
+      health:clean(sf.health), emgName:clean(sf.emgName), emgPhone:clean(sf.emgPhone)}]);
+    setSf({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,...BLANK_DETAILS}); toast("Student enrolled","🎒");};
   const addStaff=()=>{if(!stf.name.trim())return;
     setStaff(p=>[...p,{id:Date.now(),name:stf.name.trim(),role:stf.role,subject:stf.subject||"—",phone:stf.phone,salary:+stf.salary||0}]);
     setStf({name:"",role:"Teacher",subject:"",phone:"",salary:40000}); toast("Staff member added","👩‍🏫");};
   const removeStudent=id=>{setStudents(p=>p.filter(s=>s.id!==id));toast("Student removed","🗑️");};
+  /* A child who leaves keeps their record — marking them "Left" hides them from day-to-day lists. */
+  const setLeft=(id,left)=>{ setStudents(p=>p.map(s=>s.id===id?{...s,left:left?todayISO():""}:s));
+    toast(left?"Marked as left the school":"Welcome back — student is active again", left?"👋":"🎒"); };
+  /* End of session: everyone moves up one class; Class Five leaves. Roll numbers are renumbered. */
+  const promoteAll=()=>{
+    const active=students.filter(s=>!s.left);
+    if(!active.length){ toast("No active students to promote","⚠️"); return; }
+    const top=TT_CLASSES[TT_CLASSES.length-1];
+    const leaving=active.filter(s=>s.cls===top).length;
+    if(!confirm("Move every active student up one class?\n\n"+(active.length-leaving)+" students move up.\n"+
+      leaving+" students in Class "+top+" will be marked as left (their records are kept).\n\nDownload a backup first if you are unsure. This cannot be undone.")) return;
+    const counters={};
+    setStudents(p=>p.map(s=>{
+      if(s.left) return s;
+      const i=TT_CLASSES.indexOf(s.cls);
+      if(i<0) return s;
+      if(i>=TT_CLASSES.length-1) return {...s,left:todayISO()};
+      const cls=TT_CLASSES[i+1], k=cls+"-"+s.sec;
+      counters[k]=(counters[k]||0)+1;
+      return {...s,cls,roll:counters[k]};
+    }));
+    toast((active.length-leaving)+" students promoted","🎓");
+  };
   const removeStaff=id=>{setStaff(p=>p.filter(s=>s.id!==id));toast("Staff removed","🗑️");};
+  /* leave days taken this month, straight out of the staff attendance register */
+  const leaveTaken=(id,month)=>Object.keys(staffAttAll)
+    .filter(d=>d.slice(0,7)===month && staffAttAll[d][id]==="Leave").length;
+  const payslip=s=>{
+    const month=new Date(attDate+"T00:00:00").toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+    const mm=attDate.slice(0,7);
+    const absent=Object.keys(staffAttAll).filter(d=>d.slice(0,7)===mm && staffAttAll[d][s.id]==="Absent").length;
+    const leave=leaveTaken(s.id,mm);
+    const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
+    printHTML("Payslip — "+s.name,
+     `<style>.ps td.lb{width:210px;background:#f4f7fc;color:#5b657e;font-weight:700}
+       .net{background:#e8f7f0;border-radius:9px;padding:11px 15px;font-size:14px;margin-top:14px;font-weight:800;color:#00734f}
+       .sig{margin-top:44px;display:flex;justify-content:space-between;font-size:11.5px;color:#7b8499}
+       .sig div{border-top:1px solid #b9c1d1;padding-top:6px;width:200px;text-align:center}</style>
+      <div class="ps"><h1>${esc(schoolName)}</h1><div class="sub">Salary Slip — ${month}</div>
+      <table>
+        <tr><td class="lb">Name</td><td><b>${esc(s.name)}</b></td></tr>
+        <tr><td class="lb">Role</td><td>${esc(s.role)}${s.subject&&s.subject!=="—"?" · "+esc(s.subject):""}</td></tr>
+        <tr><td class="lb">Monthly salary</td><td>${rupee(s.salary)}</td></tr>
+        <tr><td class="lb">Days absent this month</td><td>${absent}</td></tr>
+        <tr><td class="lb">Approved leave taken</td><td>${leave}</td></tr>
+      </table>
+      <div class="net">Net payable&nbsp; ${rupee(s.salary)}</div>
+      <p style="font-size:11px;color:#98a1b5;margin-top:10px">Absences are shown for the record; any deduction is at the school's discretion and should be written in by hand before signing.</p>
+      <div class="sig"><div>Received by</div><div>For ${esc(schoolName)}</div></div></div>`);
+  };
+  const printSalaryRegister=()=>{
+    const mm=attDate.slice(0,7);
+    const month=new Date(attDate+"T00:00:00").toLocaleDateString("en-GB",{month:"long",year:"numeric"});
+    const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
+    const total=staff.reduce((a,s)=>a+(+s.salary||0),0);
+    printHTML("Salary register "+mm,
+     `<h1>${esc(schoolName)}</h1><div class="sub">Salary Register — ${month} · ${staff.length} staff</div>
+      <table><tr><th>Name</th><th>Role</th><th>Salary</th><th>Absent</th><th>Leave</th><th>Signature</th></tr>
+      ${staff.map(s=>{
+        const absent=Object.keys(staffAttAll).filter(d=>d.slice(0,7)===mm && staffAttAll[d][s.id]==="Absent").length;
+        return `<tr><td>${esc(s.name)}</td><td>${esc(s.role)}</td><td>${rupee(s.salary)}</td><td>${absent}</td><td>${leaveTaken(s.id,mm)}</td><td style="width:150px"></td></tr>`;}).join("")}
+      <tr><th>Total</th><th></th><th>${rupee(total)}</th><th></th><th></th><th></th></tr></table>`);
+  };
   const removeNotice=id=>setNotices(p=>p.filter(n=>n.id!==id));
-  const addNotice=()=>{if(!nf.title.trim())return;setNotices(p=>[{id:Date.now(),date:niceDate(todayISO()),title:nf.title.trim(),body:nf.body.trim()},...p]);setNf({title:"",body:""});toast("Notice published","📢");};
+  const addNotice=()=>{if(!nf.title.trim())return;
+    const on=(nf.on||"").trim();
+    setNotices(p=>[{id:Date.now(),date:niceDate(on||todayISO()),on:on,urgent:!!nf.urgent,title:nf.title.trim(),body:nf.body.trim()},...p]);
+    setNf({title:"",body:"",on:"",urgent:false});
+    toast(on&&on>todayISO()?("Notice scheduled for "+niceDate(on)):"Notice published","📢");};
+  /* urgent first, then newest — anything dated in the future is held back on the dashboard */
+  const noticeRank=n=>(n.urgent?0:1);
+  const noticesSorted=[...notices].sort((a,b)=>noticeRank(a)-noticeRank(b)||(b.id-a.id));
   const shareNotice=n=>{ const msg=`📢 *${n.title}* — ${schoolName}\n\n${n.body}\n\n(${n.date})`;
     window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank"); };
 
@@ -2118,20 +2345,58 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     setTtSubs(prev=>({...prev,[poolKey]:[...(prev[poolKey]||[]),s]})); setNewSub(""); toast(s+" added","➕"); };
   const removeSubject=s=>setTtSubs(prev=>({...prev,[poolKey]:(prev[poolKey]||[]).filter(x=>x!==s)}));
   const resetSubjects=()=>{ setTtSubs(prev=>({...prev,[poolKey]:poolKey==="early"?EY_SUBJECTS:PR_SUBJECTS})); toast("Subject list reset","↩️"); };
+  /* Teacher-wise view: subjects are matched to the teacher who teaches them (Staff → Subject). */
+  const teacherOf=subj=>{ const q=String(subj||"").toLowerCase().trim();
+    if(!q||q==="—"||q==="break") return null;
+    return staff.find(t=>(t.subject||"").toLowerCase().trim()===q)||null; };
+  /* only class-sections that actually have children in them count towards a teacher's week */
+  const sectionsInUse=Array.from(new Set(activeStudents.map(s=>s.cls+"-"+s.sec)));
+  const teacherGrids=(()=>{
+    const out={};   /* staffId -> [day][period] = [{cls,sec,subject}] */
+    sectionsInUse.forEach(key=>{
+      const [cls,sec]=key.split("-");
+      if(TT_CLASSES.indexOf(cls)<0) return;
+      if(!timetables[key]) return;
+      const g=fitGrid(timetables[key]);
+      TT_DAYS.forEach((_,d)=>ttTimes.forEach((_,p)=>{
+        const t=teacherOf(g[d][p]); if(!t) return;
+        out[t.id]=out[t.id]||TT_DAYS.map(()=>ttTimes.map(()=>[]));
+        out[t.id][d][p].push({cls,sec,subject:g[d][p]});
+      }));
+    });
+    return out;
+  })();
+  const teachers=staff.filter(t=>t.role==="Teacher");
+  const clashes=(()=>{ const list=[];
+    teachers.forEach(t=>{ const g=teacherGrids[t.id]; if(!g) return;
+      TT_DAYS.forEach((day,d)=>ttTimes.forEach((time,p)=>{
+        if(g[d][p].length>1) list.push({teacher:t,day,time,at:g[d][p]});
+      })); });
+    return list; })();
+  const printTeacherTT=t=>{ const g=teacherGrids[t.id];
+    printHTML("Timetable — "+t.name,
+     `<h1>${schoolName}</h1><div class="sub">Teacher Timetable — ${t.name}${t.subject&&t.subject!=="—"?" · "+t.subject:""}</div>
+      <table><tr><th>Day</th>${ttTimes.map(x=>`<th>${x}</th>`).join("")}</tr>
+      ${TT_DAYS.map((d,di)=>`<tr><td><b>${d}</b></td>${ttTimes.map((_,p)=>{
+        const cells=(g&&g[di][p])||[];
+        return `<td>${cells.length?cells.map(c=>c.cls+" "+c.sec).join(" + "):"—"}</td>`;}).join("")}</tr>`).join("")}</table>`); };
   const printTT=()=>printHTML("Timetable "+ttClass+" "+ttSec,
     `<h1>${schoolName}</h1><div class="sub">Class Timetable — ${ttClass} · Section ${ttSec}</div>
      <table><tr><th>Day</th>${ttTimes.map(t=>`<th>${t}</th>`).join("")}</tr>
      ${TT_DAYS.map((d,di)=>`<tr><td><b>${d}</b></td>${grid[di].map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`);
-  const printAtt=()=>{ const shown=students.filter(s=>attCls==="All"||s.cls===attCls);
+  const printAtt=()=>{ const shown=activeStudents.filter(s=>attCls==="All"||s.cls===attCls);
     printHTML("Attendance "+attDate,
     `<h1>${schoolName}</h1><div class="sub">Student Attendance — ${niceDate(attDate)}${attCls!=="All"?" · Class "+attCls:""}</div>
      <table><tr><th>Name</th><th>Class</th><th>Roll</th><th>Status</th></tr>
      ${shown.map(s=>`<tr><td>${s.name}</td><td>${s.cls} ${s.sec}</td><td>${s.roll}</td><td>${stuAtt[s.id]||"Present"}</td></tr>`).join("")}</table>`); };
   const exportStudents=()=>downloadCSV("Students_"+todayISO()+".csv",
-    [["Name","Class","Section","Roll","Guardian","Phone","Monthly Fee","Paid","Due","Status"],
-     ...students.map(s=>[s.name,s.cls,s.sec,s.roll,s.guardian,s.phone,s.fee,s.paid,dueOf(s),statusOf(s)])]);
+    [["Name","Class","Section","Roll","Guardian","Phone","Monthly Fee","Paid","Due","Status",
+      "Gender","Date of Birth","Age","Home Address","Known Health Issues","Emergency Contact","Emergency Number","Blood Group","Discount","On Roll"],
+     ...students.map(s=>[s.name,s.cls,s.sec,s.roll,s.guardian,s.phone,s.fee,s.paid,dueOf(s),statusOf(s),
+       s.gender||"",s.dob||"",ageOf(s),s.address||"",s.health||"",s.emgName||"",s.emgPhone||"",s.blood||"",
+       s.discount||0,s.left?("Left "+niceDate(s.left)):"Active"])]);
   const exportFees=()=>downloadCSV("Fee_Register_"+todayISO()+".csv",
-    [["Student","Class","Fee","Paid","Due","Status"],...students.map(s=>[s.name,s.cls+" "+s.sec,s.fee,s.paid,dueOf(s),statusOf(s)])]);
+    [["Student","Class","Monthly Fee","Discount","Payable","Paid","Due","Status"],...activeStudents.map(s=>[s.name,s.cls+" "+s.sec,s.fee,s.discount||0,netFee(s),s.paid,dueOf(s),statusOf(s)])]);
 
   const voucherCSS=`<style>.v{border:1.5px solid #99a;border-radius:10px;padding:14px 18px;margin-bottom:16px;page-break-inside:avoid}
        .vh{display:flex;justify-content:space-between;border-bottom:2px solid #0f3460;padding-bottom:6px;margin-bottom:10px;font-size:13px}
@@ -2143,12 +2408,12 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const voucherBlock=s=>{
     const month=new Date().toLocaleDateString("en-GB",{month:"long",year:"numeric"});
     const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
-    const due=dueOf(s), amt=due>0?due:s.fee, lbl=due>0?"due by the 10th":"advance for next month";
+    const due=dueOf(s), amt=due>0?due:netFee(s), lbl=due>0?"due by the 10th":"advance for next month";
     return `<div class="v">
       <div class="vh"><b>${esc(schoolName)}</b><span>FEE VOUCHER · ${month}</span></div>
       <table><tr><td>Student</td><td><b>${esc(s.name)}</b></td><td>Class</td><td><b>${esc(s.cls)} ${esc(s.sec)}</b></td></tr>
       <tr><td>Roll No</td><td>${s.roll}</td><td>Guardian</td><td>${esc(s.guardian||"—")}</td></tr>
-      <tr><td>Monthly fee</td><td>${rupee(s.fee)}</td><td>Paid</td><td>${rupee(s.paid)}</td></tr></table>
+      <tr><td>Monthly fee</td><td>${rupee(s.fee)}${(+s.discount)>0?" (less "+rupee(s.discount)+" discount)":""}</td><td>Paid</td><td>${rupee(s.paid)}</td></tr></table>
       <div class="amt">Amount payable&nbsp; <b>${rupee(amt)}</b> &nbsp;· ${lbl}</div>
       <div class="vf">Pay at the school office · Cash / Bank transfer / JazzCash / EasyPaisa · Receipt is always issued</div>
     </div>`;
@@ -2159,7 +2424,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     toast("Voucher ready for "+s.name+" 🧾");
   };
   const printVouchers=()=>{
-    const due=students.filter(s=>dueOf(s)>0);
+    const due=activeStudents.filter(s=>dueOf(s)>0);
     if(!due.length){ toast("No outstanding dues — nothing to print 🎉"); return; }
     const month=new Date().toLocaleDateString("en-GB",{month:"long",year:"numeric"});
     const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
@@ -2205,9 +2470,10 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     w.document.close();
   };
 
-  const shown=students.filter(s=>(clsFilter==="All"||s.cls===clsFilter)
+  const shown=(showLeft?students.filter(s=>!!s.left):activeStudents)
+    .filter(s=>(clsFilter==="All"||s.cls===clsFilter)
     &&(!stuQ.trim()||(s.name+" "+(s.guardian||"")).toLowerCase().includes(stuQ.toLowerCase().trim())));
-  const stuShown=students.filter(s=>attCls==="All"||s.cls===attCls);
+  const stuShown=activeStudents.filter(s=>attCls==="All"||s.cls===attCls);
   const chart=[...FEE_HISTORY,["Jul",Math.round(collected/1000)]];
   const barMax=Math.max(...chart.map(x=>x[1]),1);
   const tabs=[["overview","📊","Overview"],["students","🎒","Students"],["staff","👩‍🏫","Staff"],["fees","💰","Fees"],["attendance","🗓️","Student Attendance"],["staffatt","🧑‍🏫","Staff Attendance"],["timetable","📅","Timetable"],["notices","📢","Notices"],["reports","📄","Reports"]];
@@ -2219,7 +2485,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
 
     {tab==="overview" && <div>
       <div className="kpi-grid">
-        <div className="kpi"><div className="ic">🎒</div><div className="v">{students.length}</div><div className="l">Students enrolled</div></div>
+        <div className="kpi"><div className="ic">🎒</div><div className="v">{activeStudents.length}</div><div className="l">Students enrolled</div></div>
         <div className="kpi"><div className="ic">👩‍🏫</div><div className="v">{staff.length}</div><div className="l">Staff members</div></div>
         <div className="kpi green"><div className="ic">💰</div><div className="v">{rupee(collected)}</div><div className="l">Fees collected (Jul)</div></div>
         <div className="kpi red"><div className="ic">⚠️</div><div className="v">{rupee(outstanding)}</div><div className="l">Outstanding dues</div></div>
@@ -2237,7 +2503,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
         <p className="hint" style={{textAlign:'center',marginTop:4}}>Each ring is that month's collection relative to the best month.</p>
       </div>
       <div className="card"><h3>Recent notices</h3>
-        {notices.slice(0,3).map(n=><div key={n.id} className="notice-item"><div><b>{n.title}</b><div className="nd">{n.body}</div></div><span className="nt">{n.date}</span></div>)}
+        {notices.filter(n=>!n.on||n.on<=todayISO()).sort((a,b)=>((a.urgent?0:1)-(b.urgent?0:1))||(b.id-a.id)).slice(0,3).map(n=><div key={n.id} className={"notice-item"+(n.urgent?" urgent":"")}><div><b>{n.urgent?"🚩 ":""}{n.title}</b><div className="nd">{n.body}</div></div><span className="nt">{n.date}</span></div>)}
       </div>
     </div>}
 
@@ -2252,23 +2518,45 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <div className="field" style={{margin:0}}><label>Monthly Fee</label><input type="number" value={sf.fee} onChange={e=>setSf({...sf,fee:e.target.value})}/></div>
           <button className="btn btn-navy" onClick={addStudent}>Enroll</button>
         </div>
+        <div className="det-grid" style={{marginTop:16,gridTemplateColumns:"repeat(4,1fr)"}}>
+          <div className="field"><label>Gender</label>
+            <select data-sgender value={sf.gender} onChange={e=>setSf({...sf,gender:e.target.value})}>{GENDERS.map(g=><option key={g}>{g}</option>)}</select></div>
+          <div className="field"><label>Date of birth</label>
+            <input type="date" data-sdob value={sf.dob} onChange={e=>setSf({...sf,dob:e.target.value})}/>
+            <div className="det-age">{ageFrom(sf.dob)?("Age "+ageFrom(sf.dob)+" years"):"Age is worked out from this."}</div></div>
+          <div className="field"><label>Blood group</label>
+            <select value={sf.blood} onChange={e=>setSf({...sf,blood:e.target.value})}>{BLOODS.map(g=><option key={g}>{g}</option>)}</select></div>
+          <div className="field"><label>Emergency contact name</label>
+            <input data-semgname placeholder="e.g. Uncle Kamran" value={sf.emgName} onChange={e=>setSf({...sf,emgName:e.target.value})}/></div>
+          <div className="field"><label>Emergency contact number</label>
+            <input data-semgphone placeholder="03xx-xxxxxxx" value={sf.emgPhone} onChange={e=>setSf({...sf,emgPhone:e.target.value})}/></div>
+          <div className="field" style={{gridColumn:"span 3"}}><label>Home address</label>
+            <input data-saddress placeholder="House / street / area / city" value={sf.address} onChange={e=>setSf({...sf,address:e.target.value})}/></div>
+          <div className="field full"><label>Known health issues or allergies</label>
+            <input data-shealth placeholder="e.g. Asthma — inhaler in school bag. Allergic to peanuts." value={sf.health} onChange={e=>setSf({...sf,health:e.target.value})}/></div>
+        </div>
+        <p className="hint" style={{marginTop:10}}>Only the name is required — everything else can be filled in later by clicking ✎ on the student's row. Health notes and the emergency number are printed on the child's ID card.</p>
       </div></details></div>
       <div className="card">
-        <div className="card-flex"><h3>Students · {shown.length}</h3>
+        <div className="card-flex"><h3>{showLeft?"Students who have left":"Students"} · {shown.length}</h3>
           <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
             <input className="date-inp" style={{fontWeight:600,minWidth:150}} placeholder="🔍 Search students…" value={stuQ} onChange={e=>setStuQ(e.target.value)}/>
             <div className="filter-bar" style={{margin:0}}>{classes.map(c=><span key={c} className={"fchip"+(clsFilter===c?" active":"")} onClick={()=>setClsFilter(c)}>{c}</span>)}</div>
+            {leftCount>0 && <button className={"mini-btn"+(showLeft?"":" ghost")} data-showleft onClick={()=>setShowLeft(!showLeft)} title="Children whose records are kept but who no longer attend">👋 Left · {leftCount}</button>}
+            <button className="mini-btn ghost" data-promote onClick={promoteAll} title="End of session: move every student up one class">🎓 Promote all</button>
             <button className="mini-btn ghost" onClick={importCSV} title="Import students from a CSV file (Name, Class, Section, Guardian, Phone, Fee)">📤 Import CSV</button>
             <button className="mini-btn ghost" onClick={exportStudents}>📥 CSV</button>
           </div>
         </div>
-        <table className="gtable"><thead><tr><th>Name</th><th>Class</th><th>Roll</th><th>Guardian</th><th>Phone</th><th>Monthly Fee</th><th>Fee Status</th><th></th></tr></thead>
+        <table className="gtable"><thead><tr><th>Name</th><th>Class</th><th>Roll</th><th>Age</th><th>Guardian</th><th>Phone</th><th>Monthly Fee</th><th>Fee Status</th><th></th></tr></thead>
           <tbody>{shown.map(s=><tr key={s.id}>
-            <td><div className="tbl-name"><button className="av-btn" title={s.photo?"Change or remove photo":"Add photo"} onClick={()=>avatarClick("student",s)}><Avatar photo={s.photo} name={s.name}/></button>{s.name}</div></td>
-            <td>{s.cls} {s.sec}</td><td>{s.roll}</td><td>{s.guardian}</td><td>{s.phone}</td><td>{rupee(s.fee)}</td><td><span className={"pill "+pillCls(statusOf(s))}>{statusOf(s)}</span></td>
-            <td style={{whiteSpace:'nowrap'}}><button className="mini-btn ghost" title="Print ID card" onClick={()=>idCard(s)}>🪪</button>{" "}<button className="del-btn" onClick={()=>removeStudent(s.id)} title="Remove student">✕</button></td></tr>)}</tbody>
+            <td><div className="tbl-name"><button className="av-btn" title={s.photo?"Change or remove photo":"Add photo"} onClick={()=>avatarClick("student",s)}><Avatar photo={s.photo} name={s.name}/></button>{s.name}
+              {s.health?<span className="med-flag" title={"Health note: "+s.health}>⚕</span>:null}</div></td>
+            <td>{s.cls} {s.sec}</td><td>{s.roll}</td><td>{ageOf(s)?ageOf(s):"—"}</td><td>{s.guardian}</td><td>{s.phone}</td><td>{rupee(s.fee)}</td><td><span className={"pill "+pillCls(statusOf(s))}>{statusOf(s)}</span></td>
+            <td style={{whiteSpace:'nowrap'}}><button className="mini-btn ghost" title="Details — gender, age, address, health, emergency contact" onClick={()=>openDetails(s)}>✎</button>{" "}<button className="mini-btn ghost" title="Print ID card" onClick={()=>idCard(s)}>🪪</button>{" "}<button className="mini-btn ghost" title={s.left?"Bring this student back onto the roll":"Mark as left the school — the record is kept"} onClick={()=>setLeft(s.id,!s.left)}>{s.left?"↩":"👋"}</button>{" "}<button className="del-btn" onClick={()=>removeStudent(s.id)} title="Delete this record completely">✕</button></td></tr>)}
+            {shown.length===0 && <tr><td colSpan={9} className="empty-row">{students.length===0?"No students yet — open “🎒 Enroll a student” above to add your first child, or import a class from a CSV file.":"No students match this search or class filter."}</td></tr>}</tbody>
         </table>
-        <p className="hint">📷 Click any student's picture to add a photo (auto-compressed) · 🪪 prints an ID card · 📤 imports many students at once from a CSV file.</p>
+        <p className="hint">📷 Click any student's picture to add a photo (auto-compressed) · ✎ opens the full record — gender, date of birth, home address, known health issues and an emergency contact · 🪪 prints an ID card · 👋 marks a child as having left (the record is kept, and they drop out of attendance and fee lists) · 🎓 Promote all moves everyone up one class at the end of the session · 📤 imports many students at once from a CSV file.</p>
       </div>
     </div>}
 
@@ -2283,12 +2571,17 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <button className="btn btn-navy" onClick={addStaff}>Add</button>
         </div>
       </div></details></div>
-      <div className="card"><h3>Staff &amp; teachers · {staff.length}</h3>
-        <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Phone</th><th>Salary</th><th>Today</th><th></th></tr></thead>
+      <div className="card">
+        <div className="card-flex"><h3>Staff &amp; teachers · {staff.length}</h3>
+          <button className="mini-btn ghost" data-salreg onClick={printSalaryRegister}>🧾 Salary register</button></div>
+        <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Phone</th><th>Salary</th><th>Leave this month</th><th>Today</th><th></th></tr></thead>
           <tbody>{staff.map(s=>{const st=staffAtt[s.id]||"Present";return <tr key={s.id}>
             <td><div className="tbl-name"><button className="av-btn" title={s.photo?"Change or remove photo":"Add photo"} onClick={()=>avatarClick("staff",s)}><Avatar photo={s.photo} name={s.name} bg="#b23048"/></button>{s.name}</div></td>
-            <td>{s.role}</td><td>{s.subject}</td><td>{s.phone}</td><td>{rupee(s.salary)}</td><td><span className={"pill "+pillCls(st)}>{st}</span></td><td><button className="del-btn" onClick={()=>removeStaff(s.id)} title="Remove staff">✕</button></td></tr>;})}</tbody>
+            <td>{s.role}</td><td>{s.subject}</td><td>{s.phone}</td><td>{rupee(s.salary)}</td><td>{leaveTaken(s.id,attDate.slice(0,7))}</td><td><span className={"pill "+pillCls(st)}>{st}</span></td>
+            <td style={{whiteSpace:'nowrap'}}><button className="mini-btn ghost" data-payslip title="Print this month's salary slip" onClick={()=>payslip(s)}>🧾</button>{" "}<button className="del-btn" onClick={()=>removeStaff(s.id)} title="Remove staff">✕</button></td></tr>;})}
+            {staff.length===0 && <tr><td colSpan={8} className="empty-row">No staff yet — open “🧑‍🏫 Add a staff member” above to add your teachers.</td></tr>}</tbody>
         </table>
+        <p className="hint">🧾 prints one person's salary slip for the month shown on the Staff Attendance tab · “Salary register” prints the whole month's sheet with a signature column.</p>
       </div>
     </div>}
 
@@ -2296,7 +2589,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       <div className="kpi-grid">
         <div className="kpi green"><div className="stat-flex"><div><div className="ic">💰</div><div className="v">{rupee(collected)}</div><div className="l">Collected this month</div></div><Ring pct={(collected+outstanding)?collected/(collected+outstanding)*100:0} size={52}/></div></div>
         <div className="kpi red"><div className="ic">⚠️</div><div className="v">{rupee(outstanding)}</div><div className="l">Outstanding</div></div>
-        <div className="kpi gold"><div className="ic">👥</div><div className="v">{students.filter(s=>statusOf(s)!=="Paid").length}</div><div className="l">Students with dues</div></div>
+        <div className="kpi gold"><div className="ic">👥</div><div className="v">{activeStudents.filter(s=>statusOf(s)!=="Paid").length}</div><div className="l">Students with dues</div></div>
       </div>
       <div className="card">
         <div className="card-flex"><h3>Fee register</h3>
@@ -2305,7 +2598,9 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
             <button className="mini-btn ghost" onClick={exportFees}>📥 CSV</button>
           </div></div>
         <table className="gtable"><thead><tr><th>Student</th><th>Class</th><th>Monthly Fee</th><th>Paid</th><th>Due</th><th>Status</th><th></th></tr></thead>
-          <tbody>{students.map(s=><tr key={s.id}><td>{s.name}</td><td>{s.cls}</td><td>{rupee(s.fee)}</td><td>{rupee(s.paid)}</td><td>{rupee(dueOf(s))}</td><td><span className={"pill "+pillCls(statusOf(s))}>{statusOf(s)}</span></td>
+          <tbody>{activeStudents.map(s=><tr key={s.id}><td>{s.name}</td><td>{s.cls}</td>
+            <td>{rupee(netFee(s))}{(+s.discount)>0 && <span className="disc-tag" title={"Discount of "+rupee(s.discount)+" off "+rupee(s.fee)}>−{rupee(s.discount)}</span>}</td>
+            <td>{rupee(s.paid)}</td><td>{rupee(dueOf(s))}</td><td><span className={"pill "+pillCls(statusOf(s))}>{statusOf(s)}</span>{overdue && statusOf(s)!=="Paid" && <span className="pill absent" style={{marginLeft:6}}>Overdue</span>}</td>
             <td style={{whiteSpace:'nowrap'}}>
               <button className="mini-btn ghost" title="Print this student's fee voucher" onClick={()=>printVoucher(s)}>🧾</button>{" "}
               {statusOf(s)!=="Paid" && <span><button className="mini-btn" onClick={()=>openPay(s)}>Record payment</button>{" "}<button className="mini-btn wa" title="Send WhatsApp fee reminder" onClick={()=>feeReminder(s)}>💬 Remind</button></span>}</td></tr>)}</tbody>
@@ -2325,6 +2620,16 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
         <div className="kpi red"><div className="ic">❌</div><div className="v">{stuShown.filter(s=>(stuAtt[s.id]||"Present")==="Absent").length}</div><div className="l">Absent</div></div>
         <div className="kpi gold"><div className="ic">🌴</div><div className="v">{stuShown.filter(s=>(stuAtt[s.id]||"Present")==="Leave").length}</div><div className="l">On leave</div></div>
       </div>
+      {absentStreaks.length>0 && <div className="card alert-card" data-streaks>
+        <h3 style={{color:'var(--red)'}}>⚠️ Absent several days running</h3>
+        <p style={{fontSize:12.5,color:'var(--muted)',marginBottom:12,lineHeight:1.6}}>These children have missed three or more school days in a row. It is usually worth a phone call home.</p>
+        {absentStreaks.map(({s,n})=><div key={s.id} className="streak-row">
+          <div><b>{s.name}</b> <span style={{color:'var(--muted)'}}>· {s.cls} {s.sec} · {s.guardian||"guardian not recorded"}</span></div>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <span className="pill absent">{n} days</span>
+            <button className="mini-btn wa" onClick={()=>streakMsg(s,n)}>💬 Message</button>
+          </div></div>)}
+      </div>}
       <div className="card">
         <div className="card-flex"><h3>Student attendance</h3>
           <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
@@ -2336,12 +2641,14 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <button className="mini-btn ghost" onClick={()=>markAllStu("Present")}>✅ Mark all present</button>
           <button className="mini-btn ghost" onClick={printAtt}>🖨️ Print sheet</button>
         </div>
-        <table className="gtable"><thead><tr><th>Name</th><th>Class</th><th>Roll</th><th>Mark</th><th>This month</th></tr></thead>
+        <table className="gtable"><thead><tr><th>Name</th><th>Class</th><th>Roll</th><th>Mark</th><th>This month</th><th></th></tr></thead>
           <tbody>{stuShown.map(s=>{const st=stuAtt[s.id]||"Present";return <tr key={s.id}><td><div className="tbl-name"><Avatar photo={s.photo} name={s.name} size={26}/>{s.name}</div></td><td>{s.cls} {s.sec}</td><td>{s.roll}</td>
             <td><span className="att-btns">{["Present","Absent","Leave"].map(x=><button key={x} className={"att-b"+(st===x?" on-"+x.toLowerCase():"")} onClick={()=>markStuAtt(s.id,x)}>{x[0]}</button>)}</span></td>
-            <td>{monthPct(stuAttAll,s.id)}</td></tr>;})}</tbody>
+            <td>{monthPct(stuAttAll,s.id)}</td>
+            <td>{absentToday(s) && <button className="mini-btn wa" data-absentwa title="Tell the guardian on WhatsApp that the child is absent today" onClick={()=>absentMsg(s)}>💬 Tell guardian</button>}</td></tr>;})}
+            {stuShown.length===0 && <tr><td colSpan={6} className="empty-row">{students.length===0?"No students yet — enrol children under the Students tab and they will appear here every morning.":"No students in this class."}</td></tr>}</tbody>
         </table>
-        <p className="hint">Tap P / A / L to mark each student. Change the date to view or edit past days — every day is saved separately.</p>
+        <p className="hint">Tap P / A / L to mark each student. Change the date to view or edit past days — every day is saved separately. 💬 sends that child's guardian a WhatsApp message about today's absence.</p>
       </div>
     </div>}
 
@@ -2357,17 +2664,53 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
         <table className="gtable"><thead><tr><th>Name</th><th>Role</th><th>Subject</th><th>Mark</th><th>This month</th></tr></thead>
           <tbody>{staff.map(s=>{const st=staffAtt[s.id]||"Present";return <tr key={s.id}><td><div className="tbl-name"><Avatar photo={s.photo} name={s.name} size={26} bg="#b23048"/>{s.name}</div></td><td>{s.role}</td><td>{s.subject}</td>
             <td><span className="att-btns">{["Present","Absent","Leave"].map(x=><button key={x} className={"att-b"+(st===x?" on-"+x.toLowerCase():"")} onClick={()=>markStaffAtt(s.id,x)}>{x[0]}</button>)}</span></td>
-            <td>{monthPct(staffAttAll,s.id)}</td></tr>;})}</tbody>
+            <td>{monthPct(staffAttAll,s.id)}</td></tr>;})}
+            {staff.length===0 && <tr><td colSpan={5} className="empty-row">No staff yet — add your teachers under the Staff tab.</td></tr>}</tbody>
         </table>
-        <p className="hint">Tap P / A / L to mark attendance for the selected date.</p>
+        <p className="hint">Tap P / A / L to mark attendance for the selected date. Days marked “L” count as approved leave and appear on the salary slip.</p>
       </div>
     </div>}
 
-    {tab==="timetable" && <div className="card">
+    {tab==="timetable" && ttView==="teacher" && <div className="card">
+      <div className="card-flex"><h3>Teacher timetables</h3>
+        <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
+          <button className="mini-btn ghost" data-ttview onClick={()=>setTtView("class")}>📅 Class view</button>
+        </div>
+      </div>
+      <p className="hint" style={{marginTop:0,marginBottom:12}}>Built from the class timetables by matching each period's subject to the teacher who teaches it (set under <b>Staff → Subject</b>). It shows at a glance who is free when — and warns if a teacher is booked in two classes at once.</p>
+      {clashes.length>0 && <div className="card alert-card" style={{marginBottom:14}} data-clashes>
+        <h3 style={{color:'var(--red)'}}>⚠️ {clashes.length} clash{clashes.length>1?"es":""} found</h3>
+        <p style={{fontSize:12.5,color:'var(--muted)',marginBottom:10,lineHeight:1.6}}>The same teacher is timetabled in more than one class at the same moment. Change one of the periods, or give that subject a second teacher under Staff.</p>
+        {clashes.slice(0,10).map((c,i)=><div key={i} className="streak-row">
+          <div><b>{c.teacher.name}</b> <span style={{color:'var(--muted)'}}>· {c.day} at {c.time}</span></div>
+          <div style={{color:'var(--red)',fontWeight:700,fontSize:12.5}}>{c.at.map(x=>x.cls+" "+x.sec).join("  ·  ")}</div>
+        </div>)}
+        {clashes.length>10 && <p className="hint" style={{marginTop:10}}>…and {clashes.length-10} more.</p>}
+      </div>}
+      {teachers.length===0 && <p className="empty-row">No teachers yet — add them under the Staff tab, with the subject each one teaches, and their timetables will build themselves.</p>}
+      {teachers.length>0 && sectionsInUse.length===0 && <p className="empty-row">No classes are running yet — once children are enrolled, each teacher's week appears here automatically.</p>}
+      {teachers.map(t=>{ const g=teacherGrids[t.id];
+        const periods=g?g.reduce((a,row)=>a+row.filter(c=>c.length).length,0):0;
+        return <div key={t.id} style={{marginBottom:22}}>
+          <div className="card-flex" style={{marginBottom:8}}>
+            <h3 style={{fontSize:14.5,marginBottom:0}}>{t.name} <span style={{fontWeight:600,color:'var(--muted)',fontSize:12.5}}>· {t.subject&&t.subject!=="—"?t.subject:"no subject set"} · {periods} periods a week</span></h3>
+            <button className="mini-btn ghost" onClick={()=>printTeacherTT(t)}>🖨️ Print</button>
+          </div>
+          <table className="gtable tt-table"><thead><tr><th>Day</th>{ttTimes.map((x,i)=><th key={i}>{x}</th>)}</tr></thead>
+            <tbody>{TT_DAYS.map((day,d)=><tr key={day}><td><b>{day}</b></td>{ttTimes.map((_,p)=>{
+              const cells=(g&&g[d][p])||[];
+              return <td key={p} className={cells.length>1?"tt-clash":(cells.length?"":"tt-free")}>
+                {cells.length?cells.map(c=>c.cls+" "+c.sec).join(" + "):"free"}</td>;})}</tr>)}</tbody>
+          </table>
+        </div>; })}
+    </div>}
+
+    {tab==="timetable" && ttView==="class" && <div className="card">
       <div className="card-flex"><h3>Class timetables</h3>
         <div style={{display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
           <select className="tt-sel" value={ttClass} onChange={e=>setTtClass(e.target.value)}>{TT_CLASSES.map(c=><option key={c} value={c}>{c}</option>)}</select>
           <select className="tt-sel" value={ttSec} onChange={e=>setTtSec(e.target.value)}>{TT_SECTIONS.map(s=><option key={s} value={s}>Section {s}</option>)}</select>
+          <button className="mini-btn ghost" data-ttview onClick={()=>setTtView("teacher")}>👩‍🏫 Teacher view{clashes.length?" · "+clashes.length+" clash"+(clashes.length>1?"es":""):""}</button>
           <button className="mini-btn ghost" onClick={printTT}>🖨️ Print</button>
         </div>
       </div>
@@ -2415,13 +2758,25 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       <div className="card"><h3>Post a notice</h3>
         <div className="field" style={{marginBottom:8}}><label>Title</label><input value={nf.title} onChange={e=>setNf({...nf,title:e.target.value})}/></div>
         <div className="field"><label>Message</label><input value={nf.body} onChange={e=>setNf({...nf,body:e.target.value})}/></div>
+        <div className="det-grid" style={{marginBottom:14}}>
+          <div className="field"><label>Show from (leave blank for today)</label>
+            <input type="date" data-nfdate value={nf.on||""} onChange={e=>setNf({...nf,on:e.target.value})}/>
+            <div className="det-age">A future date keeps the notice waiting until that morning.</div></div>
+          <div className="field"><label>Mark as urgent</label>
+            <div className="setting-row" style={{border:'none',padding:'6px 0'}}>
+              <span style={{fontSize:13,color:'var(--muted)'}}>Shows with a red flag at the top</span>
+              <div className={"switch"+(nf.urgent?" on":"")} data-nfurgent onClick={()=>setNf({...nf,urgent:!nf.urgent})}><div className="knob"></div></div>
+            </div></div>
+        </div>
         <button className="btn btn-navy" onClick={addNotice}>Publish notice</button>
       </div>
       <div className="card"><h3>All notices · {notices.length}</h3>
-        {notices.map(n=><div key={n.id} className="notice-item"><div><b>{n.title}</b><div className="nd">{n.body}</div></div>
-          <div style={{display:'flex',alignItems:'center',gap:8}}><span className="nt">{n.date}</span>
+        {noticesSorted.map(n=><div key={n.id} className={"notice-item"+(n.urgent?" urgent":"")}>
+          <div><b>{n.urgent?"🚩 ":""}{n.title}{n.on&&n.on>todayISO()?<span className="sched-tag">scheduled</span>:null}</b><div className="nd">{n.body}</div></div>
+          <div style={{display:'flex',alignItems:'center',gap:8}}><span className="nt">{n.on&&n.on>todayISO()?("from "+niceDate(n.on)):n.date}</span>
             <button className="mini-btn wa" title="Share on WhatsApp" onClick={()=>shareNotice(n)}>💬</button>
             <button className="del-btn" onClick={()=>removeNotice(n.id)} title="Remove notice">✕</button></div></div>)}
+        {notices.length===0 && <p className="empty-row">No notices yet — write your first one above. Urgent notices show at the top with a red flag, and a future date keeps a notice waiting until that morning.</p>}
       </div>
     </div>}
 
@@ -2430,12 +2785,12 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       const staffDays=Object.keys(staffAttAll).filter(d=>d.slice(0,7)===repMonth).sort();
       const cnt=(all,days,id)=>{let P=0,A=0,L=0;days.forEach(d=>{const st=all[d][id];if(st==="Present")P++;else if(st==="Absent")A++;else if(st==="Leave")L++;});return {P,A,L,T:P+A+L};};
       const monthName=new Date(repMonth+"-15").toLocaleDateString("en-GB",{month:"long",year:"numeric"});
-      const defaulters=students.filter(s=>dueOf(s)>0);
+      const defaulters=activeStudents.filter(s=>dueOf(s)>0);
       const esc=x=>String(x).replace(/</g,"&lt;");
       const printAttMonth=()=>printHTML("Attendance "+repMonth,
         `<h1>${esc(schoolName)}</h1><div class="sub">Student Attendance Register — ${monthName} (${mDays.length} marked days)</div>
          <table><tr><th>Student</th><th>Class</th><th>Present</th><th>Absent</th><th>Leave</th><th>%</th></tr>
-         ${students.map(s=>{const c=cnt(stuAttAll,mDays,s.id);return `<tr><td>${esc(s.name)}</td><td>${s.cls} ${s.sec}</td><td>${c.P}</td><td>${c.A}</td><td>${c.L}</td><td>${c.T?Math.round(c.P/c.T*100)+"%":"—"}</td></tr>`;}).join("")}</table>`);
+         ${activeStudents.map(s=>{const c=cnt(stuAttAll,mDays,s.id);return `<tr><td>${esc(s.name)}</td><td>${s.cls} ${s.sec}</td><td>${c.P}</td><td>${c.A}</td><td>${c.L}</td><td>${c.T?Math.round(c.P/c.T*100)+"%":"—"}</td></tr>`;}).join("")}</table>`);
       const printStaffMonth=()=>printHTML("Staff Attendance "+repMonth,
         `<h1>${esc(schoolName)}</h1><div class="sub">Staff Attendance Register — ${monthName} (${staffDays.length} marked days)</div>
          <table><tr><th>Name</th><th>Role</th><th>Present</th><th>Absent</th><th>Leave</th><th>%</th></tr>
@@ -2446,6 +2801,13 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
          <h1 style="font-size:15px;margin-top:8px">Defaulter List</h1>
          <table><tr><th>Student</th><th>Class</th><th>Guardian</th><th>Phone</th><th>Due</th></tr>
          ${defaulters.map(s=>`<tr><td>${esc(s.name)}</td><td>${s.cls} ${s.sec}</td><td>${esc(s.guardian||"—")}</td><td>${esc(s.phone||"—")}</td><td>${rupee(dueOf(s))}</td></tr>`).join("")}</table>`);
+      const withHealth=activeStudents.filter(s=>(s.health||"").trim());
+      const printEmergency=()=>printHTML("Emergency contacts",
+        `<style>tr.hl td{background:#fdecef}</style>
+         <h1>${esc(schoolName)}</h1><div class="sub">Emergency Contact &amp; Health Sheet — printed ${niceDate(todayISO())} · keep in the office and take on trips</div>
+         <table><tr><th>Student</th><th>Class</th><th>Age</th><th>Guardian phone</th><th>Emergency contact</th><th>Known health issues</th></tr>
+         ${activeStudents.map(s=>`<tr class="${(s.health||"").trim()?"hl":""}"><td>${esc(s.name)}</td><td>${s.cls} ${s.sec}</td><td>${ageOf(s)||"—"}</td><td>${esc(s.phone||"—")}</td><td>${esc(emgOf(s)||"—")}</td><td>${esc(s.health||"—")}</td></tr>`).join("")}</table>
+         <p style="font-size:11.5px;color:#98a1b5;margin-top:12px">Shaded rows have a health note. ${withHealth.length} of ${activeStudents.length} students have one recorded. Confidential — school use only.</p>`);
       return <div>
         <div className="card-flex" style={{marginBottom:16}}>
           <h3 style={{marginBottom:0,color:'var(--brand)',fontSize:15,fontWeight:800}}>Monthly reports</h3>
@@ -2461,12 +2823,13 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
             <button className="btn btn-navy" onClick={printAttMonth}>🗓️ Student attendance register</button>
             <button className="btn btn-outline" onClick={printStaffMonth}>🧑‍🏫 Staff attendance register</button>
             <button className="btn btn-outline" onClick={printFeeReport}>💰 Fee report + defaulter list</button>
+            <button className="btn btn-outline" data-emgsheet onClick={printEmergency}>⚕ Emergency contacts &amp; health sheet</button>
           </div>
-          <p className="hint">Registers count every day you marked attendance in {monthName}. The fee report prints the current register with the full defaulter list for follow-up calls.</p>
+          <p className="hint">Registers count every day you marked attendance in {monthName}. The fee report prints the current register with the full defaulter list for follow-up calls. The emergency sheet lists every child's guardian phone, emergency contact and health note — handy for the office wall and school trips.</p>
         </div>
         <div className="card"><h3>Student attendance summary · {monthName}</h3>
           <table className="gtable"><thead><tr><th>Student</th><th>Class</th><th>P</th><th>A</th><th>L</th><th>%</th></tr></thead>
-            <tbody>{students.map(s=>{const c=cnt(stuAttAll,mDays,s.id);return <tr key={s.id}><td><div className="tbl-name"><Avatar photo={s.photo} name={s.name} size={24}/>{s.name}</div></td><td>{s.cls} {s.sec}</td><td>{c.P}</td><td>{c.A}</td><td>{c.L}</td><td>{c.T?Math.round(c.P/c.T*100)+"%":"—"}</td></tr>;})}</tbody>
+            <tbody>{activeStudents.map(s=>{const c=cnt(stuAttAll,mDays,s.id);return <tr key={s.id}><td><div className="tbl-name"><Avatar photo={s.photo} name={s.name} size={24}/>{s.name}</div></td><td>{s.cls} {s.sec}</td><td>{c.P}</td><td>{c.A}</td><td>{c.L}</td><td>{c.T?Math.round(c.P/c.T*100)+"%":"—"}</td></tr>;})}</tbody>
           </table>
         </div>
       </div>; })()}
@@ -2479,6 +2842,48 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <button className="btn btn-navy" onClick={()=>{const m=photoMenu;setPhotoMenu(null);pickPhoto(d=>setPhoto(m.kind,m.rec.id,d));}}>📷 Change photo</button>
           <button className="btn btn-danger" onClick={()=>{setPhoto(photoMenu.kind,photoMenu.rec.id,null);setPhotoMenu(null);}}>🗑️ Remove</button>
           <button className="btn btn-outline" onClick={()=>setPhotoMenu(null)}>Cancel</button>
+        </div>
+      </div>
+    </div>}
+
+    {detFor && <div className="overlay" onClick={()=>setDetFor(null)}>
+      <div className="modal" style={{maxWidth:600}} onClick={e=>e.stopPropagation()}>
+        <div className="modal-top">
+          <div className="modal-hero" style={{background:"linear-gradient(135deg,#0f3460,#1a4a8a)",height:110}}>
+            <Avatar photo={detFor.photo} name={detFor.name} size={62}/>
+            <div><h3>{detFor.name}</h3><p>{detFor.cls} · Section {detFor.sec} · Roll {detFor.roll}</p></div>
+          </div>
+          <button className="modal-x" onClick={()=>setDetFor(null)}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="det-grid">
+            <div className="field"><label>Gender</label>
+              <select data-dgender value={det.gender} onChange={e=>setDet({...det,gender:e.target.value})}>{GENDERS.map(g=><option key={g}>{g}</option>)}</select></div>
+            <div className="field"><label>Date of birth</label>
+              <input type="date" data-ddob value={det.dob} onChange={e=>setDet({...det,dob:e.target.value})}/>
+              <div className="det-age">{ageFrom(det.dob)?("Age today: "+ageFrom(det.dob)+" years"):"Age is worked out automatically from the date of birth."}</div></div>
+            <div className="field"><label>Blood group</label>
+              <select value={det.blood} onChange={e=>setDet({...det,blood:e.target.value})}>{BLOODS.map(g=><option key={g}>{g}</option>)}</select></div>
+            <div className="field"><label>Emergency contact — name</label>
+              <input data-demgname placeholder="e.g. Uncle Kamran" value={det.emgName} onChange={e=>setDet({...det,emgName:e.target.value})}/></div>
+            <div className="field full"><label>Emergency contact — number</label>
+              <input data-demgphone placeholder="03xx-xxxxxxx" value={det.emgPhone} onChange={e=>setDet({...det,emgPhone:e.target.value})}/></div>
+            <div className="field full"><label>Home address</label>
+              <textarea data-daddress rows={2} style={{width:'100%'}} placeholder="House / street / area / city" value={det.address} onChange={e=>setDet({...det,address:e.target.value})}/></div>
+            <div className="field full"><label>Known health issues or allergies</label>
+              <textarea data-dhealth rows={2} style={{width:'100%'}} placeholder="e.g. Asthma — inhaler in school bag. Allergic to peanuts." value={det.health} onChange={e=>setDet({...det,health:e.target.value})}/>
+              {det.health.trim()?<div className="det-note">⚕ This note is printed on the student's ID card and profile so staff can see it in an emergency.</div>:null}</div>
+            <div className="field"><label>Monthly fee (Rs)</label>
+              <input type="number" data-dfee value={det.fee} onChange={e=>setDet({...det,fee:e.target.value})}/></div>
+            <div className="field"><label>Discount / scholarship (Rs)</label>
+              <input type="number" data-ddisc placeholder="0" value={det.discount} onChange={e=>setDet({...det,discount:e.target.value})}/>
+              <div className="det-age">{(+det.discount)>0?("Pays "+rupee(Math.max(0,(+det.fee||0)-(+det.discount||0)))+" a month"):"Leave blank for no discount."}</div></div>
+          </div>
+          <div className="det-foot">
+            <button className="btn-primary" data-dsave onClick={saveDetails}>Save details</button>
+            <button className="mini-btn ghost" title="Print the full student profile" onClick={()=>printProfile(detFor)}>🖨 Profile</button>
+          </div>
+          <p className="hint" style={{textAlign:'center'}}>Kept on this laptop and in your cloud backup — never shared with anyone else.</p>
         </div>
       </div>
     </div>}
@@ -2512,6 +2917,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
 /* ---------- PROFILE & SETTINGS ---------- */
 function Profile({user,theme,setTheme,schoolName,setSchoolName}){
   const fileRef=useRef(null);
+  const isAdmin=user.role==="admin";
   const doImport=e=>{ const f=e.target.files[0]; if(!f)return;
     importBackup(f,ok=>{ if(ok){toast("Backup restored — reloading","💾"); setTimeout(()=>location.reload(),900);} else toast("That file isn't a valid AzharEd backup","⚠️"); });
     e.target.value=""; };
@@ -2556,10 +2962,11 @@ function Profile({user,theme,setTheme,schoolName,setSchoolName}){
       <p style={{fontSize:12.5,color:'var(--muted)',marginBottom:14,lineHeight:1.6}}>Gradebook marks, fees, attendance, timetables, favourites and progress are saved in this browser on this device. Download a backup regularly, and restore it on any other device to move your data across.</p>
       <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
         <button className="btn btn-navy" onClick={exportBackup}>⬇️ Download backup</button>
-        <button className="btn btn-outline" onClick={()=>fileRef.current.click()}>⬆️ Restore backup</button>
-        <button className="btn btn-danger" onClick={resetAll}>🗑️ Reset all data</button>
+        {isAdmin && <button className="btn btn-outline" onClick={()=>fileRef.current.click()}>⬆️ Restore backup</button>}
+        {isAdmin && <button className="btn btn-danger" onClick={resetAll}>🗑️ Reset all data</button>}
         <input ref={fileRef} type="file" accept="application/json" style={{display:'none'}} onChange={doImport}/>
       </div>
+      {!isAdmin && <p className="hint" style={{marginTop:12}}>🔒 Restoring a backup and resetting the device replace every record, so they are limited to the school's admin account.</p>}
     </div>
    </div>
   );
@@ -2583,6 +2990,10 @@ function App(){
   const [schoolName,setSchoolName]=useLS("schoolName","Azhar Model School");
   const [lang,setLang]=useLS("lang","en");
   LANGV=lang;
+  /* quiet once-a-day cloud backup, a few seconds after the app settles */
+  useEffect(()=>{ if(!user||!user.cloud) return;
+    const t=setTimeout(()=>{ maybeAutoBackup(user); }, 12000);
+    return ()=>clearTimeout(t); },[user]);
   useEffect(()=>{ document.documentElement.dataset.theme=theme; },[theme]);
   useEffect(()=>{ document.documentElement.lang=lang==="ur"?"ur":"en"; },[lang]);
   /* Pro runs without its own service worker */
@@ -2620,7 +3031,7 @@ function App(){
     certs:<Certificates students={students} schoolName={schoolName}/>,
     training:<Training user={user}/>,
     gradebook:<Gradebook students={students} goReport={goReport}/>,
-    reportcards:<ReportCard prefill={rcPrefill} students={students}/>,
+    reportcards:<ReportCard prefill={rcPrefill} students={students} schoolName={schoolName}/>,
     admin:<AdminSMS students={students} setStudents={setStudents} notices={notices} setNotices={setNotices} schoolName={schoolName}/>,
     profile:<Profile user={user} theme={theme} setTheme={setTheme} schoolName={schoolName} setSchoolName={setSchoolName}/>
   }[page]||<Dashboard user={user} go={go} openBook={setAppBook} notices={notices}/>);
