@@ -414,6 +414,14 @@ input,select,textarea,button{font-family:inherit}
 .rc-table th,.rc-table td{border:1px solid #d8dce6;padding:7px 10px;color:#17203a}
 .rc-table th{background:#0f3460;color:#fff;font-weight:700;text-align:left}
 .rc-table td.c,.rc-table th.c{text-align:center}
+/* report-card row controls — quiet until you reach for them */
+.rc-gut{border-left:none!important;border-top:none!important;border-bottom:none!important;border-right:none!important;background:transparent;width:30px;padding:0!important}
+.rc-x{width:22px;height:22px;border-radius:50%;border:none;background:transparent;color:#a8b0c0;font-size:15px;line-height:1;cursor:pointer;opacity:0;transition:.15s;display:inline-flex;align-items:center;justify-content:center}
+.rc-table tbody tr:hover .rc-x,.rc-table tbody tr:focus-within .rc-x{opacity:.75}
+.rc-x:hover{opacity:1!important;background:#fdecef;color:#e94560}
+@media (hover:none){.rc-table .rc-x{opacity:.5}}
+.rc-add td{border:1px dashed #cfd6e4!important;color:#8a93a6;font-weight:700;cursor:pointer;transition:.15s;background:transparent}
+.rc-add:hover td{color:#0f3460;background:#f4f7fd;border-color:#0f3460!important}
 .rc-total td{font-weight:800;background:#eef2fb}
 .rc-key{font-size:11px;color:#8a90a0;margin:6px 0 18px;line-height:1.5}
 .rc-sel{border:1px solid #d8dce6;border-radius:6px;padding:4px 8px;font-size:12.5px;background:#fff;color:#17203a}
@@ -1382,7 +1390,8 @@ function ReportCard({prefill,students}){
   const upd=(k,v)=>setInfo(p=>({...p,[k]:v}));
   const setSub=(i,k,v)=>setSubs(p=>p.map((s,idx)=>idx===i?{...s,[k]:k==='name'?v:(+v||0)}:s));
   /* subjects on a report card are a free list — add as many rows as the school teaches */
-  const addSub=()=>setSubs(p=>[...p,{name:"",total:100,got:0}]);
+  const addSub=()=>{ setSubs(p=>[...p,{name:"",total:100,got:0}]);
+    setTimeout(()=>{const els=document.querySelectorAll("[data-rcname]"); const last=els[els.length-1]; last&&last.focus();},50); };
   const removeSub=i=>setSubs(p=>p.length<=1?p:p.filter((_,idx)=>idx!==i));
   const setSkill=(i,v)=>setSkills(p=>p.map((s,idx)=>idx===i?[s[0],v]:s));
   const grade=p=>p>=80?"A":p>=65?"B":p>=50?"C":p>0?"D":"—";
@@ -1461,22 +1470,22 @@ function ReportCard({prefill,students}){
           <span style={{fontSize:11,color:'#8a90a0'}}>days</span></div>
       </div>
       <table className="rc-table">
-        <thead><tr><th>Subject</th><th className="c">Max Marks</th><th className="c">Obtained</th><th className="c">Grade</th><th className="c no-print" style={{width:34}}></th></tr></thead>
+        <thead><tr><th>Subject</th><th className="c">Max Marks</th><th className="c">Obtained</th><th className="c">Grade</th><th className="rc-gut no-print"></th></tr></thead>
         <tbody>
           {subs.map((s,i)=>(<tr key={i}>
-            <td><input className="rc-inp" placeholder="Subject name…" value={s.name} onChange={e=>setSub(i,'name',e.target.value)}/></td>
+            <td><input className="rc-inp" data-rcname placeholder="Subject name…" value={s.name} onChange={e=>setSub(i,'name',e.target.value)}
+              onKeyDown={e=>{if(e.key==='Enter'&&i===subs.length-1)addSub();}}/></td>
             <td className="c"><input className="rc-inp" style={{width:52,textAlign:'center',flex:'none'}} type="number" value={s.total} onChange={e=>setSub(i,'total',e.target.value)}/></td>
             <td className="c"><input className="rc-inp" style={{width:52,textAlign:'center',flex:'none'}} type="number" value={s.got} onChange={e=>setSub(i,'got',e.target.value)}/></td>
             <td className="c"><b>{grade(s.total?s.got/s.total*100:0)}</b></td>
-            <td className="c no-print">{subs.length>1 && <span className="del-btn" title="Remove this subject" style={{cursor:'pointer'}} onClick={()=>removeSub(i)}>✕</span>}</td>
+            <td className="rc-gut no-print">{subs.length>1 &&
+              <button className="rc-x" title={"Remove "+(s.name||"this subject")} onClick={()=>removeSub(i)}>−</button>}</td>
           </tr>))}
-          <tr className="rc-total"><td>Total</td><td className="c">{totMax}</td><td className="c">{totGot}</td><td className="c">{pct}% · {grade(pct)}</td><td className="no-print"></td></tr>
+          <tr className="rc-add no-print" onClick={addSub} title="Add another subject">
+            <td colSpan={4}>＋&nbsp; Add a subject</td><td className="rc-gut"></td></tr>
+          <tr className="rc-total"><td>Total</td><td className="c">{totMax}</td><td className="c">{totGot}</td><td className="c">{pct}% · {grade(pct)}</td><td className="rc-gut no-print"></td></tr>
         </tbody>
       </table>
-      <div className="no-print" style={{margin:'8px 0 4px',display:'flex',gap:10,alignItems:'center',flexWrap:'wrap'}}>
-        <button className="mini-btn" onClick={addSub}>➕ Add subject</button>
-        <span style={{fontSize:11.5,color:'var(--muted)'}}>{subs.length} subject{subs.length===1?"":"s"} on this card — add as many as the class studies; max marks can differ per subject. These buttons don't print.</span>
-      </div>
       <div className="rc-key">Grading key: A = 80–100% (Outstanding) · B = 65–79% (Good) · C = 50–64% (Satisfactory) · D = below 50% (Needs improvement)</div>
       <div style={{fontSize:13,fontWeight:800,color:'#0f3460',margin:'4px 0 8px'}}>Skills &amp; Personal Development</div>
       <table className="rc-table">
