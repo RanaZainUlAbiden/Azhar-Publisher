@@ -192,6 +192,39 @@ async function sendQuote(who,items,note){
   }catch(e){ return {err:"Could not send just now — please try again in a moment."}; }
 }
 
+/* ---------- offline catalogue ----------
+   Flipbooks are self-contained files, so saving one file per book makes the
+   whole catalogue readable with no internet. They go into the same cache the
+   site's book worker serves from. */
+const K_OFF="azsamp:offline", BOOK_CACHE="azhared-v4";
+let savedInfo=get(K_OFF,null), saving=false, armSave=false, stopSave=false, prog={done:0,total:0,bytes:0};
+const mb=n=>Math.max(1,Math.round(n/1048576));
+function setSaveBtn(txt){ const b=document.getElementById("offBtn"); if(b) b.textContent=txt; }
+async function saveOffline(){
+  if(!("caches" in window)){ toast("This browser can't save pages offline"); return; }
+  saving=true; stopSave=false; prog={done:0,total:BOOKS.length,bytes:0}; render();
+  try{
+    const c=await caches.open(BOOK_CACHE);
+    for(const b of BOOKS){
+      if(stopSave) break;
+      for(const p of [b.flipbook,b.coverImg]){
+        if(!p) continue;
+        const u=new URL(encodeURI(BASE+p),location.href).href;
+        try{
+          const r=await fetch(u,{cache:"reload"});
+          if(r&&r.ok){ const copy=r.clone(); await c.put(u,r); prog.bytes+=(await copy.arrayBuffer()).byteLength; }
+        }catch(e){}
+      }
+      prog.done++; setSaveBtn("Saving "+prog.done+"/"+prog.total+"…");
+    }
+  }catch(e){}
+  saving=false;
+  savedInfo={n:prog.done,mb:mb(prog.bytes),at:Date.now()};
+  set(K_OFF,savedInfo);
+  toast(stopSave?("Stopped — "+prog.done+" books saved"):("Catalogue saved for offline · "+savedInfo.mb+" MB"),"⬇");
+  render();
+}
+
 /* ---------- state ---------- */
 let okPass=get(K_PASS,false), who=get(K_WHO,null),
     q="", fSer="All", fLvl="All", cart=[], sheet=false, sent=false, busy=false;
@@ -294,7 +327,14 @@ function render(){
   <div class="top"><div class="top-in">
     <div class="brand"><img src="${LOGO_A}" alt="Azhar Publishers"/>
       <div class="nm">Book Library<small>e-Samples</small></div></div>
-    <div class="who"><span>Azhar Publishers</span>
+    <div class="who">
+      ${saving
+        ? `<button class="ghost" id="offBtn" style="border-color:var(--gold);color:var(--ink)">Saving ${prog.done}/${prog.total}…</button>
+           <button class="ghost" id="offStop">Stop</button>`
+        : `<button class="ghost" id="offBtn"${armSave?' style="border-color:var(--gold);color:var(--ink);background:#FDF6E3"':''}>${
+            armSave ? "≈"+Math.round(BOOKS.length*3.2)+" MB — press again to start"
+                    : (savedInfo ? "✓ Offline ready · "+savedInfo.n+" books" : "⬇ Save for offline")}</button>`}
+      <span>Azhar Publishers</span>
       <button class="ghost" id="out">Sign out</button></div>
   </div></div>
   <div class="wrap">
@@ -334,6 +374,10 @@ function render(){
   ${sheet?sheetHTML():""}`;
 
   $("#out").onclick=()=>{ if(confirm("Sign out of the e-Samples library on this device?")){ set(K_PASS,null); set(K_WHO,null); okPass=false; who=null; cart=[]; route(); } };
+  const ob=$("#offBtn"); if(ob&&!saving) ob.onclick=()=>{
+    if(!armSave){ armSave=true; render(); setTimeout(()=>{ if(armSave&&!saving){ armSave=false; render(); } },8000); return; }
+    armSave=false; saveOffline(); };
+  const os=$("#offStop"); if(os) os.onclick=()=>{ stopSave=true; toast("Stopping after this book…"); };
   const qi=$("#q"); if(qi){ qi.oninput=e=>{q=e.target.value; const p=e.target.selectionStart; render(); const n=$("#q"); if(n){n.focus(); try{n.setSelectionRange(p,p);}catch(_){}}}; }
   document.querySelectorAll("[data-ser]").forEach(b=>b.onclick=()=>{fSer=b.dataset.ser;render();});
   document.querySelectorAll("[data-lvl]").forEach(b=>b.onclick=()=>{fLvl=b.dataset.lvl;render();});
@@ -382,6 +426,11 @@ function route(){
   render();
 }
 route();
+/* the site's own workers keep this page and the book files openable offline */
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+  navigator.serviceWorker.register('/AzharEd_Deploy/sw.js').catch(function(){});
+}
 </script>
 </body>
 </html>
