@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Azhar Publishers · Book Library — e-Samples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="../AzharEd_Deploy/content_data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+/* Azhar Publishers e-Samples — one shared password for the whole catalogue.
+   The publishable key is designed to be public; the password itself is never
+   sent to the browser: it is checked inside a locked-down database function,
+   and the sample tables cannot be read from here at all. */
+window.MAKTAB_DB = { url: "https://pticimvedwrwuknqbfus.supabase.co",
+                     key: "sb_publishable_ZrdQYc81xO4-DLnS96vB6w_MYpRy5kU" };
+window.SB = null;
+try{ if(window.supabase && window.MAKTAB_DB.url){
+  window.SB = window.supabase.createClient(window.MAKTAB_DB.url, window.MAKTAB_DB.key);
+}}catch(e){ window.SB = null; }
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0B1B33; --ink2:#122744; --paper:#F7F5F0; --card:#FFFFFF;
+  --gold:#C9A227; --gold-l:#E4C767; --text:#1B2434; --muted:#7A8496;
+  --line:#E6E2D8; --shadow:0 10px 30px rgba(11,27,51,.10);
+}
+body{font-family:'Nunito',sans-serif;background:var(--paper);color:var(--text);-webkit-font-smoothing:antialiased}
+h1,h2,h3,.disp{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.2px}
+button,input,textarea{font-family:inherit}
+button{cursor:pointer}
+
+/* ============ GATE ============ */
+.gate{min-height:100vh;display:flex;align-items:stretch;background:var(--ink)}
+.gate-art{flex:1.15;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:56px 60px;color:#fff;
+  background:
+    radial-gradient(700px 420px at 88% 8%, rgba(201,162,39,.20), transparent 62%),
+    radial-gradient(620px 460px at 6% 92%, rgba(255,255,255,.07), transparent 60%),
+    linear-gradient(160deg,#0B1B33 0%,#102A4A 45%,#0B1B33 100%);
+  background-color:#0B1B33}
+.gate-art:before{content:"";position:absolute;inset:0;opacity:.13;
+  background-image:repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 2px, transparent 2px 14px);
+  mask-image:linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
+  -webkit-mask-image:linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent)}
+.gate-art>*{position:relative}
+.rule{width:54px;height:3px;background:var(--gold);border-radius:2px;margin:0 0 22px}
+.gate-art .kicker{font-size:11.5px;font-weight:900;letter-spacing:2.4px;text-transform:uppercase;color:var(--gold-l);margin-bottom:14px}
+.gate-art h1{font-size:44px;line-height:1.12;margin-bottom:14px;color:#fff}
+.gate-art h1 em{font-style:normal;color:var(--gold-l)}
+.gate-art p{font-size:15px;line-height:1.75;color:#C7D0DE;max-width:460px;font-weight:600}
+.stats{display:flex;gap:34px;margin-top:34px;flex-wrap:wrap}
+.stat b{display:block;font-family:'Fraunces',serif;font-size:27px;color:#fff;line-height:1}
+.stat span{font-size:11px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;color:#94A3B8}
+.since{margin-top:38px;font-size:11.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#7D8CA3}
+
+.gate-form{flex:.85;min-width:min(430px,100%);background:var(--paper);display:flex;flex-direction:column;justify-content:center;padding:48px 46px}
+.logo-row{display:flex;align-items:center;gap:14px;margin-bottom:30px}
+.logo-row img{height:34px;width:auto;object-fit:contain}
+.logo-row .div{width:1px;height:26px;background:var(--line)}
+.gate-form h2{font-size:25px;margin-bottom:6px}
+.gate-form .lead{font-size:13.5px;color:var(--muted);font-weight:700;line-height:1.6;margin-bottom:26px}
+.lbl{display:block;font-size:11px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:0 0 7px}
+.fld{width:100%;padding:13px 15px;border:1.5px solid var(--line);border-radius:11px;background:var(--card);font-size:14.5px;font-weight:700;color:var(--text);outline:none;transition:.15s;margin-bottom:15px}
+.fld:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(11,27,51,.07)}
+.fld::placeholder{color:#B4BCC9;font-weight:600}
+.btn{width:100%;padding:14px;border:none;border-radius:11px;background:var(--ink);color:#fff;font-size:14.5px;font-weight:900;letter-spacing:.3px;transition:.15s;box-shadow:0 8px 20px rgba(11,27,51,.22)}
+.btn:hover{background:var(--ink2);transform:translateY(-1px)}
+.btn:disabled{opacity:.55;transform:none}
+.btn-gold{background:var(--gold);color:#22190A;box-shadow:0 8px 20px rgba(201,162,39,.3)}
+.btn-gold:hover{background:var(--gold-l)}
+.err{color:#C0392B;font-size:12.5px;font-weight:800;min-height:19px;margin-bottom:6px}
+.fine{font-size:11.5px;color:var(--muted);font-weight:700;line-height:1.7;margin-top:20px}
+.row2{display:flex;gap:12px}.row2>*{flex:1}
+@media(max-width:900px){.gate{flex-direction:column}.gate-art{padding:44px 30px 38px}.gate-art h1{font-size:33px}.gate-form{padding:36px 26px 54px}.stats{gap:24px}}
+
+/* ============ LIBRARY ============ */
+.top{position:sticky;top:0;z-index:40;background:rgba(247,245,240,.93);backdrop-filter:blur(9px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px}
+.brand img{height:28px}
+.brand .nm{font-family:'Fraunces',serif;font-size:16px;font-weight:600;line-height:1.15}
+.brand .nm small{display:block;font-family:'Nunito';font-size:9.5px;font-weight:900;letter-spacing:1.7px;text-transform:uppercase;color:var(--gold)}
+.who{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;color:var(--muted)}
+.ghost{border:1.5px solid var(--line);background:var(--card);color:var(--muted);border-radius:9px;padding:7px 12px;font-size:11.5px;font-weight:900;transition:.15s}
+.ghost:hover{border-color:var(--ink);color:var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 22px 130px}
+.hero{margin-bottom:22px}
+.hero h2{font-size:27px;margin-bottom:5px}
+.hero p{font-size:13.5px;color:var(--muted);font-weight:700}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0 6px}
+.search{flex:1;min-width:210px;padding:11px 15px;border:1.5px solid var(--line);border-radius:11px;background:var(--card);font-size:14px;font-weight:700;outline:none}
+.search:focus{border-color:var(--ink)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 20px}
+.chip{border:1.5px solid var(--line);background:var(--card);color:var(--muted);border-radius:99px;padding:7px 15px;font-size:12px;font-weight:800;transition:.15s}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:22px}
+.bk{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);transition:.18s;display:flex;flex-direction:column}
+.bk:hover{transform:translateY(-4px);box-shadow:0 16px 38px rgba(11,27,51,.16)}
+.bk .cv{aspect-ratio:3/4;background:linear-gradient(150deg,#16304f,#0B1B33);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+.bk .cv img{width:100%;height:100%;object-fit:cover;display:block}
+.bk .meta{padding:11px 13px 13px}
+.bk .ser{font-size:9.5px;font-weight:900;letter-spacing:1.3px;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.bk .ttl{font-size:13px;font-weight:800;line-height:1.3;margin-bottom:2px}
+.bk .lvl{font-size:11px;color:var(--muted);font-weight:700}
+.bk .acts{display:flex;gap:7px;padding:0 13px 13px}
+.bk .acts button{flex:1;border-radius:9px;padding:8px 6px;font-size:11.5px;font-weight:900;border:1.5px solid var(--ink);background:var(--ink);color:#fff;transition:.15s}
+.bk .acts .add{background:var(--card);color:var(--ink)}
+.bk .acts .add.on{background:var(--gold);border-color:var(--gold);color:#22190A}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);font-weight:700}
+.empty .e{font-size:40px;display:block;margin-bottom:10px}
+
+/* quote bar + sheet */
+.bar{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:60;background:var(--ink);color:#fff;border-radius:14px;padding:12px 14px 12px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 14px 40px rgba(11,27,51,.4);max-width:calc(100% - 32px)}
+.bar b{font-size:13.5px;font-weight:800}
+.bar .x{background:none;border:none;color:#93A2B8;font-size:16px;padding:0 2px}
+.sheet{position:fixed;inset:0;z-index:90;background:rgba(11,27,51,.55);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px)}
+.sheet-in{background:var(--paper);border-radius:18px;padding:26px;width:min(520px,100%);max-height:86vh;overflow:auto;box-shadow:0 30px 70px rgba(0,0,0,.4)}
+.sheet-in h3{font-size:21px;margin-bottom:4px}
+.sheet-in .lead{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:18px}
+.qlist{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 12px;margin-bottom:16px;max-height:190px;overflow:auto}
+.qrow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12.5px;font-weight:700}
+.qrow:last-child{border:none}
+.qrow .rm{margin-left:auto;color:#C0392B;font-weight:900;cursor:pointer;opacity:.6}
+.qrow .rm:hover{opacity:1}
+.ta{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;background:var(--card);font-size:14px;font-weight:600;outline:none;resize:vertical;min-height:74px;margin-bottom:14px}
+.ta:focus{border-color:var(--ink)}
+.done{text-align:center;padding:14px 4px}
+.done .tick{font-size:42px;display:block;margin-bottom:8px}
+.toastz{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);z-index:120;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.tz{background:var(--ink);color:#fff;padding:10px 20px;border-radius:99px;font-size:13px;font-weight:800;box-shadow:var(--shadow);white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toastz" id="toastz"></div>
+<script>
+/* ============================================================
+   Azhar Publishers · Book Library — e-Samples
+   Flipbook samples of the whole catalogue, behind one shared
+   password. Views and quote requests go to Supabase through
+   locked-down functions; nothing here can read them back.
+   ============================================================ */
+const BASE="../AzharEd_Deploy/";
+const C=window.AZHAR_CONTENT||{books:[]};
+const BOOKS=(C.books||[]).filter(b=>b.flipbook);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+function toast(m){const e=document.createElement("div");e.className="tz";e.textContent=m;$("#toastz").appendChild(e);setTimeout(()=>e.remove(),2400);}
+const LOGO_A=BASE+"assets/azhar_logo.png", LOGO_B=BASE+"assets/bookfactory_logo.png";
+
+const SERIES=[...new Set(BOOKS.map(b=>b.series).filter(Boolean))];
+const LVL_ORDER=["Playgroup","Nursery","Prep","One","Two","Three","Four","Five"];
+const LVL_LABEL={One:"Class 1",Two:"Class 2",Three:"Class 3",Four:"Class 4",Five:"Class 5"};
+const LEVELS=LVL_ORDER.filter(l=>BOOKS.some(b=>b.level===l));
+const lvlName=l=>LVL_LABEL[l]||l;
+const serName=s=>s==="Alfatah"?"Al-Fatah":s;
+
+/* ---------- device memory ---------- */
+const K_PASS="azsamp:ok", K_WHO="azsamp:who";
+const get=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}};
+const set=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+
+/* ---------- cloud ---------- */
+function withTimeout(p,ms){return Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error("T")),ms))]);}
+async function cloudLogin(pw){
+  if(!navigator.onLine||!window.SB) return {offline:true};
+  try{
+    const {data,error}=await withTimeout(SB.rpc("sample_login",{p_pw:pw}),12000);
+    if(error) return {offline:true};
+    return data===true?{ok:true}:{bad:true};
+  }catch(e){ return {offline:true}; }
+}
+function logView(who,b){
+  if(!window.SB||!navigator.onLine) return;
+  try{ SB.rpc("sample_log_view",{p_visitor:who.name||"",p_school:who.school||"",p_book_id:b.id,p_book_title:b.title}); }catch(e){}
+}
+async function sendQuote(who,items,note){
+  if(!window.SB||!navigator.onLine) return {err:"You appear to be offline — please reconnect and send again."};
+  try{
+    const {error}=await withTimeout(SB.rpc("sample_quote",{
+      p_visitor:who.name||"",p_school:who.school||"",p_phone:who.phone||"",
+      p_items:items.map(b=>({id:b.id,title:b.title,series:b.series,level:b.level})),
+      p_note:note||""}),12000);
+    if(error) return {err:"Could not send just now — please try again in a moment."};
+    return {ok:true};
+  }catch(e){ return {err:"Could not send just now — please try again in a moment."}; }
+}
+
+/* ---------- state ---------- */
+let okPass=get(K_PASS,false), who=get(K_WHO,null),
+    q="", fSer="All", fLvl="All", cart=[], sheet=false, sent=false, busy=false;
+
+/* ---------- gate ---------- */
+function renderGate(msg){
+  document.body.innerHTML='<div id="app"></div><div class="toastz" id="toastz"></div>';
+  $("#app").innerHTML=`
+  <div class="gate">
+    <div class="gate-art">
+      <div class="rule"></div>
+      <div class="kicker">Azhar Publishers · Since 1972</div>
+      <h1>The complete<br/>catalogue, <em>page by page</em></h1>
+      <p>Browse every GoldCrest, Panda and Al-Fatah title as a full digital flipbook — exactly as it reaches the classroom. Read a sample, then request a quote for the titles your school needs.</p>
+      <div class="stats">
+        <div class="stat"><b>${BOOKS.length}</b><span>Titles</span></div>
+        <div class="stat"><b>${SERIES.length}</b><span>Series</span></div>
+        <div class="stat"><b>${LEVELS.length}</b><span>Levels</span></div>
+      </div>
+      <div class="since">Urdu Bazar · Lahore · Pakistan</div>
+    </div>
+    <div class="gate-form">
+      <div class="logo-row"><img src="${LOGO_A}" alt="Azhar Publishers"/><span class="div"></span><img src="${LOGO_B}" alt="Book Factory"/></div>
+      <h2>Book Library — e-Samples</h2>
+      <div class="lead">Enter the access password shared by your Azhar Publishers representative.</div>
+      <label class="lbl" for="pw">Access password</label>
+      <input class="fld" id="pw" type="password" placeholder="••••••••••" autocomplete="off"/>
+      <div class="err" id="gerr">${esc(msg||"")}</div>
+      <button class="btn" id="go">Enter the library</button>
+      <div class="fine">Don't have the password? Contact Azhar Publishers, Urdu Bazar, Lahore — azharpublisherbookfactory@gmail.com</div>
+    </div>
+  </div>`;
+  const go=$("#go"), pw=$("#pw");
+  pw.onkeydown=e=>{if(e.key==="Enter")go.click();};
+  pw.focus();
+  go.onclick=async()=>{
+    const v=(pw.value||"").trim();
+    if(!v){$("#gerr").textContent="Please enter the password.";return;}
+    go.disabled=true; go.textContent="Checking…";
+    const r=await cloudLogin(v);
+    if(r.ok){ okPass=true; set(K_PASS,true); route(); }
+    else if(r.bad){ go.disabled=false; go.textContent="Enter the library"; $("#gerr").textContent="That password isn't right — please check with your representative."; }
+    else { if(get(K_PASS,false)){ okPass=true; route(); }
+      else { go.disabled=false; go.textContent="Enter the library"; $("#gerr").textContent="Internet is needed the first time — please connect and try again."; } }
+  };
+}
+
+/* ---------- who ---------- */
+function renderWho(){
+  document.body.innerHTML='<div id="app"></div><div class="toastz" id="toastz"></div>';
+  $("#app").innerHTML=`
+  <div class="gate">
+    <div class="gate-art">
+      <div class="rule"></div>
+      <div class="kicker">Welcome</div>
+      <h1>Who are we<br/><em>showing these to?</em></h1>
+      <p>So we can prepare a quote for the right school and follow up properly. Nothing else is asked, and you can browse the whole catalogue either way.</p>
+      <div class="since">Azhar Publishers · Urdu Bazar · Lahore</div>
+    </div>
+    <div class="gate-form">
+      <div class="logo-row"><img src="${LOGO_A}" alt="Azhar Publishers"/><span class="div"></span><img src="${LOGO_B}" alt="Book Factory"/></div>
+      <h2>Your details</h2>
+      <div class="lead">Used only for your quote request and follow-up.</div>
+      <label class="lbl" for="nm">Your name</label>
+      <input class="fld" id="nm" placeholder="e.g. Mr. Imran Khan" autocomplete="off"/>
+      <label class="lbl" for="sc">School / bookshop</label>
+      <input class="fld" id="sc" placeholder="e.g. Sunrise Grammar School, Lahore" autocomplete="off"/>
+      <label class="lbl" for="ph">Phone (optional)</label>
+      <input class="fld" id="ph" placeholder="e.g. 0300 1234567" autocomplete="off"/>
+      <div class="err" id="werr"></div>
+      <button class="btn btn-gold" id="wgo">Open the library →</button>
+    </div>
+  </div>`;
+  const go=$("#wgo");
+  ["nm","sc","ph"].forEach(id=>{$("#"+id).onkeydown=e=>{if(e.key==="Enter")go.click();};});
+  $("#nm").focus();
+  go.onclick=()=>{
+    const name=$("#nm").value.trim(), school=$("#sc").value.trim(), phone=$("#ph").value.trim();
+    if(!name||!school){$("#werr").textContent="Please add your name and your school or bookshop.";return;}
+    who={name,school,phone}; set(K_WHO,who); route();
+  };
+}
+
+/* ---------- library ---------- */
+function shown(){
+  const t=q.trim().toLowerCase();
+  return BOOKS.filter(b=>
+    (fSer==="All"||b.series===fSer) &&
+    (fLvl==="All"||b.level===fLvl) &&
+    (!t||[b.title,b.subject,b.series,lvlName(b.level)].join(" ").toLowerCase().includes(t)));
+}
+const inCart=b=>cart.some(x=>x.id===b.id);
+function openBook(b){ logView(who,b); window.open(encodeURI(BASE+b.flipbook),"_blank"); }
+function toggleCart(b){ cart=inCart(b)?cart.filter(x=>x.id!==b.id):[...cart,b]; render(); }
+
+function render(){
+  const list=shown();
+  document.body.innerHTML='<div id="app"></div><div class="toastz" id="toastz"></div>';
+  $("#app").innerHTML=`
+  <div class="top"><div class="top-in">
+    <div class="brand"><img src="${LOGO_A}" alt="Azhar Publishers"/>
+      <div class="nm">Book Library<small>e-Samples</small></div></div>
+    <div class="who"><span>${esc(who.school)}</span>
+      <button class="ghost" id="out">Sign out</button></div>
+  </div></div>
+  <div class="wrap">
+    <div class="hero"><h2>The Azhar Publishers catalogue</h2>
+      <p>${BOOKS.length} titles across GoldCrest, Panda and Al-Fatah — open any book to read the full flipbook sample.</p></div>
+    <div class="tools">
+      <input class="search" id="q" placeholder="Search a title or subject…" value="${esc(q)}"/>
+    </div>
+    <div class="chips">
+      <button class="chip${fSer==="All"?" on":""}" data-ser="All">All series</button>
+      ${SERIES.map(s=>`<button class="chip${fSer===s?" on":""}" data-ser="${esc(s)}">${esc(serName(s))}</button>`).join("")}
+    </div>
+    <div class="chips">
+      <button class="chip${fLvl==="All"?" on":""}" data-lvl="All">All levels</button>
+      ${LEVELS.map(l=>`<button class="chip${fLvl===l?" on":""}" data-lvl="${esc(l)}">${esc(lvlName(l))}</button>`).join("")}
+    </div>
+    ${list.length?`<div class="grid">${list.map(b=>`
+      <div class="bk">
+        <div class="cv" data-open="${esc(b.id)}">${b.coverImg?`<img src="${encodeURI(BASE+b.coverImg)}" loading="lazy" alt="${esc(b.title)}"/>`:(b.icon||"📘")}</div>
+        <div class="meta">
+          <div class="ser">${esc(serName(b.series))}</div>
+          <div class="ttl">${esc(b.title)}</div>
+          <div class="lvl">${esc(lvlName(b.level))}${b.age?" · "+esc(b.age):""}</div>
+        </div>
+        <div class="acts">
+          <button data-open="${esc(b.id)}">Read sample</button>
+          <button class="add${inCart(b)?" on":""}" data-add="${esc(b.id)}">${inCart(b)?"✓ Added":"+ Quote"}</button>
+        </div>
+      </div>`).join("")}</div>`
+      :`<div class="empty"><span class="e">🔎</span>No titles match that search.</div>`}
+  </div>
+  ${cart.length?`<div class="bar">
+      <b>${cart.length} title${cart.length>1?"s":""} selected</b>
+      <button class="btn btn-gold" style="width:auto;padding:9px 16px;font-size:12.5px;box-shadow:none" id="ask">Request a quote</button>
+      <button class="x" id="clr" title="Clear selection">✕</button>
+    </div>`:""}
+  ${sheet?sheetHTML():""}`;
+
+  $("#out").onclick=()=>{ if(confirm("Sign out of the e-Samples library on this device?")){ set(K_PASS,null); set(K_WHO,null); okPass=false; who=null; cart=[]; route(); } };
+  const qi=$("#q"); if(qi){ qi.oninput=e=>{q=e.target.value; const p=e.target.selectionStart; render(); const n=$("#q"); if(n){n.focus(); try{n.setSelectionRange(p,p);}catch(_){}}}; }
+  document.querySelectorAll("[data-ser]").forEach(b=>b.onclick=()=>{fSer=b.dataset.ser;render();});
+  document.querySelectorAll("[data-lvl]").forEach(b=>b.onclick=()=>{fLvl=b.dataset.lvl;render();});
+  document.querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>{const b=BOOKS.find(x=>x.id===el.dataset.open); if(b)openBook(b);});
+  document.querySelectorAll("[data-add]").forEach(el=>el.onclick=()=>{const b=BOOKS.find(x=>x.id===el.dataset.add); if(b)toggleCart(b);});
+  const ask=$("#ask"); if(ask) ask.onclick=()=>{sheet=true;sent=false;render();};
+  const clr=$("#clr"); if(clr) clr.onclick=()=>{cart=[];render();};
+  wireSheet();
+}
+
+function sheetHTML(){
+  if(sent) return `<div class="sheet"><div class="sheet-in"><div class="done">
+    <span class="tick">✅</span><h3>Request sent</h3>
+    <div class="lead" style="margin:8px 0 18px">Thank you — Azhar Publishers has your list and will be in touch about pricing and delivery.</div>
+    <button class="btn" id="close2">Back to the library</button></div></div></div>`;
+  return `<div class="sheet"><div class="sheet-in">
+    <h3>Request a quote</h3>
+    <div class="lead">For ${esc(who.school)}${who.name?" · "+esc(who.name):""}</div>
+    <div class="qlist">${cart.map(b=>`<div class="qrow">📘 ${esc(b.title)} <span style="color:var(--muted)">· ${esc(lvlName(b.level))}</span><span class="rm" data-rm="${esc(b.id)}">✕</span></div>`).join("")}</div>
+    <label class="lbl">Anything to add? (quantities, session, delivery)</label>
+    <textarea class="ta" id="note" placeholder="e.g. Around 120 students in Playgroup–Prep, needed before the new session"></textarea>
+    <div class="err" id="serr"></div>
+    <div class="row2">
+      <button class="ghost" style="padding:13px" id="close">Cancel</button>
+      <button class="btn btn-gold" id="send" ${busy?"disabled":""}>${busy?"Sending…":"Send request"}</button>
+    </div></div></div>`;
+}
+function wireSheet(){
+  const c=$("#close"); if(c) c.onclick=()=>{sheet=false;render();};
+  const c2=$("#close2"); if(c2) c2.onclick=()=>{sheet=false;sent=false;cart=[];render();};
+  document.querySelectorAll("[data-rm]").forEach(el=>el.onclick=()=>{cart=cart.filter(x=>x.id!==el.dataset.rm); if(!cart.length)sheet=false; render();});
+  const s=$("#send"); if(s) s.onclick=async()=>{
+    const note=($("#note")||{}).value||"";
+    busy=true; render();
+    const r=await sendQuote(who,cart,note);
+    busy=false;
+    if(r.ok){ sent=true; render(); }
+    else { render(); const e=$("#serr"); if(e)e.textContent=r.err; }
+  };
+}
+
+/* ---------- routing ---------- */
+function route(){
+  if(!okPass) return renderGate();
+  if(!who||!who.school) return renderWho();
+  render();
+}
+route();
+</script>
+</body>
+</html>
