@@ -1870,6 +1870,11 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const [staff,setStaff]=useLS("sms:staff",SEED_STAFF);
   const [payments,setPayments]=useLS("sms:payments",SEED_PAYMENTS);
   const [timetables,setTimetables]=useLS("sms:timetables",SEED_TT);
+  /* School's own period times and subject lists — editable, saved on this device */
+  const [ttTimes,setTtTimes]=useLS("sms:ttTimes",TT_TIMES);
+  const [ttSubs,setTtSubs]=useLS("sms:ttSubjects",{early:EY_SUBJECTS,primary:PR_SUBJECTS});
+  const [subEdit,setSubEdit]=useState(false);
+  const [newSub,setNewSub]=useState("");
   const [stuAttAll,setStuAttAll]=useLS("sms:stuAtt",{});
   const [staffAttAll,setStaffAttAll]=useLS("sms:staffAtt",{});
   const [attDate,setAttDate]=useState(todayISO());
@@ -1998,11 +2003,24 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank"); };
 
   const ttKey=ttClass+"-"+ttSec;
-  const grid=timetables[ttKey]||genTimetable(ttClass);
-  const updateCell=(d,p,v)=>setTimetables(prev=>{const g=(prev[ttKey]||genTimetable(ttClass)).map(r=>[...r]);g[d][p]=v;return {...prev,[ttKey]:g};});
+  /* grids are stored per class-section; pad or trim them to the school's current period count */
+  const fitGrid=g=>TT_DAYS.map((_,d)=>ttTimes.map((_,p)=>((g&&g[d]&&g[d][p])||"—")));
+  const grid=fitGrid(timetables[ttKey]||genTimetable(ttClass));
+  const updateCell=(d,p,v)=>setTimetables(prev=>{const g=fitGrid(prev[ttKey]||genTimetable(ttClass));g[d][p]=v;return {...prev,[ttKey]:g};});
+  const subPool=isEarly(ttClass)?(ttSubs.early||[]):(ttSubs.primary||[]);
+  const poolKey=isEarly(ttClass)?"early":"primary";
+  const setTime=(i,v)=>setTtTimes(prev=>{const t=[...prev];t[i]=v;return t;});
+  const addPeriod=()=>setTtTimes(prev=>[...prev,"—:—"]);
+  const removePeriod=()=>{ if(ttTimes.length<=1){toast("A timetable needs at least one period","⚠️");return;}
+    setTtTimes(prev=>prev.slice(0,-1)); };
+  const addSubject=()=>{ const s=newSub.trim(); if(!s) return;
+    if(subPool.some(x=>x.toLowerCase()===s.toLowerCase())){toast("That subject is already in the list","⚠️");setNewSub("");return;}
+    setTtSubs(prev=>({...prev,[poolKey]:[...(prev[poolKey]||[]),s]})); setNewSub(""); toast(s+" added","➕"); };
+  const removeSubject=s=>setTtSubs(prev=>({...prev,[poolKey]:(prev[poolKey]||[]).filter(x=>x!==s)}));
+  const resetSubjects=()=>{ setTtSubs(prev=>({...prev,[poolKey]:poolKey==="early"?EY_SUBJECTS:PR_SUBJECTS})); toast("Subject list reset","↩️"); };
   const printTT=()=>printHTML("Timetable "+ttClass+" "+ttSec,
     `<h1>${schoolName}</h1><div class="sub">Class Timetable — ${ttClass} · Section ${ttSec}</div>
-     <table><tr><th>Day</th>${TT_TIMES.map(t=>`<th>${t}</th>`).join("")}</tr>
+     <table><tr><th>Day</th>${ttTimes.map(t=>`<th>${t}</th>`).join("")}</tr>
      ${TT_DAYS.map((d,di)=>`<tr><td><b>${d}</b></td>${grid[di].map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</table>`);
   const printAtt=()=>{ const shown=students.filter(s=>attCls==="All"||s.cls===attCls);
     printHTML("Attendance "+attDate,
@@ -2253,18 +2271,44 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <button className="mini-btn ghost" onClick={printTT}>🖨️ Print</button>
         </div>
       </div>
-      <p className="hint" style={{marginTop:0,marginBottom:14}}>Showing <b>{ttClass} · Section {ttSec}</b>. Every slot is a dropdown with all {isEarly(ttClass)?"early-years":"Class "+ttClass} subjects — swap any period to any subject, changes save automatically.</p>
-      {(()=>{ const pool=isEarly(ttClass)?EY_SUBJECTS:PR_SUBJECTS;
-        return (
-      <table className="gtable tt-table"><thead><tr><th>Day</th>{TT_TIMES.map(t=><th key={t}>{t}</th>)}</tr></thead>
-        <tbody>{TT_DAYS.map((day,d)=><tr key={day}><td><b>{day}</b></td>{TT_TIMES.map((t,p)=>{const v=grid[d][p];return (
+      <p className="hint" style={{marginTop:0,marginBottom:12}}>Showing <b>{ttClass} · Section {ttSec}</b>. <b>Tap a time to change it</b>, and pick any subject from the dropdowns — everything saves automatically. Times and periods are shared by every class; subject lists are separate for early years and primary.</p>
+
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center',marginBottom:14}}>
+        <button className="mini-btn ghost" onClick={addPeriod}>➕ Add period</button>
+        <button className="mini-btn ghost" onClick={removePeriod}>➖ Remove last period</button>
+        <button className="mini-btn ghost" onClick={()=>setSubEdit(v=>!v)}>{subEdit?"✕ Close subjects":"✏️ Edit subjects"}</button>
+      </div>
+
+      {subEdit && <div className="card" style={{background:'var(--surface2)',marginBottom:14}}>
+        <h3 style={{fontSize:14}}>Subjects for {isEarly(ttClass)?"early years (Playgroup–Prep)":"primary classes (1–5)"}</h3>
+        <p className="hint" style={{marginTop:2,marginBottom:10}}>Add your school's own subjects — Nazra, Tarbiyah, Deeniyat, anything. Removing a subject only takes it out of the dropdown list; periods already using it keep their name until you change them.</p>
+        <div style={{display:'flex',gap:7,flexWrap:'wrap',marginBottom:12}}>
+          {subPool.map(s=><span key={s} className="mini" style={{display:'inline-flex',alignItems:'center',gap:6,padding:'6px 10px',fontSize:12}}>
+            {s}<span onClick={()=>removeSubject(s)} title={"Remove "+s} style={{cursor:'pointer',color:'var(--red,#e94560)',fontWeight:900}}>✕</span></span>)}
+          {!subPool.length && <span className="hint">No subjects yet — add one below.</span>}
+        </div>
+        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <input className="tt-inp" style={{textAlign:'left',minWidth:200,border:'1px solid var(--border)',background:'var(--surface)'}}
+            placeholder="New subject name…" value={newSub}
+            onChange={e=>setNewSub(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addSubject()}/>
+          <button className="mini-btn" onClick={addSubject}>➕ Add subject</button>
+          <button className="mini-btn ghost" onClick={resetSubjects}>↩️ Reset to defaults</button>
+        </div>
+      </div>}
+
+      <table className="gtable tt-table"><thead><tr><th>Day</th>
+        {ttTimes.map((t,i)=><th key={i}>
+          <input className="tt-inp" style={{fontWeight:800,minWidth:64}} value={t} placeholder="8:30"
+            onChange={e=>setTime(i,e.target.value)} title="Tap to change this period's time"/>
+        </th>)}</tr></thead>
+        <tbody>{TT_DAYS.map((day,d)=><tr key={day}><td><b>{day}</b></td>{ttTimes.map((t,p)=>{const v=grid[d][p];return (
           <td key={p}><select className="tt-cell" value={v} onChange={e=>updateCell(d,p,e.target.value)}>
-            {v&&pool.indexOf(v)<0&&v!=="Break"&&v!=="—"&&<option value={v}>{v}</option>}
-            {pool.map(s=><option key={s} value={s}>{s}</option>)}
+            {v&&subPool.indexOf(v)<0&&v!=="Break"&&v!=="—"&&<option value={v}>{v}</option>}
+            {subPool.map(s=><option key={s} value={s}>{s}</option>)}
             <option value="Break">Break</option>
             <option value="—">— free —</option>
           </select></td>);})}</tr>)}</tbody>
-      </table>); })()}
+      </table>
     </div>}
 
     {tab==="notices" && <div>
