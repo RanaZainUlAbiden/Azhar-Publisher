@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-c grading key on report card -->
+<!-- build: maktab-2026-09-02-d owner dashboard -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -459,6 +459,11 @@ input,select,textarea,button{font-family:inherit}
 .pp-t{font-weight:800;font-size:13.5px;color:var(--brand)}.pp-s{font-size:12px;color:var(--muted);margin-top:2px}
 .hero-av{position:relative;flex:none}
 .hero-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.bars{display:flex;align-items:flex-end;gap:6px;height:150px;padding:8px 4px 0;border-bottom:1px solid var(--border)}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.bar-fill{width:70%;max-width:34px;background:linear-gradient(180deg,#2f6fed,#0f3460);border-radius:6px 6px 2px 2px;min-height:2px;transition:height .3s}
+.bar-n{font-size:10.5px;font-weight:800;color:var(--brand);height:14px;margin-top:2px}
+.bar-l{font-size:9.5px;color:var(--muted);margin-top:2px;white-space:nowrap}
 .cat-row{display:grid;grid-template-columns:200px 1fr 170px;gap:12px;align-items:center;padding:6px 0;font-size:13px}
 .cat-lb{font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cat-bar{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
@@ -916,7 +921,7 @@ async function cloudSignIn(email, pw){
   const uid = data && data.user && data.user.id;
   let prof;
   try{
-    ({data:prof} = await withTimeout(SB.from("profiles").select("role,school_id,full_name").eq("id",uid).maybeSingle(), 15000));
+    ({data:prof} = await withTimeout(SB.from("profiles").select("role,school_id,full_name,is_owner").eq("id",uid).maybeSingle(), 15000));
   }catch(e){
     return offline("Signed in, but could not load your profile — please try again in a moment.");
   }
@@ -925,8 +930,10 @@ async function cloudSignIn(email, pw){
   const {data:sch} = await SB.from("schools").select("name,active").eq("id",prof.school_id).maybeSingle();
   if(sch && sch.active===false){ await SB.auth.signOut(); return {err:"This school's subscription is not active. Please contact Azhar Publishers."}; }
   if(sch) schoolName = sch.name;
-  const user = {id:uid,email:(data.user.email||email),name:(prof.full_name||email),role:prof.role,school:schoolName,school_id:prof.school_id,cloud:true};
+  const user = {id:uid,email:(data.user.email||email),name:(prof.full_name||email),role:prof.role,school:schoolName,school_id:prof.school_id,cloud:true,owner:!!prof.is_owner};
   await authCacheSave(email, pw, user);
+  /* note the sign-in in the school's own history (the owner's dashboard reads it) — never blocks the login */
+  try{ SB.rpc("log_signin",{p_device:(navigator.platform||"")+" · "+(navigator.userAgent.match(/(Chrome|Safari|Firefox|Edg)\/[\d.]+/)||[""])[0]}).then(function(){},function(){}); }catch(e){}
   return {user: user};
 }
 function Auth({onLogin}){
@@ -3188,6 +3195,138 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   );
 }
 
+/* ---------- OWNER DASHBOARD — Azhar Publishers only ---------- */
+function ago(iso){ if(!iso) return "never"; const m=Math.round((Date.now()-new Date(iso).getTime())/60000);
+  if(m<1) return "just now"; if(m<60) return m+" min ago"; const h=Math.round(m/60); if(h<24) return h+"h ago";
+  const d=Math.round(h/24); if(d<30) return d+"d ago"; return Math.round(d/30)+"mo ago"; }
+function when(iso){ if(!iso) return "—"; const d=new Date(iso); return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }
+function health(sc){ /* traffic light for a school: green if used this week, amber if within a month, red otherwise */
+  const last=sc.last_signin?new Date(sc.last_signin).getTime():0; const days=(Date.now()-last)/86400000;
+  if(sc.active===false) return ["Suspended","#8a93a6"];
+  if(!last) return ["Never signed in","#e94560"];
+  if(days<=7) return ["Active this week","#00a884"];
+  if(days<=30) return ["Quiet · "+Math.round(days)+" days","#F0A500"];
+  return ["Inactive · "+Math.round(days)+" days","#e94560"]; }
+
+function OwnerDash({user}){
+  const [data,setData]=useState(()=>LS.get("owner:cache",null));
+  const [busy,setBusy]=useState(false);
+  const [err,setErr]=useState("");
+  const [tab,setTab]=useState("schools");
+  const [days,setDays]=useState(14);
+  const load=async(d)=>{
+    setBusy(true); setErr("");
+    if(!navigator.onLine){ setBusy(false); setErr("You're offline — showing the last figures this laptop fetched."); return; }
+    try{
+      const {data:res,error}=await withTimeout(SB.rpc("owner_overview",{p_days:d||days}),20000);
+      if(error) throw new Error(error.message);
+      setData(res); LS.set("owner:cache",res);
+    }catch(e){ setErr(/Owner only/i.test(e.message||"")?"This page is for the Azhar Publishers owner account only.":("Couldn't reach the cloud: "+(e.message||"try again"))); }
+    setBusy(false);
+  };
+  useEffect(()=>{ load(days); },[]);
+  const t=(data&&data.totals)||{};
+  const schools=(data&&data.schools)||[], accounts=(data&&data.accounts)||[], signins=(data&&data.signins)||[];
+  const byDay=(data&&data.signins_by_day)||[], backups=(data&&data.backups)||[], views=(data&&data.sample_views)||[], quotes=(data&&data.sample_quotes)||[];
+  /* fill the day chart so quiet days show as empty bars, not gaps */
+  const dayMap={}; byDay.forEach(x=>{dayMap[x.day]=+x.n;});
+  const series=Array.from({length:days},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(days-1-i)); const k=d.toISOString().slice(0,10); return {k,n:dayMap[k]||0,lbl:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}; });
+  const maxN=Math.max(1,...series.map(x=>x.n));
+  const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
+  const exportSchools=()=>downloadCSV("MAKTAB_schools_"+todayISO()+".csv",
+    [["School","Status","Accounts","Admin emails","Last sign-in","Sign-ins 7d","Last backup","Backups 7d","Devices","Backup KB"],
+     ...schools.map(sc=>[sc.name,health(sc)[0],sc.accounts,sc.admins,sc.last_signin||"",sc.signins_7d,sc.last_backup||"",sc.backups_7d,sc.devices,Math.round((sc.backup_bytes||0)/1024)])]);
+  const kpi=(cls,ic,v,l)=><div className={"kpi "+cls}><div className="ic">{ic}</div><div className="v">{v}</div><div className="l">{l}</div></div>;
+  return (
+   <div>
+    <div className="page-head"><h2>🏢 Owner dashboard</h2>
+      <p>Every school on MAKTAB, in one place — who is signing in, whose laptops are backing up, and who is browsing the sample library. Only the Azhar Publishers owner account can see this.</p></div>
+    <div className="card-flex" style={{marginBottom:16}}>
+      <div style={{fontSize:12.5,color:'var(--muted)'}}>{data?("Figures as of "+when(data.generated_at)+" · "+ago(data.generated_at)):"No figures yet"}</div>
+      <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        <button className="mini-btn" data-ownerrefresh onClick={()=>load(days)} disabled={busy}>{busy?"Refreshing…":"⟳ Refresh"}</button>
+        <button className="mini-btn ghost" onClick={exportSchools}>📥 Schools CSV</button>
+      </div>
+    </div>
+    {err && <div className="card" style={{borderLeft:'4px solid var(--red)',padding:'12px 16px',fontSize:13}}>{err}</div>}
+    <div className="kpi-grid" data-ownerkpis>
+      {kpi("","🏫",t.schools||0,"Schools")}
+      {kpi("","👥",t.accounts||0,"Accounts")}
+      {kpi("green","🔑",t.signins_7d||0,"Sign-ins · last 7 days")}
+      {kpi("gold","☁️",t.backups_7d||0,"Backups · last 7 days")}
+      {kpi("","📚",t.views_7d||0,"Sample views · last 7 days")}
+      {kpi("red","💬",t.quotes_all||0,"Quote requests")}
+    </div>
+
+    <div className="sms-tabs">
+      {[["schools","🏫","Schools"],["signins","🔑","Sign-ins"],["backups","☁️","Backups"],["samples","📚","e-Samples"]].map(([id,ic,l])=>
+        <div key={id} className={"sms-tab"+(tab===id?" active":"")} onClick={()=>setTab(id)}>{ic} {l}</div>)}
+    </div>
+
+    {tab==="schools" && <div className="card">
+      <h3>Schools · {schools.length}</h3>
+      <table className="gtable"><thead><tr><th>School</th><th>Status</th><th>Accounts</th><th>Last sign-in</th><th>7d sign-ins</th><th>Last backup</th><th>7d backups</th><th>Laptops</th></tr></thead>
+        <tbody>{schools.map(sc=>{ const [lbl,col]=health(sc); return <tr key={sc.id}>
+          <td><b>{sc.name}</b><div style={{fontSize:11,color:'var(--muted)'}}>{sc.admins||"no admin yet"} · since {when(sc.created_at).split(" ")[0]} {when(sc.created_at).split(" ")[1]}</div></td>
+          <td><span className="pill" style={{background:col+"22",color:col}}>{lbl}</span></td>
+          <td>{sc.accounts}</td>
+          <td title={when(sc.last_signin)}>{ago(sc.last_signin)}</td>
+          <td>{sc.signins_7d}</td>
+          <td title={when(sc.last_backup)}>{ago(sc.last_backup)}</td>
+          <td>{sc.backups_7d}</td>
+          <td>{sc.devices||0}</td></tr>; })}
+          {schools.length===0 && <tr><td colSpan={8} className="empty-row">{busy?"Loading…":"No schools yet."}</td></tr>}
+        </tbody></table>
+      <p className="hint">Green = someone at the school signed in this week. Amber = within a month. Red = longer, or never. "Laptops" counts the distinct devices that have backed up.</p>
+    </div>}
+
+    {tab==="signins" && <div>
+      <div className="card">
+        <div className="card-flex"><h3>Sign-ins per day</h3>
+          <div className="filter-bar" style={{margin:0}}>{[7,14,30,60].map(d=><span key={d} className={"fchip"+(days===d?" active":"")} onClick={()=>{setDays(d);load(d);}}>{d} days</span>)}</div></div>
+        <div className="bars">{series.map(x=><div key={x.k} className="bar-col" title={x.lbl+": "+x.n}>
+          <div className="bar-fill" style={{height:Math.round(x.n/maxN*100)+"%"}}></div>
+          <div className="bar-n">{x.n||""}</div>
+          <div className="bar-l">{x.lbl.split(" ")[0]}</div></div>)}</div>
+        <p className="hint">{t.signins_all||0} sign-ins recorded in total. This history lives in your own database, so it never expires.</p>
+      </div>
+      <div className="card"><h3>Recent sign-ins</h3>
+        <table className="gtable"><thead><tr><th>When</th><th>Who</th><th>Role</th><th>School</th><th>Device</th></tr></thead>
+          <tbody>{signins.map((l,i)=><tr key={i}><td title={when(l.at)}>{ago(l.at)}</td><td>{l.email}</td><td>{l.role}</td><td>{l.school||"—"}</td><td style={{fontSize:11.5,color:'var(--muted)'}}>{l.device||"—"}</td></tr>)}
+            {signins.length===0 && <tr><td colSpan={5} className="empty-row">No sign-ins recorded yet — the log starts from the next time anyone signs in.</td></tr>}</tbody></table>
+      </div>
+      <div className="card"><h3>All accounts · {accounts.length}</h3>
+        <table className="gtable"><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>School</th><th>Last sign-in</th><th>Created</th></tr></thead>
+          <tbody>{accounts.map((a,i)=><tr key={i}><td>{a.email}</td><td>{a.name||"—"}</td><td>{a.role}</td><td>{a.school||"—"}</td><td title={when(a.last_signin)}>{ago(a.last_signin)}</td><td>{when(a.created_at).split(" ")[0]} {when(a.created_at).split(" ")[1]}</td></tr>)}</tbody></table>
+      </div>
+    </div>}
+
+    {tab==="backups" && <div className="card">
+      <h3>Recent cloud backups · {t.backups_all||0} in total</h3>
+      <table className="gtable"><thead><tr><th>When</th><th>School</th><th>Laptop</th><th>Size</th></tr></thead>
+        <tbody>{backups.map((b,i)=><tr key={i}><td title={when(b.at)}>{ago(b.at)}</td><td>{b.school||"—"}</td><td style={{fontSize:12,color:'var(--muted)'}}>{b.device||"—"}</td><td>{Math.round((b.bytes||0)/1024)} KB</td></tr>)}
+          {backups.length===0 && <tr><td colSpan={4} className="empty-row">No backups yet.</td></tr>}</tbody></table>
+      <p className="hint">Each laptop backs itself up once a day when it is online. A school whose backups stop is a school whose laptops are off, offline — or not being used.</p>
+    </div>}
+
+    {tab==="samples" && <div>
+      <div className="card"><h3>Quote requests · {quotes.length}</h3>
+        <table className="gtable"><thead><tr><th>When</th><th>Name</th><th>School</th><th>Phone</th><th>Books</th><th>Note</th></tr></thead>
+          <tbody>{quotes.map((q,i)=><tr key={i}><td title={when(q.at)}>{ago(q.at)}</td><td>{q.visitor}</td><td>{q.school}</td><td><a href={"https://wa.me/"+String(q.phone||"").replace(/\D/g,"").replace(/^0/,"92")} target="_blank" rel="noreferrer">{q.phone}</a></td>
+            <td style={{fontSize:12}}>{Array.isArray(q.items)?q.items.map(x=>x.title||x.name||x).join(", "):String(q.items||"")}</td><td style={{fontSize:12,color:'var(--muted)'}}>{q.note||""}</td></tr>)}
+            {quotes.length===0 && <tr><td colSpan={6} className="empty-row">No quote requests yet.</td></tr>}</tbody></table>
+        <p className="hint">Tap a phone number to open WhatsApp. These are warm leads — schools that browsed the books and asked for prices.</p>
+      </div>
+      <div className="card"><h3>Books opened · {t.views_all||0} in total</h3>
+        <table className="gtable"><thead><tr><th>When</th><th>Visitor</th><th>School</th><th>Book</th></tr></thead>
+          <tbody>{views.map((v,i)=><tr key={i}><td title={when(v.at)}>{ago(v.at)}</td><td>{v.visitor}</td><td>{v.school}</td><td>{v.book}</td></tr>)}
+            {views.length===0 && <tr><td colSpan={4} className="empty-row">Nobody has opened a sample yet.</td></tr>}</tbody></table>
+      </div>
+    </div>}
+   </div>
+  );
+}
+
 /* ---------- ACCOUNTS — daily expenses & monthly books ---------- */
 const EXP_CATS=["Salaries","Rent","Utilities (electricity, gas, water)","Internet & phone","Stationery & printing","Books & supplies",
   "Maintenance & repairs","Transport & fuel","Food & refreshments","Events & functions","Marketing","Other"];
@@ -3378,7 +3517,7 @@ function Profile({user,theme,setTheme,schoolName,setSchoolName}){
 
 /* ---------- APP ---------- */
 function App(){
-  const SESSION_V=3;   /* bump this number + redeploy to force-logout every existing session */
+  const SESSION_V=4;   /* bump this number + redeploy to force-logout every existing session */
   const [user,setUser]=useLS("session",null);
   useEffect(()=>{ if(user && user.sv!==SESSION_V) setUser(null); },[user]);
   const [page,setPage]=useState("dashboard");
@@ -3422,10 +3561,11 @@ function App(){
     {id:"gradebook",label:"Class Gradebook",icon:"📊"},
     {id:"reportcards",label:"Report Cards",icon:"🧾"},
     ...(user.role==='admin'?[{section:"Administration"},{id:"admin",label:"School Management",icon:"🏫"},{id:"accounts",label:"Accounts",icon:"💵"}]:[]),
+    ...(user.owner?[{section:"Azhar Publishers"},{id:"owner",label:"Owner dashboard",icon:"🏢"}]:[]),
     {section:"Account"},
     {id:"profile",label:"Profile & Settings",icon:"👤"},
   ];
-  const titles={dashboard:"Dashboard",library:"Book Library",papergen:"Paper Generator",planner:"Lesson Planner",diary:"Homework Diary",certs:"Certificates",training:"Teacher Training",gradebook:"Class Gradebook",reportcards:"Report Cards",admin:"School Management",accounts:"Accounts",profile:"Profile & Settings"};
+  const titles={dashboard:"Dashboard",library:"Book Library",papergen:"Paper Generator",planner:"Lesson Planner",diary:"Homework Diary",certs:"Certificates",training:"Teacher Training",gradebook:"Class Gradebook",reportcards:"Report Cards",admin:"School Management",accounts:"Accounts",owner:"Owner dashboard",profile:"Profile & Settings"};
   const render=()=>({
     dashboard:<Dashboard user={user} go={go} openBook={setAppBook} notices={notices}/>,
     library:<Library openBook={setAppBook} favs={favs} setFavs={setFavs} onFocus={setFocusBook}/>,
@@ -3438,6 +3578,7 @@ function App(){
     reportcards:<ReportCard prefill={rcPrefill} students={students} schoolName={schoolName}/>,
     admin:<AdminSMS students={students} setStudents={setStudents} notices={notices} setNotices={setNotices} schoolName={schoolName}/>,
     accounts:<Accounts schoolName={schoolName} user={user}/>,
+    owner:user.owner?<OwnerDash user={user}/>:<Dashboard user={user} go={go} openBook={setAppBook} notices={notices}/>,
     profile:<Profile user={user} theme={theme} setTheme={setTheme} schoolName={schoolName} setSchoolName={setSchoolName}/>
   }[page]||<Dashboard user={user} go={go} openBook={setAppBook} notices={notices}/>);
   return (
