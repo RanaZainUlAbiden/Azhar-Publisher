@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-h paper generator -->
+<!-- build: maktab-2026-09-02-i book contents -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -29,6 +29,7 @@ try {
 </script>
 <script src="../AzharEd_Deploy/content_data.js"></script>
 <script src="../AzharEd_Deploy/question_bank.js"></script>
+<script src="../AzharEd_Deploy/book_toc.js"></script>
 
 <meta name="theme-color" content="#0f3460">
 <style>
@@ -1676,6 +1677,7 @@ function ReportCard({prefill,students,schoolName}){
 }
 /* ---------- PAPER GENERATOR (book-tailored) ---------- */
 const QBANK = window.AZHAR_QBANK || {};
+const TOC = window.AZHAR_TOC || {};   /* real table of contents per book: [firstPage,lastPage,title] */
 const QB={
  "English|primary":["Fill in the blank: She ____ (go/goes) to school every day.","Write the plurals: box → ____ , child → ____","Use these words in sentences: happy, school, friend","Circle the noun: The boy plays with a red ball.","Write the opposites: big, hot, day, fast","Punctuate this sentence: where is my book","Choose the correct word: I have (a / an) orange.","Make a sentence from these words: garden / flowers / the / in","Write five sentences about your school.","Change to past tense: I play cricket.","Circle the verb: Ali runs very fast.","Fill in the blank: The sun rises in the ____."],
  "Urdu|primary":["خالی جگہ پُر کریں: علم بڑی ____ ہے۔ (دولت / چیز)","واحد جمع لکھیں: کتاب ، قلم ، استاد","ان الفاظ کے جملے بنائیں: محنت ، کامیابی ، وقت","متضاد الفاظ لکھیں: دن ، بڑا ، روشنی","«میرا اسکول» کے موضوع پر پانچ جملے لکھیں۔","مذکر مونث لکھیں: استاد ، بکری ، دادا","محاورہ مکمل کریں: نیکی کر دریا میں ____","درست جملہ بنائیں: جاتا میں اسکول ہوں","ان حروف سے لفظ بنائیں: ب + ا + غ = ____"],
@@ -1721,8 +1723,12 @@ const PG_LONG={
   Computer:["Draw a computer and label its parts.","Write five uses of a computer."],
   default:["Write five sentences about '{pt}'.","Write what you learned in '{pt}'."]
 };
-function pgChapters(bank){
-  /* lessons in page order — the printed banks tag each question with its page title */
+function pgChapters(bank,bookId){
+  /* the book's own contents list when we have it; otherwise the lessons the bank tagged */
+  const toc=TOC[bookId];
+  if(toc&&toc.length){
+    return toc.map(x=>({title:String(x[2]).replace(/^باب:\s*/,""),from:x[0],to:x[1],n:bank?bank.items.filter(q=>q.pg>=x[0]&&q.pg<=x[1]).length:0}));
+  }
   if(!bank) return [];
   const map={},order=[];
   bank.items.slice().sort((a,b)=>a.pg-b.pg).forEach(q=>{
@@ -1744,10 +1750,11 @@ function PaperGen({schoolName,openBook}){
   const bank=book?QBANK[bookId]:null;
   useEffect(()=>{ const ok=bankBooks.some(b=>b.id===bookId)||(!early&&subjMode);
     if(!ok){ const first=bankBooks[0]; setBookId(first?first.id:(early?"":"subj:English")); } },[cls]);
-  const chapters=useMemo(()=>pgChapters(bank),[bookId]);
+  const chapters=useMemo(()=>pgChapters(bank,bookId),[bookId]);
   const [lesFrom,setLesFrom]=useState(-1);         /* -1 = whole book */
   const [lesTo,setLesTo]=useState(-1);
-  const maxPage=bank?Math.max.apply(null,bank.items.map(q=>q.pg)):1;
+  const pl=(bank&&bank.unit==="chapter")?"ch.":"p.";   /* Alfatah banks are indexed by chapter, not page */
+  const maxPage=Math.max(bank?Math.max.apply(null,bank.items.map(q=>q.pg)):1, chapters.length?chapters[chapters.length-1].to:1);
   const [pgFrom,setPgFrom]=useState(1);
   const [pgTo,setPgTo]=useState(999);
   useEffect(()=>{ setPgFrom(1); setPgTo(maxPage); setLesFrom(-1); setLesTo(-1); setPaper(null); },[bookId]);
@@ -1899,13 +1906,13 @@ function PaperGen({schoolName,openBook}){
         <span style={{fontSize:13,fontWeight:700}}>Lessons</span>
         <select className="tt-sel" data-pglesfrom value={lesFrom} onChange={e=>pickLessons(+e.target.value,lesTo)} style={{maxWidth:280}}>
           <option value={-1}>Whole book · all {chapters.length} lessons</option>
-          {chapters.map((c,i)=><option key={i} value={i}>{i+1}. {c.title} (p.{c.from}{c.to>c.from?"–"+c.to:""})</option>)}
+          {chapters.map((c,i)=><option key={i} value={i}>{i+1}. {c.title} · {pl}{c.from}{c.to>c.from?"–"+c.to:""}{c.n?" · "+c.n+" Qs":" · no questions yet"}</option>)}
         </select>
         {lesFrom>=0&&<span style={{fontSize:13,fontWeight:700}}>to</span>}
         {lesFrom>=0&&<select className="tt-sel" data-pglesto value={lesTo} onChange={e=>pickLessons(lesFrom,+e.target.value)} style={{maxWidth:280}}>
-          {chapters.map((c,i)=>i>=lesFrom?<option key={i} value={i}>{i+1}. {c.title} (p.{c.from}{c.to>c.from?"–"+c.to:""})</option>:null)}
+          {chapters.map((c,i)=>i>=lesFrom?<option key={i} value={i}>{i+1}. {c.title} · {pl}{c.from}{c.to>c.from?"–"+c.to:""}{c.n?" · "+c.n+" Qs":""}</option>:null)}
         </select>}
-        <span style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,fontWeight:700,marginLeft:4}}>pages
+        <span style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,fontWeight:700,marginLeft:4}}>{pl==="ch."?"chapters":"pages"}
           <input type="number" className="date-inp" data-pgfrom style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgFrom} onChange={e=>{setPgFrom(Math.max(1,+e.target.value||1));setPaper(null);}}/>–
           <input type="number" className="date-inp" data-pgto style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgTo} onChange={e=>{setPgTo(Math.min(maxPage,+e.target.value||maxPage));setPaper(null);}}/>
           <span style={{color:'var(--muted)',fontWeight:500}}>of {maxPage}</span></span>
