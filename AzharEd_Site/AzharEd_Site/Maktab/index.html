@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-01-d staff details -->
+<!-- build: maktab-2026-09-02-a add-subject buttons -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -446,6 +446,14 @@ input,select,textarea,button{font-family:inherit}
 .gtable .rc-add:hover td{color:var(--brand);background:var(--surface2);border-color:var(--navy)!important}
 .sub-add{border:none;background:transparent;font:inherit;font-weight:700;color:inherit;outline:none;width:100%;padding:0}
 .sub-add::placeholder{color:inherit;opacity:.85}
+/* "Add a subject" as a real control: an input beside a full button, not a faint ghost line */
+.add-row td{border:none!important;background:transparent!important;padding:12px 4px 4px!important}
+.add-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.add-inp{flex:1;min-width:180px;padding:10px 13px;border:1.5px dashed var(--border);border-radius:9px;font:inherit;font-size:13.5px;font-weight:600;background:var(--surface);color:var(--text);outline:none;transition:border .15s}
+.add-inp:focus{border-style:solid;border-color:var(--navy)}
+.add-inp::placeholder{color:var(--muted);font-weight:600}
+.add-btn{white-space:nowrap;padding:10px 18px;border-radius:9px;font-size:12.5px;font-weight:800;border:none;cursor:pointer;background:var(--navy);color:#fff;box-shadow:0 2px 6px rgba(15,52,96,.18)}
+.add-btn:hover{filter:brightness(1.12)}
 .rc-total td{font-weight:800;background:#eef2fb}
 .rc-key{font-size:11px;color:#8a90a0;margin:6px 0 18px;line-height:1.5}
 .rc-sel{border:1px solid #d8dce6;border-radius:6px;padding:4px 8px;font-size:12.5px;background:#fff;color:#17203a}
@@ -1808,12 +1816,13 @@ function Planner({schoolName,openBook}){
           <td><input className="tt-inp" style={{textAlign:'left',minWidth:220}} placeholder={"e.g. "+(isEarly(cls)?"Counting book p. 12–15 · numbers 6–10":"Unit 3 · exercise Q1–5")} value={plan.rows[s2]||""} onChange={e=>setRow(s2,e.target.value)}/></td>
           <td className="rc-gut no-print">{subs.length>1 &&
             <button className="rc-x" title={"Remove "+s2+" from this list"} onClick={()=>removeSubject(s2)}>−</button>}</td></tr>)}
-          <tr className="rc-add no-print">
-            <td colSpan={2} onClick={()=>{const el=document.getElementById("plNewSub");el&&el.focus();}}>
-              ＋&nbsp; <input id="plNewSub" className="sub-add" placeholder="Add a subject — type a name and press Enter"
+          <tr className="add-row no-print"><td colSpan={3}>
+            <div className="add-wrap">
+              <input id="plNewSub" className="add-inp" placeholder="New subject name… e.g. Nazra, Tarbiyah, Computer"
                 value={newSub} onChange={e=>setNewSub(e.target.value)}
-                onKeyDown={e=>{if(e.key==='Enter')addSubject();}} onBlur={addSubject}/></td>
-            <td className="rc-gut"></td></tr>
+                onKeyDown={e=>{if(e.key==='Enter')addSubject();}}/>
+              <button className="add-btn" data-addsub onClick={addSubject}>＋ Add subject</button>
+            </div></td></tr>
         </tbody>
       </table>
       <div className="field" style={{marginTop:14}}><label>Notes for the week (optional)</label>
@@ -1970,12 +1979,13 @@ function Diary({schoolName}){
           <td><input className="tt-inp" style={{textAlign:'left',minWidth:220}} placeholder={"e.g. "+(isEarly(cls)?"Trace numbers 1–5 · colour the apple":"Ex 4.2 Q1–5 · learn definitions")} value={entry.rows[su]||""} onChange={e=>setRow(su,e.target.value)}/></td>
           <td className="rc-gut no-print">{subs.length>1 &&
             <button className="rc-x" title={"Remove "+su+" from this list"} onClick={()=>removeSubject(su)}>−</button>}</td></tr>)}
-          <tr className="rc-add no-print">
-            <td colSpan={2} onClick={()=>{const el=document.getElementById("dyNewSub");el&&el.focus();}}>
-              ＋&nbsp; <input id="dyNewSub" className="sub-add" placeholder="Add a subject — type a name and press Enter"
+          <tr className="add-row no-print"><td colSpan={3}>
+            <div className="add-wrap">
+              <input id="dyNewSub" className="add-inp" placeholder="New subject name… e.g. Nazra, Tarbiyah, Computer"
                 value={newSub} onChange={e=>setNewSub(e.target.value)}
-                onKeyDown={e=>{if(e.key==='Enter')addSubject();}} onBlur={addSubject}/></td>
-            <td className="rc-gut"></td></tr>
+                onKeyDown={e=>{if(e.key==='Enter')addSubject();}}/>
+              <button className="add-btn" data-addsub onClick={addSubject}>＋ Add subject</button>
+            </div></td></tr>
         </tbody>
       </table>
       <div className="field" style={{marginTop:14}}><label>Note for parents (optional)</label>
