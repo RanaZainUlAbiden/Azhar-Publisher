@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-e activity log -->
+<!-- build: maktab-2026-09-02-f paper generator -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -1686,126 +1686,281 @@ const QB={
  "Computer|primary":["Name three parts of a computer.","What do we use a keyboard for? ____","Circle the input device: monitor / mouse / printer","The brain of the computer is called ____ .","Write two uses of computers in school.","What does Save mean on a computer? ____"],
  "Nazra Quran|primary":["بسم اللہ مکمل لکھیں۔","سورۃ الفاتحہ کی پہلی آیت لکھیں۔","حروفِ مدہ کون سے ہیں؟ ____","سورۃ الاخلاص زبانی سنائیں۔ (زبانی)","نون ساکن کی ایک مثال لکھیں۔"]
 };
+/* ---------- PAPER GENERATOR ----------
+   Builds a printable paper in the same pattern as the ready-made Monthly / Term papers:
+   header, marks table, numbered sections (Fill in the blanks · MCQs · Match · Short · Long),
+   from the pages / lessons the school chooses, with the school deciding how many of each. */
+const PG_TYPES=[
+  {k:"blank",label:"Fill in the blanks",icon:"✏️",marks:1},
+  {k:"mcq",  label:"Multiple choice",   icon:"◯", marks:1},
+  {k:"match",label:"Match the columns", icon:"⇄", marks:1},
+  {k:"short",label:"Short questions",   icon:"✍️",marks:2},
+  {k:"long", label:"Long questions",    icon:"📝",marks:5}
+];
+const PG_PRESETS={
+  "Monthly Test":{blank:5,mcq:5,match:1,short:3,long:0},
+  "Class Test":{blank:5,mcq:5,match:0,short:0,long:0},
+  "1st Term Exam":{blank:8,mcq:8,match:1,short:4,long:2},
+  "2nd Term Exam":{blank:8,mcq:8,match:1,short:4,long:2},
+  "Final Term Exam":{blank:10,mcq:10,match:2,short:5,long:2},
+  "Practice Worksheet":{blank:5,mcq:5,match:1,short:2,long:0}
+};
+const PG_TIMES=["30 Minutes","45 Minutes","1 Hour","1.5 Hours","2 Hours"];
+/* long-answer questions are not in the printed bank — these templates use the chosen lessons' titles */
+const PG_LONG={
+  English:["Write five sentences about '{pt}'.","Copy the lesson '{pt}' in your best handwriting (any five lines).","Write the letters A to Z in capital and small letters.","Write three words you learned in '{pt}' and use each in a sentence."],
+  Urdu:["سبق «{pt}» سے پانچ الفاظ لکھیں اور ان کے جملے بنائیں۔","حروفِ تہجی ا سے ی تک خوش خط لکھیں۔","«{pt}» کے بارے میں تین جملے لکھیں۔","سبق «{pt}» کی پانچ سطریں نقل کریں۔"],
+  Counting:["Write the counting from 1 to 20.","Write the number names from one to ten.","Draw five apples and write the number.","Write the numbers that come after: 3, 7, 9, 12, 15."],
+  Maths:["Write the counting from 1 to 100.","Write the table of {n}.","Solve: 25 + 17, 48 − 19, 6 × 7, 36 ÷ 4.","Write the number names from 1 to 20."],
+  Tables:["Write the table of {n}.","Write the tables of 2 and 5.","Fill the missing numbers in the table of {n}."],
+  Islamiyat:["«{pt}» کے بارے میں مختصر نوٹ لکھیں۔","کلمہ طیبہ ترجمے کے ساتھ لکھیں۔","نماز کے فوائد پر پانچ جملے لکھیں۔","سبق «{pt}» سے آپ نے کیا سیکھا؟ لکھیں۔"],
+  Islamiat:["«{pt}» کے بارے میں مختصر نوٹ لکھیں۔","کلمہ طیبہ ترجمے کے ساتھ لکھیں۔","نماز کے فوائد پر پانچ جملے لکھیں۔"],
+  "General Knowledge":["Write five sentences about '{pt}'.","Name the four provinces of Pakistan and their capitals.","Draw the national flag of Pakistan and colour it."],
+  Science:["Write what you learned in '{pt}' in five sentences.","Draw and label a plant.","Name the five senses and what each one does."],
+  "Social Studies":["Write five sentences about '{pt}'.","Draw a map of Pakistan and mark your city.","Write two duties of a good citizen."],
+  Computer:["Draw a computer and label its parts.","Write five uses of a computer."],
+  default:["Write five sentences about '{pt}'.","Write what you learned in '{pt}'."]
+};
+function pgChapters(bank){
+  /* lessons in page order — the printed banks tag each question with its page title */
+  if(!bank) return [];
+  const map={},order=[];
+  bank.items.slice().sort((a,b)=>a.pg-b.pg).forEach(q=>{
+    const t=(q.pt||("Page "+q.pg)).replace(/^باب:\s*/,"");
+    if(!map[t]){ map[t]={title:t,from:q.pg,to:q.pg,n:0}; order.push(t); }
+    map[t].to=Math.max(map[t].to,q.pg); map[t].from=Math.min(map[t].from,q.pg); map[t].n++;
+  });
+  return order.map(t=>map[t]);
+}
 function PaperGen({schoolName,openBook}){
   const [cls,setCls]=useLS("pg:cls","Nursery");
   const early=isEarly(cls);
   const levelBooks=BOOKS.filter(b=>b.level===cls);
+  const bankBooks=levelBooks.filter(b=>QBANK[b.id]);
   const [bookId,setBookId]=useLS("pg:book","");
+  const subjMode=!early&&String(bookId).indexOf("subj:")===0;
+  const subject=subjMode?bookId.slice(5):"";
   const book=BOOKS.find(b=>b.id===bookId);
-  const bank=QBANK[bookId];
-  useEffect(()=>{ if(early){ const ok=levelBooks.some(b=>b.id===bookId&&QBANK[b.id]);
-    if(!ok){ const first=levelBooks.find(b=>QBANK[b.id]); setBookId(first?first.id:""); } } },[cls]);
-  const [subject,setSubject]=useLS("pg:subject","English");
-  useEffect(()=>{ if(!early&&SUBJECT_POOL.primary.indexOf(subject)<0) setSubject(SUBJECT_POOL.primary[0]); },[cls]);
+  const bank=book?QBANK[bookId]:null;
+  useEffect(()=>{ const ok=bankBooks.some(b=>b.id===bookId)||(!early&&subjMode);
+    if(!ok){ const first=bankBooks[0]; setBookId(first?first.id:(early?"":"subj:English")); } },[cls]);
+  const chapters=useMemo(()=>pgChapters(bank),[bookId]);
+  const [selCh,setSelCh]=useState(null);           /* null = every lesson */
   const maxPage=bank?Math.max.apply(null,bank.items.map(q=>q.pg)):1;
   const [pgFrom,setPgFrom]=useState(1);
   const [pgTo,setPgTo]=useState(999);
-  useEffect(()=>{ setPgFrom(1); setPgTo(maxPage); },[bookId]);
-  const [count,setCount]=useLS("pg:count",10);
+  useEffect(()=>{ setPgFrom(1); setPgTo(maxPage); setSelCh(null); setPaper(null); },[bookId]);
   const [title,setTitle]=useLS("pg:title","Monthly Test");
+  const [custom,setCustom]=useLS("pg:custom","");
+  const [time,setTime]=useLS("pg:time","1 Hour");
+  const [counts,setCounts]=useLS("pg:counts",PG_PRESETS["Monthly Test"]);
+  const [marks,setMarks]=useLS("pg:marks",{blank:1,mcq:1,match:1,short:2,long:5});
   const [paper,setPaper]=useState(null);
+  const [saved,setSaved]=useLS("pg:saved",[]);
   const [qbank,setQbank]=useLS("qbank2",[]);
-  const [nq,setNq]=useState("");
+  const [nq,setNq]=useState(""),[na,setNa]=useState(""),[nk,setNk]=useState("short");
   const [showAdd,setShowAdd]=useState(false);
-  const target=early?bookId:(subject+"|primary");
+  const target=subjMode?(subject+"|primary"):bookId;
+  const subjectName=subjMode?subject:(book?book.subject:"");
   const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+  const shuffle=arr=>{for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t2=arr[i];arr[i]=arr[j];arr[j]=t2;}return arr;};
   const mathQ=()=>{
     if(subject==="Tables"){const a=R(2,10),b=R(1,10);return {text:a+" × "+b+" = ____",answer:String(a*b)};}
     if(cls==="One"||cls==="Two"){const a=R(10,99),b=R(1,a);return Math.random()<0.5?{text:a+" + "+b+" = ____",answer:String(a+b)}:{text:a+" − "+b+" = ____",answer:String(a-b)};}
     const a=R(2,12),b=R(2,12);
     return Math.random()<0.5?{text:a+" × "+b+" = ____",answer:String(a*b)}:{text:(a*b)+" ÷ "+a+" = ____",answer:String(b)};
   };
-  const shuffle=arr=>{for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t2=arr[i];arr[i]=arr[j];arr[j]=t2;}return arr;};
-  const generate=()=>{
-    let pool=[];
-    if(early){
-      if(!bank){toast("Pick a book first","ℹ️");return;}
-      pool=bank.items.filter(q=>q.pg>=pgFrom&&q.pg<=pgTo).map(q=>Object.assign({},q));
-    }else{
-      if(subject==="Maths"||subject==="Tables"){for(let i=0;i<count*3;i++)pool.push(Object.assign({k:"short"},mathQ()));}
+  /* which lessons / pages are in play */
+  const chosen=chapters.filter(c=>!selCh||selCh.indexOf(c.title)>=0);
+  const inScope=q=>{ if(q.pg<pgFrom||q.pg>pgTo) return false;
+    if(selCh){ const t=(q.pt||("Page "+q.pg)).replace(/^باب:\s*/,""); return selCh.indexOf(t)>=0; } return true; };
+  const scopeItems=bank?bank.items.filter(inScope):[];
+  const hasBlank=q=>/____/.test(typeof q==="string"?q:(q&&q.text)||"");
+  const pools=()=>{
+    const P={blank:[],mcq:[],match:[],short:[],long:[]};
+    if(bank){
+      scopeItems.forEach(q=>{
+        const c=Object.assign({},q);
+        if(q.k==="match"&&q.pairs) P.match.push(c);
+        else if(q.k==="mcq"){ P.mcq.push(c); if(hasBlank(q.text)) P.blank.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt}); else P.short.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt}); }
+        else if(hasBlank(q.text)) P.blank.push(c);
+        else P.short.push(c);
+      });
+    }
+    if(subjMode){
+      if(subject==="Maths"||subject==="Tables"){ for(let i=0;i<40;i++) P.blank.push(mathQ()); }
+      (QB[subject+"|primary"]||[]).forEach(t2=>{ const o={text:t2,answer:""}; (hasBlank(t2)?P.blank:P.short).push(o); });
       const alias={Islamiat:"Islamiyat"};
       BOOKS.filter(b=>b.level===cls&&QBANK[b.id]&&b.subject===(alias[subject]||subject))
-        .forEach(b=>QBANK[b.id].items.forEach(q=>pool.push(Object.assign({},q))));
-      (QB[subject+"|primary"]||[]).forEach(s2=>pool.push({k:"short",text:s2,answer:""}));
+        .forEach(b=>QBANK[b.id].items.forEach(q=>{ const c=Object.assign({},q);
+          if(q.k==="match") P.match.push(c); else if(q.k==="mcq") P.mcq.push(c); else (hasBlank(q.text)?P.blank:P.short).push(c); }));
     }
-    qbank.filter(q=>q.target===target).forEach(q=>pool.push({k:"short",text:q.text,answer:""}));
-    if(!pool.length){toast("No questions in this page range — widen it","⚠️");return;}
-    shuffle(pool);
-    const seen={},out=[];
-    pool.forEach(q=>{ if(!seen[q.text]&&out.length<count){ seen[q.text]=1; out.push(q); } });
-    out.forEach(q=>{ if(q.k==="match"&&q.pairs){ q.left=q.pairs.map(p=>p[0]); q.right=shuffle(q.pairs.map(p=>p[1]).slice()); } });
-    setPaper(out); toast("Paper ready — "+out.length+" questions","📝");
+    qbank.filter(q=>q.target===target).forEach(q=>P[q.k||"short"].push({text:q.text,answer:q.answer||"",own:true}));
+    /* long answers: the school's own first, then lesson-based templates */
+    const tpl=PG_LONG[subjectName]||PG_LONG.default;
+    const pts=chosen.length?chosen.map(c=>c.title):["this lesson"];
+    tpl.forEach(t2=>{ if(/\{pt\}/.test(t2)) shuffle(pts.slice()).slice(0,3).forEach(pt=>P.long.push({text:t2.replace("{pt}",pt),answer:"",tpl:true}));
+      else P.long.push({text:t2.replace("{n}",String(R(2,9))),answer:"",tpl:true}); });
+    return P;
   };
-  const esc2=s2=>String(s2).replace(/</g,"&lt;");
-  const qHTML=(q,i)=>{
-    let body;
-    if(q.k==="mcq") body=`<div>${esc2(q.text)}</div><div style="margin-top:9px">${q.options.map(o=>`◯ ${esc2(o)}`).join("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")}</div>`;
-    else if(q.k==="match") body=`<div>${esc2(q.text)}</div><table style="margin-top:9px;width:auto;border-collapse:collapse"><tr>${q.left.map(l=>`<td style="border:1px solid #ccd3e0;padding:6px 14px;text-align:center">${esc2(l)}</td>`).join("")}</tr><tr>${q.right.map(r2=>`<td style="border:1px solid #ccd3e0;padding:6px 14px;text-align:center">${esc2(r2)}</td>`).join("")}</tr></table><div style="font-size:11px;color:#99a;margin-top:4px">Draw lines to match the two rows.</div>`;
-    else body=`<div>${esc2(q.text)}</div>`;
-    return `<div style="display:flex;gap:10px;margin:0 0 24px;font-size:14px"><b>${i+1}.</b><div style="flex:1">${body}</div><span style="color:#99a;font-size:11px;white-space:nowrap">/ 1</span></div>`;
+  const generate=()=>{
+    if(!bank&&!subjMode){ toast("Pick a book first","ℹ️"); return; }
+    if(bank&&!scopeItems.length){ toast("No questions in those lessons / pages — widen the range","⚠️"); return; }
+    const P=pools(), sections=[], short_=[], seen={};   /* a question appears once on the whole paper */
+    PG_TYPES.forEach(tp=>{
+      const n=+counts[tp.k]||0; if(!n) return;
+      const pool=shuffle(P[tp.k].slice()); const items=[];
+      pool.forEach(q=>{ if(!seen[q.text]&&items.length<n){ seen[q.text]=1; items.push(q); } });
+      if(!items.length) { short_.push(tp.label); return; }
+      items.forEach(q=>{ if(q.k==="match"&&q.pairs){ q.left=q.pairs.map(p=>p[0]); q.right=shuffle(q.pairs.map(p=>p[1]).slice()); } });
+      const each=+marks[tp.k]||1;
+      const sec={k:tp.k,label:tp.label,items,each,marks:items.length*each,wanted:n};
+      if(tp.k==="blank"){ const ans=items.map(q=>q.answer).filter(Boolean); sec.wordBank=ans.length===items.length?shuffle(ans.filter((w,i)=>ans.indexOf(w)===i)):null; }
+      sections.push(sec);
+    });
+    if(!sections.length){ toast("Nothing to put on the paper — check the counts","⚠️"); return; }
+    const scope=bank?(selCh&&chosen.length<chapters.length?chosen.map(c=>c.title).slice(0,3).join(" · ")+(chosen.length>3?" …":""):(pgFrom>1||pgTo<maxPage?"Pages "+pgFrom+"–"+pgTo:"Full book")):"Class "+cls;
+    const p={id:Date.now(),title:(custom||title),time,cls,bookId,bookTitle:subjMode?subject+" · Class "+cls:(book.title+" · "+cls),subject:subjectName,scope,sections,total:sections.reduce((a,s2)=>a+s2.marks,0),made:todayISO()};
+    setPaper(p);
+    toast(short_.length?"Paper ready — not enough "+short_.join(", ").toLowerCase()+" in the bank":"Paper ready — "+p.total+" marks","📝");
   };
-  const printPaper=withKey=>{ if(!paper)return;
-    const src=early?(book?book.title+" · pages "+pgFrom+"–"+pgTo+" · "+cls:""):subject+" · Class "+cls;
-    const key=withKey?`<div style="page-break-before:always"><h1 style="font-size:16px">Answer Key (teacher copy)</h1>`+paper.map((q,i)=>{
-        let a=q.answer||""; if(q.k==="match"&&q.pairs)a=q.pairs.map(p=>p[0]+" → "+p[1]).join(" ,  ");
-        return a?`<div style="font-size:12.5px;margin-bottom:6px"><b>${i+1}.</b> ${esc2(a)} ${q.pg?'<span style="color:#99a">(p. '+q.pg+')</span>':''}</div>`:"";
-      }).join("")+"</div>":"";
-    printHTML(title,
-      `<h1>${esc2(schoolName)}</h1><div class="sub">${esc2(title)} · ${esc2(src)} · Total Marks: ${paper.length}</div>
-       <div style="display:flex;gap:26px;font-size:13px;margin:14px 0 24px;flex-wrap:wrap"><span>Name: __________________</span><span>Roll No: ______</span><span>Date: __________</span></div>
-       ${paper.map(qHTML).join("")}${key}`);
+  const esc2=s2=>String(s2==null?"":s2).replace(/</g,"&lt;");
+  const rom=i=>["i","ii","iii","iv","v","vi","vii","viii","ix","x","xi","xii","xiii","xiv","xv","xvi","xvii","xviii","xix","xx"][i]||String(i+1);
+  const secHTML=(sec,idx)=>{
+    const head=`<div style="display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 8px;border-bottom:1.5px solid #0f3460;padding-bottom:4px"><b style="font-size:14px">Q. No. ${idx+1}: ${esc2(sec.label)}.</b><span style="font-size:12px;color:#556">(${sec.items.length} × ${sec.each} = ${sec.marks})</span></div>`;
+    let body="";
+    if(sec.k==="blank"){
+      body=(sec.wordBank?`<div style="border:1px dashed #99a;border-radius:8px;padding:6px 10px;margin:4px 0 10px;font-size:12.5px;display:flex;flex-wrap:wrap;gap:6px 18px">${sec.wordBank.map(w=>`<span>${esc2(w)}</span>`).join("")}</div>`:"")+
+        sec.items.map((q,i)=>`<div style="margin:0 0 12px;font-size:13.5px;line-height:1.9"><b>${rom(i)})</b> ${esc2(q.text).replace(/____+/g,"<span style='display:inline-block;min-width:90px;border-bottom:1px solid #333'>&nbsp;</span>")}</div>`).join("");
+    } else if(sec.k==="mcq"){
+      body=sec.items.map((q,i)=>`<div style="margin:0 0 12px;font-size:13.5px"><b>${rom(i)})</b> ${esc2(q.text)}<div style="margin:6px 0 0 22px;display:flex;flex-wrap:wrap;gap:6px 26px">${(q.options||[]).map((o,oi)=>`<span>(${String.fromCharCode(97+oi)}) ◯ ${esc2(o)}</span>`).join("")}</div></div>`).join("");
+    } else if(sec.k==="match"){
+      body=sec.items.map((q,i)=>`<div style="margin:0 0 14px;font-size:13.5px"><b>${rom(i)})</b> ${esc2(q.text)}<table style="margin:8px 0 0 22px;width:auto;border-collapse:collapse"><tr>${q.left.map(l=>`<td style="border:1px solid #ccd3e0;padding:6px 16px;text-align:center">${esc2(l)}</td>`).join("")}</tr><tr>${q.right.map(r2=>`<td style="border:1px solid #ccd3e0;padding:6px 16px;text-align:center">${esc2(r2)}</td>`).join("")}</tr></table><div style="font-size:11px;color:#99a;margin:4px 0 0 22px">Draw lines to match the two rows.</div></div>`).join("");
+    } else if(sec.k==="short"){
+      body=sec.items.map((q,i)=>`<div style="margin:0 0 6px;font-size:13.5px"><b>${rom(i)})</b> ${esc2(q.text)}</div><div style="height:34px;border-bottom:1px dotted #bbb;margin:0 0 10px 22px"></div>`).join("");
+    } else {
+      body=sec.items.map((q,i)=>`<div style="margin:0 0 6px;font-size:13.5px"><b>${rom(i)})</b> ${esc2(q.text)}</div><div style="height:110px;border-bottom:1px dotted #bbb;margin:0 0 12px 22px"></div>`).join("");
+    }
+    return head+body;
   };
+  const printPaper=(p,withKey)=>{ if(!p)return;
+    const cols=p.sections.map((s2,i)=>`<td style="text-align:center">${i+1}</td>`).join("");
+    const mk=p.sections.map(s2=>`<td style="text-align:center">${s2.marks}</td>`).join("");
+    const ob=p.sections.map(()=>`<td style="height:26px"></td>`).join("");
+    const key=withKey?`<div style="page-break-before:always"><h1 style="font-size:16px">Answer Key (teacher copy) · ${esc2(p.title)}</h1>`+p.sections.map((s2,si)=>`<div style="margin:10px 0 4px"><b>Q. No. ${si+1}: ${esc2(s2.label)}</b></div>`+s2.items.map((q,i)=>{
+        let a=q.answer||""; if(q.k==="match"&&q.pairs)a=q.pairs.map(pp=>pp[0]+" → "+pp[1]).join(" ,  ");
+        if(!a&&(s2.k==="long"||s2.k==="short")) a="(teacher's discretion)";
+        return `<div style="font-size:12.5px;margin-bottom:4px"><b>${rom(i)})</b> ${esc2(a)} ${q.pg?'<span style="color:#99a">(p. '+q.pg+')</span>':''}</div>`;
+      }).join("")).join("")+"</div>":"";
+    printHTML(p.title,
+      `<div style="text-align:center;border-bottom:2px solid #0f3460;padding-bottom:10px;margin-bottom:12px">
+         <h1 style="font-size:21px;margin:0">${esc2(schoolName)}</h1>
+         <div style="font-size:13.5px;font-weight:700;margin-top:4px">${esc2(p.bookTitle)}</div>
+         <div style="font-size:11.5px;color:#556">${isEarly(p.cls)?"Early Years Assessment Series":"Primary Assessment Series"} · Time: ${esc2(p.time)} · Total Marks: ${p.total}</div>
+         <div style="font-size:15px;font-weight:800;color:#0f3460;margin-top:8px">${esc2(p.title)} <span style="font-weight:500;color:#556">(${esc2(p.scope)})</span></div>
+       </div>
+       <div style="display:flex;gap:26px;font-size:13px;margin:8px 0 14px;flex-wrap:wrap"><span>Name: ____________________</span><span>Roll No: ______</span><span>Date: __________</span></div>
+       <table style="font-size:12px;margin-bottom:6px"><tr><th style="text-align:left">Question No.</th>${cols}<th style="text-align:center">Total</th></tr>
+         <tr><td><b>Total Marks</b></td>${mk}<td style="text-align:center"><b>${p.total}</b></td></tr>
+         <tr><td><b>Obtained Marks</b></td>${ob}<td></td></tr></table>
+       ${p.sections.map(secHTML).join("")}
+       <div style="margin-top:26px;font-size:10.5px;color:#99a;text-align:center;border-top:1px solid #dde;padding-top:6px">${esc2(p.bookTitle)} — ${esc2(p.title)} — © Azhar Publishers / Book Factory</div>${key}`);
+  };
+  const savePaper=()=>{ if(!paper)return; setSaved(s2=>[paper,...s2.filter(x=>x.id!==paper.id)].slice(0,30)); toast("Paper saved — reprint it any time","💾"); };
+  const applyPreset=name=>{ setTitle(name); if(PG_PRESETS[name]) setCounts(PG_PRESETS[name]); setPaper(null); };
   const addQ=()=>{ const v=nq.trim(); if(!v||!target)return;
-    setQbank(p=>[...p,{id:Date.now(),target,text:v}]); setNq(""); toast("Question added"); };
+    setQbank(p=>[...p,{id:Date.now(),target,k:nk,text:v,answer:na.trim()}]); setNq(""); setNa(""); toast("Question added to "+(PG_TYPES.find(t2=>t2.k===nk)||{}).label); };
   const myQs=qbank.filter(q=>q.target===target);
-  const inRange=bank?bank.items.filter(q=>q.pg>=pgFrom&&q.pg<=pgTo).length:0;
+  const total=PG_TYPES.reduce((a,tp)=>a+(+counts[tp.k]||0)*(+marks[tp.k]||0),0);
+  const avail=(()=>{ const P=(bank||subjMode)?pools():{blank:[],mcq:[],match:[],short:[],long:[]}; const o={}; PG_TYPES.forEach(tp=>{ const seen={}; P[tp.k].forEach(q=>{seen[q.text]=1;}); o[tp.k]=Object.keys(seen).length; }); return o; })();
+  const toggleCh=t2=>{ setPaper(null); setSelCh(cur=>{ const all=chapters.map(c=>c.title); const base=cur||all; const nxt=base.indexOf(t2)>=0?base.filter(x=>x!==t2):base.concat([t2]); return nxt.length===all.length?null:nxt; }); };
   return (
    <div>
     <div className="page-head"><h2>📝 {t("Paper Generator")}</h2>
-      <p>Pick the book and the pages you've taught, press Generate, print. Every paper is built from the book's own pages.</p></div>
+      <p>Choose the book and the lessons you've taught, decide how many fill-in-the-blanks, MCQs, short and long questions you want, and print — in the same pattern as the ready-made Monthly and Term papers.</p></div>
+
     <div className="card">
-      <div className="rc-toolbar" style={{marginBottom:0}}>
-        <select className="tt-sel" value={cls} onChange={e=>{setCls(e.target.value);setPaper(null);}}>{TT_CLASSES.map(c=><option key={c}>{c}</option>)}</select>
-        {early
-          ? <select className="tt-sel" value={bookId} onChange={e=>{setBookId(e.target.value);setPaper(null);}} style={{maxWidth:250}}>
-              {levelBooks.map(b=><option key={b.id} value={b.id} disabled={!QBANK[b.id]}>{b.title}{QBANK[b.id]?"":" (no bank)"}</option>)}
-            </select>
-          : <select className="tt-sel" value={subject} onChange={e=>{setSubject(e.target.value);setPaper(null);}}>{SUBJECT_POOL.primary.map(s2=><option key={s2}>{s2}</option>)}</select>}
-        {early&&bank&&<span style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,fontWeight:700}}>p.
-          <input type="number" className="date-inp" style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgFrom} onChange={e=>{setPgFrom(Math.max(1,+e.target.value||1));setPaper(null);}}/>–
-          <input type="number" className="date-inp" style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgTo} onChange={e=>{setPgTo(Math.min(maxPage,+e.target.value||maxPage));setPaper(null);}}/></span>}
-        <select className="tt-sel" value={count} onChange={e=>setCount(+e.target.value)}>{[5,10,15,20].map(n=><option key={n} value={n}>{n} Qs</option>)}</select>
-        <select className="tt-sel" value={title} onChange={e=>setTitle(e.target.value)}>{["Monthly Test","Class Test","1st Term Exam","2nd Term Exam","3rd Term Exam","Practice Worksheet"].map(x=><option key={x}>{x}</option>)}</select>
-        <button className="btn btn-navy" onClick={generate}>🎲 Generate paper</button>
+      <h3>1 · Book &amp; lessons</h3>
+      <div className="rc-toolbar" style={{marginBottom:10}}>
+        <select className="tt-sel" data-pgcls value={cls} onChange={e=>{setCls(e.target.value);setPaper(null);}}>{TT_CLASSES.map(c=><option key={c}>{c}</option>)}</select>
+        <select className="tt-sel" data-pgbook value={bookId} onChange={e=>{setBookId(e.target.value);}} style={{maxWidth:300}}>
+          {levelBooks.map(b=><option key={b.id} value={b.id} disabled={!QBANK[b.id]}>{b.title}{QBANK[b.id]?"":" (no bank)"}</option>)}
+          {!early&&SUBJECT_POOL.primary.map(s2=><option key={"subj:"+s2} value={"subj:"+s2}>Subject bank · {s2}</option>)}
+        </select>
+        {bank&&<span style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,fontWeight:700}}>pages
+          <input type="number" className="date-inp" data-pgfrom style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgFrom} onChange={e=>{setPgFrom(Math.max(1,+e.target.value||1));setPaper(null);}}/>–
+          <input type="number" className="date-inp" data-pgto style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgTo} onChange={e=>{setPgTo(Math.min(maxPage,+e.target.value||maxPage));setPaper(null);}}/>
+          <span style={{color:'var(--muted)',fontWeight:500}}>of {maxPage}</span></span>}
+        {book&&openBook&&<button className="mini-btn ghost" onClick={()=>openBook(book)}>📖 Open book</button>}
       </div>
-      <p className="hint">{early
-        ?(bank?inRange+" questions available in this range (book has "+maxPage+" pages). Ready-made PDF papers stay on each book's page in the Library.":"Pick a book to begin.")
-        :"Classes One–Five use the subject bank plus questions from that class’s own books (like the Al-Fatah series) where available. Maths and Tables sums are freshly generated every time."}
-        {" "}<button className="link-btn" onClick={()=>setShowAdd(x=>!x)}>{showAdd?"Hide my questions":"➕ Add your own questions"}</button></p>
+      {bank&&chapters.length>0&&<div>
+        <div className="card-flex" style={{marginBottom:6}}><div style={{fontSize:12.5,fontWeight:700,color:'var(--muted)'}}>Lessons / chapters · {chosen.length} of {chapters.length} selected</div>
+          <div style={{display:'flex',gap:6}}><button className="link-btn" data-pgall onClick={()=>{setSelCh(null);setPaper(null);}}>All</button><button className="link-btn" onClick={()=>{setSelCh([]);setPaper(null);}}>None</button></div></div>
+        <div className="filter-bar" data-pgchapters style={{margin:0}}>
+          {chapters.map(c=><span key={c.title} className={"fchip"+((!selCh||selCh.indexOf(c.title)>=0)?" active":"")} title={"p. "+c.from+(c.to>c.from?"–"+c.to:"")+" · "+c.n+" questions"} onClick={()=>toggleCh(c.title)}>{c.title} <span style={{opacity:.6,fontWeight:500}}>p.{c.from}{c.to>c.from?"–"+c.to:""}</span></span>)}
+        </div>
+      </div>}
+      <p className="hint">{bank?scopeItems.length+" questions in the chosen lessons and pages. Ready-made PDF papers stay on each book's page in the Library.":(subjMode?"Subject bank for Class "+cls+" — plus any Alfatah book of that subject. Maths and Tables sums are freshly generated every time.":"Pick a book to begin.")}</p>
+    </div>
+
+    <div className="card">
+      <h3>2 · Paper pattern</h3>
+      <div className="filter-bar" style={{marginBottom:12}}>{Object.keys(PG_PRESETS).map(n=><span key={n} className={"fchip"+(title===n?" active":"")} data-pgpreset={n} onClick={()=>applyPreset(n)}>{n}</span>)}</div>
+      <table className="gtable" data-pgpattern style={{maxWidth:640}}><thead><tr><th>Question type</th><th style={{width:110}}>How many</th><th style={{width:110}}>Marks each</th><th style={{width:90}}>Subtotal</th><th>In bank</th></tr></thead>
+        <tbody>{PG_TYPES.map(tp=><tr key={tp.k}>
+          <td><b>{tp.icon} {tp.label}</b></td>
+          <td><input type="number" className="date-inp" data-pgcount={tp.k} style={{width:72,padding:'6px 8px'}} min={0} max={30} value={counts[tp.k]||0} onChange={e=>{setCounts(c=>Object.assign({},c,{[tp.k]:Math.max(0,Math.min(30,+e.target.value||0))}));setPaper(null);}}/></td>
+          <td><input type="number" className="date-inp" data-pgmarks={tp.k} style={{width:72,padding:'6px 8px'}} min={1} max={20} value={marks[tp.k]||1} onChange={e=>{setMarks(m=>Object.assign({},m,{[tp.k]:Math.max(1,Math.min(20,+e.target.value||1))}));setPaper(null);}}/></td>
+          <td>{(+counts[tp.k]||0)*(+marks[tp.k]||0)}</td>
+          <td style={{fontSize:12,color:(+counts[tp.k]||0)>avail[tp.k]?'var(--red)':'var(--muted)'}}>{avail[tp.k]} available{(+counts[tp.k]||0)>avail[tp.k]?" — only "+avail[tp.k]+" will appear":""}</td></tr>)}
+          <tr><td><b>Total marks</b></td><td></td><td></td><td><b data-pgtotal>{total}</b></td><td></td></tr></tbody></table>
+      <div className="rc-toolbar" style={{marginTop:12,marginBottom:0}}>
+        <input className="date-inp" data-pgname placeholder={"Paper name (default: "+title+")"} value={custom} onChange={e=>setCustom(e.target.value)} style={{minWidth:220}}/>
+        <select className="tt-sel" value={time} onChange={e=>setTime(e.target.value)}>{PG_TIMES.map(x=><option key={x} value={x}>Time: {x}</option>)}</select>
+        <button className="btn btn-navy" data-pggen onClick={generate}>🎲 Generate paper</button>
+      </div>
+      <p className="hint">Long questions are drawn from your own questions first, then from lesson-based prompts (e.g. "Write five sentences about …") since the printed bank has none. {" "}<button className="link-btn" onClick={()=>setShowAdd(x=>!x)}>{showAdd?"Hide my questions":"➕ Add your own questions"}</button></p>
       {showAdd&&<div style={{marginTop:6}}>
         <div className="quick-add" style={{marginBottom:6}}>
-          <input placeholder="Type a question to add…" value={nq} onChange={e=>setNq(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addQ()} style={{maxWidth:520}}/>
-          <button className="btn btn-navy btn-sm" onClick={addQ}>Add</button>
+          <select className="tt-sel" value={nk} onChange={e=>setNk(e.target.value)}>{PG_TYPES.filter(t2=>t2.k!=="match"&&t2.k!=="mcq").map(t2=><option key={t2.k} value={t2.k}>{t2.label}</option>)}</select>
+          <input placeholder={nk==="blank"?"Question with ____ for the blank":"Type a question to add…"} data-pgnq value={nq} onChange={e=>setNq(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addQ()} style={{minWidth:280,flex:1}}/>
+          <input placeholder="Answer (optional)" value={na} onChange={e=>setNa(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addQ()} style={{maxWidth:200}}/>
+          <button className="btn btn-navy btn-sm" data-pgadd onClick={addQ}>Add</button>
         </div>
-        {myQs.map(q=><div key={q.id} className="notice-item"><div style={{fontSize:13}}>{q.text}</div><button className="del-btn" onClick={()=>setQbank(p=>p.filter(x=>x.id!==q.id))}>✕</button></div>)}
+        {myQs.map(q=><div key={q.id} className="notice-item"><div style={{fontSize:13}}><span className="pill" style={{marginRight:8}}>{(PG_TYPES.find(t2=>t2.k===(q.k||"short"))||{}).label}</span>{q.text}{q.answer?<span style={{color:'var(--muted)'}}> — {q.answer}</span>:null}</div><button className="del-btn" onClick={()=>setQbank(p=>p.filter(x=>x.id!==q.id))}>✕</button></div>)}
+        {myQs.length===0&&<div className="empty-row" style={{padding:'8px 0'}}>No questions of your own yet for this book.</div>}
       </div>}
     </div>
-    {paper && <div className="card" style={{borderLeft:'4px solid var(--green)'}}>
-      <div className="card-flex"><h3>✅ {title} · {early?(book?book.title:""):subject+" · Class "+cls} · {paper.length} questions</h3>
+
+    {paper && <div className="card" data-pgpaper style={{borderLeft:'4px solid var(--green)'}}>
+      <div className="card-flex"><h3>✅ {paper.title} · {paper.bookTitle} · {paper.total} marks</h3>
         <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-          <button className="btn btn-navy btn-sm" onClick={()=>printPaper(false)}>🖨️ Print for students</button>
-          <button className="btn btn-outline btn-sm" onClick={()=>printPaper(true)}>🖨️ Print with answers</button>
+          <button className="btn btn-navy btn-sm" onClick={()=>printPaper(paper,false)}>🖨️ Print for students</button>
+          <button className="btn btn-outline btn-sm" onClick={()=>printPaper(paper,true)}>🖨️ Print with answers</button>
           <button className="mini-btn ghost" onClick={generate}>🔄 Shuffle</button>
+          <button className="mini-btn ghost" data-pgsave onClick={savePaper}>💾 Save</button>
         </div></div>
-      {paper.map((q,i)=><div key={i} style={{display:'flex',gap:10,padding:'10px 0',borderBottom:'1px solid var(--border)',fontSize:13.5,alignItems:'flex-start'}}>
-        <b style={{color:'var(--brand)'}}>{i+1}.</b>
-        <div style={{flex:1}}>
-          <div>{q.text}</div>
-          {q.k==="mcq"&&<div style={{marginTop:5,color:'var(--muted)',fontSize:12.5}}>{q.options.map((o,oi)=><span key={oi} style={{marginRight:16}}>◯ {o}</span>)}</div>}
-          {q.k==="match"&&<div style={{marginTop:5,color:'var(--muted)',fontSize:12.5}}>{q.left.join("  ·  ")}  ⇄  {q.right.join("  ·  ")}</div>}
-        </div>
-        {q.pg?<span className="mini" title={q.pt}>p. {q.pg}</span>:null}
+      <div style={{fontSize:12.5,color:'var(--muted)',marginBottom:8}}>{paper.scope} · Time: {paper.time}</div>
+      {paper.sections.map((sec,si)=><div key={si} style={{marginBottom:14}}>
+        <div style={{display:'flex',justifyContent:'space-between',fontWeight:800,borderBottom:'1px solid var(--border)',padding:'6px 0'}}><span>Q. No. {si+1}: {sec.label}</span><span style={{color:'var(--muted)',fontWeight:600}}>{sec.items.length} × {sec.each} = {sec.marks}{sec.items.length<sec.wanted?" · only "+sec.items.length+" of "+sec.wanted+" available":""}</span></div>
+        {sec.wordBank&&<div style={{fontSize:12,color:'var(--muted)',padding:'6px 0'}}>Word bank: {sec.wordBank.join("  ·  ")}</div>}
+        {sec.items.map((q,i)=><div key={i} style={{display:'flex',gap:10,padding:'7px 0',borderBottom:'1px dashed var(--border)',fontSize:13.5,alignItems:'flex-start'}}>
+          <b style={{color:'var(--brand)',minWidth:26}}>{rom(i)})</b>
+          <div style={{flex:1}}>
+            <div>{q.text}</div>
+            {sec.k==="mcq"&&<div style={{marginTop:4,color:'var(--muted)',fontSize:12.5}}>{(q.options||[]).map((o,oi)=><span key={oi} style={{marginRight:16}}>({String.fromCharCode(97+oi)}) {o}</span>)}</div>}
+            {sec.k==="match"&&<div style={{marginTop:4,color:'var(--muted)',fontSize:12.5}}>{q.left.join("  ·  ")}  ⇄  {q.right.join("  ·  ")}</div>}
+          </div>
+          {q.pg?<span className="mini" title={q.pt}>p. {q.pg}</span>:(q.own?<span className="mini">yours</span>:(q.tpl?<span className="mini">prompt</span>:null))}
+        </div>)}
       </div>)}
+    </div>}
+
+    {saved.length>0&&<div className="card">
+      <h3>💾 Saved papers · {saved.length}</h3>
+      <table className="gtable"><thead><tr><th>Paper</th><th>Book</th><th>Scope</th><th>Marks</th><th>Made</th><th></th></tr></thead>
+        <tbody>{saved.map(p=><tr key={p.id}><td><b>{p.title}</b></td><td>{p.bookTitle}</td><td style={{fontSize:12}}>{p.scope}</td><td>{p.total}</td><td>{niceDate(p.made)}</td>
+          <td style={{whiteSpace:'nowrap'}}><button className="mini-btn" onClick={()=>printPaper(p,false)}>🖨️</button> <button className="mini-btn ghost" onClick={()=>printPaper(p,true)}>🔑</button> <button className="mini-btn ghost" onClick={()=>setPaper(p)}>👁</button> <button className="del-btn" onClick={()=>setSaved(s2=>s2.filter(x=>x.id!==p.id))}>✕</button></td></tr>)}</tbody></table>
     </div>}
    </div>
   );
