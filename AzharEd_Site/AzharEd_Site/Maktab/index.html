@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-a add-subject buttons -->
+<!-- build: maktab-2026-09-02-b accounts + photos at enrolment -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -454,6 +454,17 @@ input,select,textarea,button{font-family:inherit}
 .add-inp::placeholder{color:var(--muted);font-weight:600}
 .add-btn{white-space:nowrap;padding:10px 18px;border-radius:9px;font-size:12.5px;font-weight:800;border:none;cursor:pointer;background:var(--navy);color:#fff;box-shadow:0 2px 6px rgba(15,52,96,.18)}
 .add-btn:hover{filter:brightness(1.12)}
+.photo-pick{display:flex;gap:14px;align-items:center;padding:12px 14px;border:1.5px dashed var(--border);border-radius:12px;background:var(--surface2)}
+.photo-pick .av-btn{flex:none}
+.pp-t{font-weight:800;font-size:13.5px;color:var(--brand)}.pp-s{font-size:12px;color:var(--muted);margin-top:2px}
+.hero-av{position:relative;flex:none}
+.hero-cam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.cat-row{display:grid;grid-template-columns:200px 1fr 170px;gap:12px;align-items:center;padding:6px 0;font-size:13px}
+.cat-lb{font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-bar{height:10px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
+.cat-fill{height:100%;background:linear-gradient(90deg,var(--navy),#e94560);border-radius:99px}
+.cat-v{text-align:right;font-weight:800;color:var(--brand)}.cat-v span{color:var(--muted);font-weight:600}
+@media(max-width:640px){.cat-row{grid-template-columns:110px 1fr 120px}}
 .rc-total td{font-weight:800;background:#eef2fb}
 .rc-key{font-size:11px;color:#8a90a0;margin:6px 0 18px;line-height:1.5}
 .rc-sel{border:1px solid #d8dce6;border-radius:6px;padding:4px 8px;font-size:12.5px;background:#fff;color:#17203a}
@@ -799,7 +810,7 @@ const SEARCH_INDEX=(()=> {
 })();
 const PAGE_LINKS=[
   ["dashboard","🏠","Dashboard"],["library","📚","Book Library"],["training","🎓","Teacher Training"],
-  ["gradebook","📊","Class Gradebook"],["reportcards","🧾","Report Cards"],["admin","🏫","School Management"],["profile","👤","Profile & Settings"]
+  ["gradebook","📊","Class Gradebook"],["reportcards","🧾","Report Cards"],["admin","🏫","School Management"],["accounts","💵","Accounts"],["profile","👤","Profile & Settings"]
 ];
 
 function SearchModal({onClose,onOpenBook,go}){
@@ -2070,8 +2081,8 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
   const [staffAttAll,setStaffAttAll]=useLS("sms:staffAtt",{});
   const [attDate,setAttDate]=useState(todayISO());
   const [nf,setNf]=useState({title:"",body:"",on:"",urgent:false});
-  const [sf,setSf]=useState({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,...BLANK_DETAILS});
-  const [stf,setStf]=useState({name:"",role:"Teacher",subject:"",phone:"",salary:40000,cnic:"",qual:"",joined:"",...BLANK_DETAILS});
+  const [sf,setSf]=useState({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,photo:null,...BLANK_DETAILS});
+  const [stf,setStf]=useState({name:"",role:"Teacher",subject:"",phone:"",salary:40000,cnic:"",qual:"",joined:"",photo:null,...BLANK_DETAILS});
   const [stfDetFor,setStfDetFor]=useState(null);
   const [stfDet,setStfDet]=useState(BLANK_DETAILS);
   const [showLeftStaff,setShowLeftStaff]=useState(false);
@@ -2323,7 +2334,7 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     const amt=Math.max(0,Math.min(Number(payAmt)||0,dueOf(payFor)));
     if(amt<=0){setPayFor(null);return;}
     setStudents(p=>p.map(s=>s.id===payFor.id?{...s,paid:s.paid+amt}:s));
-    setPayments(p=>[{id:Date.now(),student:payFor.name,cls:payFor.cls,amount:amt,method:payMethod,date:niceDate(todayISO())},...p]);
+    setPayments(p=>[{id:Date.now(),student:payFor.name,cls:payFor.cls,amount:amt,method:payMethod,date:niceDate(todayISO()),iso:todayISO()},...p]);
     setPayFor(null); toast("Payment recorded — "+rupee(amt),"💰");
   };
   /* who has been absent several school days in a row, counting back from the chosen date */
@@ -2351,15 +2362,15 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
     const clean=v=>String(v||"").trim(), pick=v=>(v==="—"?"":v);
     setStudents(p=>[...p,{id:Date.now(),name:sf.name.trim(),cls:sf.cls,sec:sf.sec,roll:cnt,guardian:sf.guardian,phone:sf.phone,fee:+sf.fee||0,paid:0,
       gender:pick(sf.gender), dob:clean(sf.dob), blood:pick(sf.blood), address:clean(sf.address),
-      health:clean(sf.health), emgName:clean(sf.emgName), emgPhone:clean(sf.emgPhone)}]);
-    setSf({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,...BLANK_DETAILS}); toast("Student enrolled","🎒");};
+      health:clean(sf.health), emgName:clean(sf.emgName), emgPhone:clean(sf.emgPhone), photo:sf.photo||null}]);
+    setSf({name:"",cls:"Playgroup",sec:"A",guardian:"",phone:"",fee:4000,photo:null,...BLANK_DETAILS}); toast("Student enrolled","🎒");};
   const addStaff=()=>{if(!stf.name.trim())return;
     const clean=v=>String(v||"").trim(), pick=v=>(v==="—"?"":v);
     setStaff(p=>[...p,{id:Date.now(),name:stf.name.trim(),role:stf.role,subject:stf.subject||"—",phone:stf.phone,salary:+stf.salary||0,
       cnic:clean(stf.cnic), qual:clean(stf.qual), joined:clean(stf.joined),
       gender:pick(stf.gender), dob:clean(stf.dob), blood:pick(stf.blood), address:clean(stf.address),
-      health:clean(stf.health), emgName:clean(stf.emgName), emgPhone:clean(stf.emgPhone)}]);
-    setStf({name:"",role:"Teacher",subject:"",phone:"",salary:40000,cnic:"",qual:"",joined:"",...BLANK_DETAILS});
+      health:clean(stf.health), emgName:clean(stf.emgName), emgPhone:clean(stf.emgPhone), photo:stf.photo||null}]);
+    setStf({name:"",role:"Teacher",subject:"",phone:"",salary:40000,cnic:"",qual:"",joined:"",photo:null,...BLANK_DETAILS});
     toast("Staff member added","👩‍🏫");};
   /* a teacher who leaves keeps their record — the same idea as students */
   const setStaffLeft=(id,left)=>{ setStaff(p=>p.map(x=>x.id===id?{...x,left:left?todayISO():""}:x));
@@ -2649,6 +2660,20 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <button className="btn btn-navy" onClick={addStudent}>Enroll</button>
         </div>
         <div className="det-grid" style={{marginTop:16,gridTemplateColumns:"repeat(4,1fr)"}}>
+          <div className="field full">
+            <div className="photo-pick">
+              <button type="button" className="av-btn" data-sphoto title={sf.photo?"Change photo":"Add a photo"} onClick={()=>pickPhoto(d=>setSf(f=>({...f,photo:d})))}>
+                <Avatar photo={sf.photo} name={sf.name||"?"} size={64}/></button>
+              <div>
+                <div className="pp-t">{sf.photo?"Photo added":"Student photo"}</div>
+                <div className="pp-s">{sf.photo?"Tap the picture to change it.":"Optional — used on the ID card, report card and class lists."}</div>
+                <div style={{display:'flex',gap:8,marginTop:6}}>
+                  <button type="button" className="mini-btn ghost" onClick={()=>pickPhoto(d=>setSf(f=>({...f,photo:d})))}>📷 {sf.photo?"Change photo":"Add photo"}</button>
+                  {sf.photo && <button type="button" className="mini-btn ghost" onClick={()=>setSf(f=>({...f,photo:null}))}>Remove</button>}
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="field"><label>Gender</label>
             <select data-sgender value={sf.gender} onChange={e=>setSf({...sf,gender:e.target.value})}>{GENDERS.map(g=><option key={g}>{g}</option>)}</select></div>
           <div className="field"><label>Date of birth</label>
@@ -2701,6 +2726,20 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
           <button className="btn btn-navy" onClick={addStaff}>Add</button>
         </div>
         <div className="det-grid" style={{marginTop:16,gridTemplateColumns:"repeat(4,1fr)"}}>
+          <div className="field full">
+            <div className="photo-pick">
+              <button type="button" className="av-btn" data-fphoto title={stf.photo?"Change photo":"Add a photo"} onClick={()=>pickPhoto(d=>setStf(f=>({...f,photo:d})))}>
+                <Avatar photo={stf.photo} name={stf.name||"?"} size={64} bg="#b23048"/></button>
+              <div>
+                <div className="pp-t">{stf.photo?"Photo added":"Staff photo"}</div>
+                <div className="pp-s">{stf.photo?"Tap the picture to change it.":"Optional — used on the staff card and attendance lists."}</div>
+                <div style={{display:'flex',gap:8,marginTop:6}}>
+                  <button type="button" className="mini-btn ghost" onClick={()=>pickPhoto(d=>setStf(f=>({...f,photo:d})))}>📷 {stf.photo?"Change photo":"Add photo"}</button>
+                  {stf.photo && <button type="button" className="mini-btn ghost" onClick={()=>setStf(f=>({...f,photo:null}))}>Remove</button>}
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="field"><label>Qualification</label>
             <input data-fqual placeholder="e.g. B.Ed, M.A. English" value={stf.qual} onChange={e=>setStf({...stf,qual:e.target.value})}/></div>
           <div className="field"><label>CNIC</label>
@@ -3019,7 +3058,9 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       <div className="modal" style={{maxWidth:600}} onClick={e=>e.stopPropagation()}>
         <div className="modal-top">
           <div className="modal-hero" style={{background:"linear-gradient(135deg,#0f3460,#1a4a8a)",height:110}}>
-            <Avatar photo={detFor.photo} name={detFor.name} size={62}/>
+            <button type="button" className="av-btn hero-av" title={detFor.photo?"Change photo":"Add a photo"}
+              onClick={()=>pickPhoto(d=>{ setPhoto("student",detFor.id,d); setDetFor({...detFor,photo:d}); })}>
+              <Avatar photo={detFor.photo} name={detFor.name} size={62}/><span className="hero-cam">📷</span></button>
             <div><h3>{detFor.name}</h3><p>{detFor.cls} · Section {detFor.sec} · Roll {detFor.roll}</p></div>
           </div>
           <button className="modal-x" onClick={()=>setDetFor(null)}>✕</button>
@@ -3061,7 +3102,9 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
       <div className="modal" style={{maxWidth:620}} onClick={e=>e.stopPropagation()}>
         <div className="modal-top">
           <div className="modal-hero" style={{background:"linear-gradient(135deg,#8d1f36,#b23048)",height:110}}>
-            <Avatar photo={stfDetFor.photo} name={stfDetFor.name} size={62} bg="#6f1729"/>
+            <button type="button" className="av-btn hero-av" title={stfDetFor.photo?"Change photo":"Add a photo"}
+              onClick={()=>pickPhoto(d=>{ setPhoto("staff",stfDetFor.id,d); setStfDetFor({...stfDetFor,photo:d}); })}>
+              <Avatar photo={stfDetFor.photo} name={stfDetFor.name} size={62} bg="#6f1729"/><span className="hero-cam">📷</span></button>
             <div><h3>{stfDetFor.name}</h3><p>{stfDetFor.role}{stfDetFor.subject&&stfDetFor.subject!=="—"?" · "+stfDetFor.subject:""}</p></div>
           </div>
           <button className="modal-x" onClick={()=>setStfDetFor(null)}>✕</button>
@@ -3131,6 +3174,136 @@ function AdminSMS({students,setStudents,notices,setNotices,schoolName}){
         </div>
       </div>
     </div>}
+   </div>
+  );
+}
+
+/* ---------- ACCOUNTS — daily expenses & monthly books ---------- */
+const EXP_CATS=["Salaries","Rent","Utilities (electricity, gas, water)","Internet & phone","Stationery & printing","Books & supplies",
+  "Maintenance & repairs","Transport & fuel","Food & refreshments","Events & functions","Marketing","Other"];
+const PAY_METHODS=["Cash","Bank transfer","JazzCash","EasyPaisa","Cheque"];
+/* older fee payments only stored a display date ("5 Jul 2026") — read it back */
+function payIso(p){ if(p.iso) return p.iso; const d=new Date(p.date); return isNaN(d.getTime())?"":d.toISOString().slice(0,10); }
+function monthName(ym){ return new Date(ym+"-15T12:00").toLocaleDateString("en-GB",{month:"long",year:"numeric"}); }
+
+function Accounts({schoolName,user}){
+  const [expenses,setExpenses]=useLS("acc:expenses",[]);
+  const [month,setMonth]=useState(todayISO().slice(0,7));
+  const [catFilter,setCatFilter]=useState("All");
+  const [ef,setEf]=useState({date:todayISO(),cat:EXP_CATS[0],desc:"",amount:"",method:"Cash",payee:""});
+  const payments=LS.get("sms:payments",[]);
+  const staff=LS.get("sms:staff",[]).filter(x=>!x.left);
+  const isAdmin=user.role==="admin";
+
+  const inMonth=e=>(e.date||"").slice(0,7)===month;
+  const monthExp=expenses.filter(inMonth).sort((a,b)=>(b.date+String(b.id)).localeCompare(a.date+String(a.id)));
+  const shown=monthExp.filter(e=>catFilter==="All"||e.cat===catFilter);
+  const totalExp=monthExp.reduce((a,e)=>a+(+e.amount||0),0);
+  const monthPay=payments.filter(p=>payIso(p).slice(0,7)===month);
+  const income=monthPay.reduce((a,p)=>a+(+p.amount||0),0);
+  const net=income-totalExp;
+  const byCat=EXP_CATS.map(c=>[c,monthExp.filter(e=>e.cat===c).reduce((a,e)=>a+(+e.amount||0),0)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const catMax=byCat.length?byCat[0][1]:1;
+  const todayExp=expenses.filter(e=>e.date===todayISO()).reduce((a,e)=>a+(+e.amount||0),0);
+
+  const addExpense=()=>{
+    const amt=+ef.amount||0; if(!ef.desc.trim()&&!ef.payee.trim()){ toast("Write what the money was spent on","⚠️"); return; }
+    if(amt<=0){ toast("Enter the amount","⚠️"); return; }
+    setExpenses(p=>[{id:Date.now(),date:ef.date||todayISO(),cat:ef.cat,desc:ef.desc.trim(),amount:amt,method:ef.method,payee:ef.payee.trim(),by:user.name||""},...p]);
+    setEf({...ef,desc:"",amount:"",payee:""}); toast("Expense recorded — "+rupee(amt),"💸");
+    if((ef.date||"").slice(0,7)!==month) setMonth((ef.date||todayISO()).slice(0,7));
+  };
+  const removeExpense=id=>{ setExpenses(p=>p.filter(e=>e.id!==id)); toast("Entry removed","🗑️"); };
+  /* one click books every active staff member's salary for the month */
+  const paySalaries=()=>{
+    const done=new Set(monthExp.filter(e=>e.cat==="Salaries"&&e.staffId).map(e=>e.staffId));
+    const due=staff.filter(x=>!done.has(x.id)&&(+x.salary||0)>0);
+    if(!due.length){ toast(staff.length?"Every salary for "+monthName(month)+" is already booked":"No staff on the list yet","ℹ️"); return; }
+    const total=due.reduce((a,x)=>a+(+x.salary||0),0);
+    if(!confirm("Book "+due.length+" salaries for "+monthName(month)+" — "+rupee(total)+" in total?")) return;
+    const d=month===todayISO().slice(0,7)?todayISO():month+"-28";
+    setExpenses(p=>[...due.map((x,i)=>({id:Date.now()+i,date:d,cat:"Salaries",desc:"Salary — "+x.name+" ("+x.role+")",amount:+x.salary||0,method:"Cash",payee:x.name,staffId:x.id,by:user.name||""})),...p]);
+    toast(due.length+" salaries booked","💸");
+  };
+  const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
+  const exportCSV=()=>downloadCSV("Expenses_"+month+".csv",
+    [["Date","Category","Description","Payee","Amount","Paid via","Recorded by"],
+     ...monthExp.map(e=>[e.date,e.cat,e.desc,e.payee||"",e.amount,e.method,e.by||""])]);
+  const printStatement=()=>printHTML("Accounts "+month,
+    `<style>.sum td{font-size:13.5px}.sum td.lb{width:220px;background:#f4f7fc;color:#5b657e;font-weight:700}
+      .pos{color:#00734f;font-weight:800}.neg{color:#c1223c;font-weight:800}</style>
+     <h1>${esc(schoolName)}</h1><div class="sub">Monthly Accounts — ${monthName(month)}</div>
+     <table class="sum"><tr><td class="lb">Fee income received</td><td>${rupee(income)} <span style="color:#889;font-size:11px">(${monthPay.length} payments)</span></td></tr>
+       <tr><td class="lb">Total expenses</td><td>${rupee(totalExp)} <span style="color:#889;font-size:11px">(${monthExp.length} entries)</span></td></tr>
+       <tr><td class="lb">Net for the month</td><td class="${net>=0?"pos":"neg"}">${net>=0?"+":"−"} ${rupee(Math.abs(net))}</td></tr></table>
+     <h1 style="font-size:15px;margin-top:18px">Spending by category</h1>
+     <table><tr><th>Category</th><th>Amount</th><th>Share</th></tr>
+     ${byCat.map(([c,v])=>`<tr><td>${esc(c)}</td><td>${rupee(v)}</td><td>${totalExp?Math.round(v/totalExp*100):0}%</td></tr>`).join("")||"<tr><td colspan=3>No expenses recorded</td></tr>"}</table>
+     <h1 style="font-size:15px;margin-top:18px">Expense ledger</h1>
+     <table><tr><th>Date</th><th>Category</th><th>Description</th><th>Payee</th><th>Via</th><th>Amount</th></tr>
+     ${[...monthExp].reverse().map(e=>`<tr><td>${niceDate(e.date)}</td><td>${esc(e.cat)}</td><td>${esc(e.desc)}</td><td>${esc(e.payee||"—")}</td><td>${esc(e.method)}</td><td>${rupee(e.amount)}</td></tr>`).join("")}
+     <tr><th colspan=5>Total</th><th>${rupee(totalExp)}</th></tr></table>
+     <p style="font-size:11px;color:#98a1b5;margin-top:12px">Fee income is taken from payments recorded under School Management → Fees. Printed ${niceDate(todayISO())}.</p>`);
+
+  return (
+   <div>
+    <div className="page-head"><h2>💵 Accounts</h2>
+      <p>Record what the school spends each day, and see it against the fees that came in. Every entry saves on this laptop and in your cloud backup.</p></div>
+    <div className="card-flex" style={{marginBottom:16}}>
+      <h3 style={{marginBottom:0,color:'var(--brand)',fontSize:15,fontWeight:800}}>{monthName(month)}</h3>
+      <div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+        <input type="month" className="date-inp" value={month} max={todayISO().slice(0,7)} onChange={e=>setMonth(e.target.value)}/>
+        <button className="mini-btn ghost" data-paysal onClick={paySalaries} title="Book every staff member's salary for this month in one go">👩‍🏫 Book staff salaries</button>
+        <button className="mini-btn ghost" onClick={printStatement}>🖨️ Monthly statement</button>
+        <button className="mini-btn ghost" onClick={exportCSV}>📥 CSV</button>
+      </div>
+    </div>
+    <div className="kpi-grid">
+      <div className="kpi green"><div className="ic">💰</div><div className="v">{rupee(income)}</div><div className="l">Fee income this month</div></div>
+      <div className="kpi red"><div className="ic">💸</div><div className="v" data-exptotal>{rupee(totalExp)}</div><div className="l">Expenses this month</div></div>
+      <div className={"kpi "+(net>=0?"green":"red")}><div className="ic">{net>=0?"📈":"📉"}</div><div className="v">{net<0?"− ":""}{rupee(Math.abs(net))}</div><div className="l">{net>=0?"Left over":"Short"} this month</div></div>
+      <div className="kpi gold"><div className="ic">📅</div><div className="v">{rupee(todayExp)}</div><div className="l">Spent today</div></div>
+    </div>
+
+    <div className="card">
+      <h3>💸 Record an expense</h3>
+      <div className="det-grid" style={{gridTemplateColumns:"repeat(4,1fr)"}}>
+        <div className="field"><label>Date</label><input type="date" data-edate value={ef.date} max={todayISO()} onChange={e=>setEf({...ef,date:e.target.value})}/></div>
+        <div className="field"><label>Category</label>
+          <select data-ecat value={ef.cat} onChange={e=>setEf({...ef,cat:e.target.value})}>{EXP_CATS.map(c=><option key={c}>{c}</option>)}</select></div>
+        <div className="field"><label>Amount (Rs)</label><input type="number" data-eamt placeholder="0" value={ef.amount} onChange={e=>setEf({...ef,amount:e.target.value})} onKeyDown={e=>e.key==='Enter'&&addExpense()}/></div>
+        <div className="field"><label>Paid via</label>
+          <select value={ef.method} onChange={e=>setEf({...ef,method:e.target.value})}>{PAY_METHODS.map(m=><option key={m}>{m}</option>)}</select></div>
+        <div className="field" style={{gridColumn:"span 2"}}><label>What was it for?</label>
+          <input data-edesc placeholder="e.g. Electricity bill for August · 5 reams of paper · plumber for the washroom" value={ef.desc} onChange={e=>setEf({...ef,desc:e.target.value})} onKeyDown={e=>e.key==='Enter'&&addExpense()}/></div>
+        <div className="field"><label>Paid to (optional)</label>
+          <input data-epayee placeholder="e.g. LESCO, Ahmed Stationers" value={ef.payee} onChange={e=>setEf({...ef,payee:e.target.value})} onKeyDown={e=>e.key==='Enter'&&addExpense()}/></div>
+        <div className="field" style={{display:'flex',alignItems:'flex-end'}}><button className="add-btn" data-eadd style={{width:'100%'}} onClick={addExpense}>＋ Record expense</button></div>
+      </div>
+      <p className="hint">Tip: press Enter in any box to save. Salaries can be booked for everyone at once with the button at the top.</p>
+    </div>
+
+    {byCat.length>0 && <div className="card">
+      <h3>Where the money went · {monthName(month)}</h3>
+      {byCat.map(([c,v])=><div key={c} className="cat-row">
+        <div className="cat-lb">{c}</div>
+        <div className="cat-bar"><div className="cat-fill" style={{width:Math.max(3,Math.round(v/catMax*100))+"%"}}></div></div>
+        <div className="cat-v">{rupee(v)} <span>· {totalExp?Math.round(v/totalExp*100):0}%</span></div>
+      </div>)}
+    </div>}
+
+    <div className="card">
+      <div className="card-flex"><h3>Expense ledger · {shown.length}</h3>
+        <div className="filter-bar" style={{margin:0}}>{["All",...byCat.map(x=>x[0])].map(c=><span key={c} className={"fchip"+(catFilter===c?" active":"")} onClick={()=>setCatFilter(c)}>{c.split(" (")[0]}</span>)}</div></div>
+      <table className="gtable"><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Paid to</th><th>Via</th><th>Amount</th><th></th></tr></thead>
+        <tbody>{shown.map(e=><tr key={e.id}><td style={{whiteSpace:'nowrap'}}>{niceDate(e.date)}</td><td>{e.cat.split(" (")[0]}</td><td>{e.desc||<span style={{color:'var(--muted)'}}>—</span>}</td><td>{e.payee||"—"}</td><td>{e.method}</td>
+          <td><b style={{color:'var(--red)'}}>{rupee(e.amount)}</b></td>
+          <td>{isAdmin && <button className="del-btn" title="Remove this entry" onClick={()=>removeExpense(e.id)}>✕</button>}</td></tr>)}
+          {shown.length===0 && <tr><td colSpan={7} className="empty-row">{monthExp.length===0?"Nothing recorded for "+monthName(month)+" yet — add the first expense above.":"No entries in this category."}</td></tr>}
+          {shown.length>0 && <tr className="rc-total"><td colSpan={5}><b>Total{catFilter!=="All"?" · "+catFilter.split(" (")[0]:""}</b></td><td><b>{rupee(shown.reduce((a,e)=>a+(+e.amount||0),0))}</b></td><td></td></tr>}
+        </tbody></table>
+      <p className="hint">Fee income comes from payments recorded under School Management → Fees, so the two sides of the month stay in step without double entry.</p>
+    </div>
    </div>
   );
 }
@@ -3238,11 +3411,11 @@ function App(){
     {id:"training",label:"Teacher Training",icon:"🎓"},
     {id:"gradebook",label:"Class Gradebook",icon:"📊"},
     {id:"reportcards",label:"Report Cards",icon:"🧾"},
-    ...(user.role==='admin'?[{section:"Administration"},{id:"admin",label:"School Management",icon:"🏫"}]:[]),
+    ...(user.role==='admin'?[{section:"Administration"},{id:"admin",label:"School Management",icon:"🏫"},{id:"accounts",label:"Accounts",icon:"💵"}]:[]),
     {section:"Account"},
     {id:"profile",label:"Profile & Settings",icon:"👤"},
   ];
-  const titles={dashboard:"Dashboard",library:"Book Library",papergen:"Paper Generator",planner:"Lesson Planner",diary:"Homework Diary",certs:"Certificates",training:"Teacher Training",gradebook:"Class Gradebook",reportcards:"Report Cards",admin:"School Management",profile:"Profile & Settings"};
+  const titles={dashboard:"Dashboard",library:"Book Library",papergen:"Paper Generator",planner:"Lesson Planner",diary:"Homework Diary",certs:"Certificates",training:"Teacher Training",gradebook:"Class Gradebook",reportcards:"Report Cards",admin:"School Management",accounts:"Accounts",profile:"Profile & Settings"};
   const render=()=>({
     dashboard:<Dashboard user={user} go={go} openBook={setAppBook} notices={notices}/>,
     library:<Library openBook={setAppBook} favs={favs} setFavs={setFavs} onFocus={setFocusBook}/>,
@@ -3254,6 +3427,7 @@ function App(){
     gradebook:<Gradebook students={students} goReport={goReport}/>,
     reportcards:<ReportCard prefill={rcPrefill} students={students} schoolName={schoolName}/>,
     admin:<AdminSMS students={students} setStudents={setStudents} notices={notices} setNotices={setNotices} schoolName={schoolName}/>,
+    accounts:<Accounts schoolName={schoolName} user={user}/>,
     profile:<Profile user={user} theme={theme} setTheme={setTheme} schoolName={schoolName} setSchoolName={setSchoolName}/>
   }[page]||<Dashboard user={user} go={go} openBook={setAppBook} notices={notices}/>);
   return (
