@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-d owner dashboard -->
+<!-- build: maktab-2026-09-02-e activity log -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -933,8 +933,25 @@ async function cloudSignIn(email, pw){
   const user = {id:uid,email:(data.user.email||email),name:(prof.full_name||email),role:prof.role,school:schoolName,school_id:prof.school_id,cloud:true,owner:!!prof.is_owner};
   await authCacheSave(email, pw, user);
   /* note the sign-in in the school's own history (the owner's dashboard reads it) — never blocks the login */
-  try{ SB.rpc("log_signin",{p_device:(navigator.platform||"")+" · "+(navigator.userAgent.match(/(Chrome|Safari|Firefox|Edg)\/[\d.]+/)||[""])[0]}).then(function(){},function(){}); }catch(e){}
+  logActivity("signin");
+  try{ localStorage.setItem(PING_KEY,String(Date.now())); }catch(e){}
   return {user: user};
+}
+/* ---------- ACTIVITY LOG — every laptop that opens MAKTAB says hello once in a while ----------
+   Testers often stay signed in for weeks, so counting password sign-ins alone hides them.
+   Each device gets a random id (no personal data) so the owner can count laptops, not just accounts. */
+const DEVICE_ID=(()=>{ try{ let d=localStorage.getItem("azhared2:deviceId"); if(!d){ d=Math.random().toString(36).slice(2,10)+Date.now().toString(36); localStorage.setItem("azhared2:deviceId",d); } return d; }catch(e){ return "anon"; } })();
+const PING_KEY="azhared2:lastPing";
+const PING_EVERY=4*60*60*1000;   /* one "open" per device per 4 hours */
+function deviceLabel(){ return (navigator.platform||"")+" · "+(navigator.userAgent.match(/(Chrome|Safari|Firefox|Edg)\/[\d.]+/)||[""])[0]; }
+function logActivity(kind){
+  try{ if(!window.SB||!navigator.onLine) return;
+    SB.rpc("log_activity",{p_device:deviceLabel(),p_device_id:DEVICE_ID,p_kind:kind}).then(function(){},function(){}); }catch(e){}
+}
+function maybePing(user){
+  if(!user||!user.cloud||user.offline) return;
+  try{ const last=+localStorage.getItem(PING_KEY)||0; if(Date.now()-last<PING_EVERY) return; localStorage.setItem(PING_KEY,String(Date.now())); }catch(e){}
+  logActivity("open");
 }
 function Auth({onLogin}){
   const [email,setEmail]=useState(""),[pw,setPw]=useState(""),[err,setErr]=useState(""),[busy,setBusy]=useState(false);
@@ -3228,9 +3245,11 @@ function OwnerDash({user}){
   const t=(data&&data.totals)||{};
   const schools=(data&&data.schools)||[], accounts=(data&&data.accounts)||[], signins=(data&&data.signins)||[];
   const byDay=(data&&data.signins_by_day)||[], backups=(data&&data.backups)||[], views=(data&&data.sample_views)||[], quotes=(data&&data.sample_quotes)||[];
-  /* fill the day chart so quiet days show as empty bars, not gaps */
-  const dayMap={}; byDay.forEach(x=>{dayMap[x.day]=+x.n;});
+  const devices=(data&&data.devices)||[];
+  /* fill the day chart so quiet days show as empty bars, not gaps — bars are laptops seen that day, not clicks */
+  const dayMap={}; byDay.forEach(x=>{dayMap[x.day]=+(x.devices!=null?x.devices:x.n);});
   const series=Array.from({length:days},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(days-1-i)); const k=d.toISOString().slice(0,10); return {k,n:dayMap[k]||0,lbl:d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})}; });
+  const kindLbl=k=>k==="signin"?"Signed in":k==="open"?"Opened app":(k||"—");
   const maxN=Math.max(1,...series.map(x=>x.n));
   const esc=x=>String(x==null?"":x).replace(/</g,"&lt;");
   const exportSchools=()=>downloadCSV("MAKTAB_schools_"+todayISO()+".csv",
@@ -3252,48 +3271,56 @@ function OwnerDash({user}){
     <div className="kpi-grid" data-ownerkpis>
       {kpi("","🏫",t.schools||0,"Schools")}
       {kpi("","👥",t.accounts||0,"Accounts")}
-      {kpi("green","🔑",t.signins_7d||0,"Sign-ins · last 7 days")}
+      {kpi("green","💻",t.devices_7d||0,"Laptops active · 7 days")}
+      {kpi("","📅",t.devices_today||0,"Laptops active today")}
+      {kpi("","🔑",t.signins_7d||0,"Password sign-ins · 7 days")}
       {kpi("gold","☁️",t.backups_7d||0,"Backups · last 7 days")}
       {kpi("","📚",t.views_7d||0,"Sample views · last 7 days")}
       {kpi("red","💬",t.quotes_all||0,"Quote requests")}
     </div>
 
     <div className="sms-tabs">
-      {[["schools","🏫","Schools"],["signins","🔑","Sign-ins"],["backups","☁️","Backups"],["samples","📚","e-Samples"]].map(([id,ic,l])=>
+      {[["schools","🏫","Schools"],["signins","💻","Activity"],["backups","☁️","Backups"],["samples","📚","e-Samples"]].map(([id,ic,l])=>
         <div key={id} className={"sms-tab"+(tab===id?" active":"")} onClick={()=>setTab(id)}>{ic} {l}</div>)}
     </div>
 
     {tab==="schools" && <div className="card">
       <h3>Schools · {schools.length}</h3>
-      <table className="gtable"><thead><tr><th>School</th><th>Status</th><th>Accounts</th><th>Last sign-in</th><th>7d sign-ins</th><th>Last backup</th><th>7d backups</th><th>Laptops</th></tr></thead>
+      <table className="gtable"><thead><tr><th>School</th><th>Status</th><th>Accounts</th><th>Last sign-in</th><th>7d laptops</th><th>Last backup</th><th>7d backups</th><th>Laptops</th></tr></thead>
         <tbody>{schools.map(sc=>{ const [lbl,col]=health(sc); return <tr key={sc.id}>
           <td><b>{sc.name}</b><div style={{fontSize:11,color:'var(--muted)'}}>{sc.admins||"no admin yet"} · since {when(sc.created_at).split(" ")[0]} {when(sc.created_at).split(" ")[1]}</div></td>
           <td><span className="pill" style={{background:col+"22",color:col}}>{lbl}</span></td>
           <td>{sc.accounts}</td>
           <td title={when(sc.last_signin)}>{ago(sc.last_signin)}</td>
-          <td>{sc.signins_7d}</td>
+          <td>{sc.devices_7d!=null?sc.devices_7d:sc.signins_7d}</td>
           <td title={when(sc.last_backup)}>{ago(sc.last_backup)}</td>
           <td>{sc.backups_7d}</td>
           <td>{sc.devices||0}</td></tr>; })}
           {schools.length===0 && <tr><td colSpan={8} className="empty-row">{busy?"Loading…":"No schools yet."}</td></tr>}
         </tbody></table>
-      <p className="hint">Green = someone at the school signed in this week. Amber = within a month. Red = longer, or never. "Laptops" counts the distinct devices that have backed up.</p>
+      <p className="hint">Green = someone at the school used MAKTAB this week. Amber = within a month. Red = longer, or never. "7d laptops" = distinct laptops that opened the app this week; "Laptops" = distinct devices that have ever backed up.</p>
     </div>}
 
     {tab==="signins" && <div>
       <div className="card">
-        <div className="card-flex"><h3>Sign-ins per day</h3>
+        <div className="card-flex"><h3>Laptops using MAKTAB per day</h3>
           <div className="filter-bar" style={{margin:0}}>{[7,14,30,60].map(d=><span key={d} className={"fchip"+(days===d?" active":"")} onClick={()=>{setDays(d);load(d);}}>{d} days</span>)}</div></div>
         <div className="bars">{series.map(x=><div key={x.k} className="bar-col" title={x.lbl+": "+x.n}>
           <div className="bar-fill" style={{height:Math.round(x.n/maxN*100)+"%"}}></div>
           <div className="bar-n">{x.n||""}</div>
           <div className="bar-l">{x.lbl.split(" ")[0]}</div></div>)}</div>
-        <p className="hint">{t.signins_all||0} sign-ins recorded in total. This history lives in your own database, so it never expires.</p>
+        <p className="hint">Each bar is the number of different laptops/phones that opened MAKTAB that day — whether they typed a password or were already signed in. Several people sharing one account still count separately. {t.signins_all||0} events recorded in total; this history lives in your own database and never expires.</p>
       </div>
-      <div className="card"><h3>Recent sign-ins</h3>
-        <table className="gtable"><thead><tr><th>When</th><th>Who</th><th>Role</th><th>School</th><th>Device</th></tr></thead>
-          <tbody>{signins.map((l,i)=><tr key={i}><td title={when(l.at)}>{ago(l.at)}</td><td>{l.email}</td><td>{l.role}</td><td>{l.school||"—"}</td><td style={{fontSize:11.5,color:'var(--muted)'}}>{l.device||"—"}</td></tr>)}
-            {signins.length===0 && <tr><td colSpan={5} className="empty-row">No sign-ins recorded yet — the log starts from the next time anyone signs in.</td></tr>}</tbody></table>
+      <div className="card"><h3>Laptops seen · {devices.length}</h3>
+        <table className="gtable" data-ownerdevices><thead><tr><th>Laptop</th><th>Account</th><th>School</th><th>First seen</th><th>Last seen</th><th>Opens</th></tr></thead>
+          <tbody>{devices.map((d,i)=><tr key={i}><td><b>{d.device||"—"}</b><div style={{fontSize:10.5,color:'var(--muted)'}}>#{String(d.device_id||"").slice(0,6)}</div></td><td>{d.email}</td><td>{d.school||"—"}</td><td title={when(d.first_seen)}>{when(d.first_seen).split(" ").slice(0,2).join(" ")}</td><td title={when(d.last_seen)}>{ago(d.last_seen)}</td><td>{d.opens}</td></tr>)}
+            {devices.length===0 && <tr><td colSpan={6} className="empty-row">No laptops seen yet — each one reports the next time it opens MAKTAB.</td></tr>}</tbody></table>
+        <p className="hint">One row per device. This is the truest count of how many people are actually using MAKTAB, even when they share a login.</p>
+      </div>
+      <div className="card"><h3>Recent activity</h3>
+        <table className="gtable"><thead><tr><th>When</th><th>What</th><th>Who</th><th>Role</th><th>School</th><th>Device</th></tr></thead>
+          <tbody>{signins.map((l,i)=><tr key={i}><td title={when(l.at)}>{ago(l.at)}</td><td>{kindLbl(l.kind)}</td><td>{l.email}</td><td>{l.role}</td><td>{l.school||"—"}</td><td style={{fontSize:11.5,color:'var(--muted)'}}>{l.device||"—"}{l.device_id?<span style={{opacity:.6}}> #{String(l.device_id).slice(0,6)}</span>:null}</td></tr>)}
+            {signins.length===0 && <tr><td colSpan={6} className="empty-row">Nothing recorded yet — the log starts from the next time anyone opens MAKTAB.</td></tr>}</tbody></table>
       </div>
       <div className="card"><h3>All accounts · {accounts.length}</h3>
         <table className="gtable"><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>School</th><th>Last sign-in</th><th>Created</th></tr></thead>
@@ -3537,6 +3564,12 @@ function App(){
   useEffect(()=>{ if(!user||!user.cloud) return;
     const t=setTimeout(()=>{ maybeAutoBackup(user); }, 12000);
     return ()=>clearTimeout(t); },[user]);
+  /* tell the cloud this laptop is in use — on open, on coming back to the tab, on coming back online */
+  useEffect(()=>{ if(!user||!user.cloud) return;
+    const t=setTimeout(()=>maybePing(user),3000);
+    const onVis=()=>{ if(document.visibilityState==="visible") maybePing(user); };
+    document.addEventListener("visibilitychange",onVis); window.addEventListener("online",onVis);
+    return ()=>{ clearTimeout(t); document.removeEventListener("visibilitychange",onVis); window.removeEventListener("online",onVis); }; },[user&&user.id]);
   useEffect(()=>{ document.documentElement.dataset.theme=theme; },[theme]);
   useEffect(()=>{ document.documentElement.lang=lang==="ur"?"ur":"en"; },[lang]);
   /* Pro runs without its own service worker */
