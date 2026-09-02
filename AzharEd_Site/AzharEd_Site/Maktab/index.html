@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-g paper generator -->
+<!-- build: maktab-2026-09-02-h paper generator -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -1745,11 +1745,15 @@ function PaperGen({schoolName,openBook}){
   useEffect(()=>{ const ok=bankBooks.some(b=>b.id===bookId)||(!early&&subjMode);
     if(!ok){ const first=bankBooks[0]; setBookId(first?first.id:(early?"":"subj:English")); } },[cls]);
   const chapters=useMemo(()=>pgChapters(bank),[bookId]);
-  const [selCh,setSelCh]=useState(null);           /* null = every lesson */
+  const [lesFrom,setLesFrom]=useState(-1);         /* -1 = whole book */
+  const [lesTo,setLesTo]=useState(-1);
   const maxPage=bank?Math.max.apply(null,bank.items.map(q=>q.pg)):1;
   const [pgFrom,setPgFrom]=useState(1);
   const [pgTo,setPgTo]=useState(999);
-  useEffect(()=>{ setPgFrom(1); setPgTo(maxPage); setSelCh(null); setPaper(null); },[bookId]);
+  useEffect(()=>{ setPgFrom(1); setPgTo(maxPage); setLesFrom(-1); setLesTo(-1); setPaper(null); },[bookId]);
+  /* choosing lessons sets the page range; pages stay editable for fine-tuning */
+  const pickLessons=(a,b)=>{ setPaper(null); if(a<0){ setLesFrom(-1); setLesTo(-1); setPgFrom(1); setPgTo(maxPage); return; }
+    const hi=b<0||b<a?a:b; setLesFrom(a); setLesTo(hi); setPgFrom(chapters[a].from); setPgTo(chapters[hi].to); };
   const [title,setTitle]=useLS("pg:title","Monthly Test");
   const [custom,setCustom]=useLS("pg:custom","");
   const [time,setTime]=useLS("pg:time","1 Hour");
@@ -1771,9 +1775,8 @@ function PaperGen({schoolName,openBook}){
     return Math.random()<0.5?{text:a+" × "+b+" = ____",answer:String(a*b)}:{text:(a*b)+" ÷ "+a+" = ____",answer:String(b)};
   };
   /* which lessons / pages are in play */
-  const chosen=chapters.filter(c=>!selCh||selCh.indexOf(c.title)>=0);
-  const inScope=q=>{ if(q.pg<pgFrom||q.pg>pgTo) return false;
-    if(selCh){ const t=(q.pt||("Page "+q.pg)).replace(/^باب:\s*/,""); return selCh.indexOf(t)>=0; } return true; };
+  const chosen=chapters.filter(c=>c.to>=pgFrom&&c.from<=pgTo);   /* lessons that fall in the page range */
+  const inScope=q=>q.pg>=pgFrom&&q.pg<=pgTo;
   const scopeItems=bank?bank.items.filter(inScope):[];
   const hasBlank=q=>/____/.test(typeof q==="string"?q:(q&&q.text)||"");
   const pools=()=>{
@@ -1823,7 +1826,7 @@ function PaperGen({schoolName,openBook}){
       sections.push(sec);
     });
     if(!sections.length){ toast("Nothing to put on the paper — check the counts","⚠️"); return; }
-    const scope=bank?(selCh&&chosen.length<chapters.length?chosen.map(c=>c.title).slice(0,3).join(" · ")+(chosen.length>3?" …":""):(pgFrom>1||pgTo<maxPage?"Pages "+pgFrom+"–"+pgTo:"Full book")):"Class "+cls;
+    const scope=bank?(pgFrom<=1&&pgTo>=maxPage?"Full book":(chosen.length===1?chosen[0].title:(chosen.length>1&&chosen.length<chapters.length?chosen[0].title+" – "+chosen[chosen.length-1].title:"Pages "+pgFrom+"–"+pgTo))):"Class "+cls;
     const p={id:Date.now(),title:(custom||title),time,cls,bookId,bookTitle:subjMode?subject+" · Class "+cls:(book.title+" · "+cls),subject:subjectName,scope,sections,total:sections.reduce((a,s2)=>a+s2.marks,0),made:todayISO()};
     setPaper(p);
     toast(short_.length?"Paper ready — not enough "+short_.join(", ").toLowerCase()+" in the bank":"Paper ready — "+p.total+" marks","📝");
@@ -1877,7 +1880,6 @@ function PaperGen({schoolName,openBook}){
   const myQs=qbank.filter(q=>q.target===target);
   const total=PG_TYPES.reduce((a,tp)=>a+(+counts[tp.k]||0)*(+marks[tp.k]||0),0);
   const avail=(()=>{ const P=(bank||subjMode)?pools():{blank:[],blank2:[],mcq:[],match:[],short:[],long:[]}; const o={}; PG_TYPES.forEach(tp=>{ const seen={}; P[tp.k].concat(tp.k==="blank"?P.blank2:[]).forEach(q=>{seen[q.base||q.text]=1;}); o[tp.k]=Object.keys(seen).length; }); return o; })();
-  const toggleCh=t2=>{ setPaper(null); setSelCh(cur=>{ const all=chapters.map(c=>c.title); const base=cur||all; const nxt=base.indexOf(t2)>=0?base.filter(x=>x!==t2):base.concat([t2]); return nxt.length===all.length?null:nxt; }); };
   return (
    <div>
     <div className="page-head"><h2>📝 {t("Paper Generator")}</h2>
@@ -1891,20 +1893,24 @@ function PaperGen({schoolName,openBook}){
           {levelBooks.map(b=><option key={b.id} value={b.id} disabled={!QBANK[b.id]}>{b.title}{QBANK[b.id]?"":" (no bank)"}</option>)}
           {!early&&SUBJECT_POOL.primary.map(s2=><option key={"subj:"+s2} value={"subj:"+s2}>Subject bank · {s2}</option>)}
         </select>
-        {bank&&<span style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,fontWeight:700}}>pages
-          <input type="number" className="date-inp" data-pgfrom style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgFrom} onChange={e=>{setPgFrom(Math.max(1,+e.target.value||1));setPaper(null);}}/>–
-          <input type="number" className="date-inp" data-pgto style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgTo} onChange={e=>{setPgTo(Math.min(maxPage,+e.target.value||maxPage));setPaper(null);}}/>
-          <span style={{color:'var(--muted)',fontWeight:500}}>of {maxPage}</span></span>}
         {book&&openBook&&<button className="mini-btn ghost" onClick={()=>openBook(book)}>📖 Open book</button>}
       </div>
-      {bank&&chapters.length>0&&<div>
-        <div className="card-flex" style={{marginBottom:6}}><div style={{fontSize:12.5,fontWeight:700,color:'var(--muted)'}}>Lessons / chapters · {chosen.length} of {chapters.length} selected</div>
-          <div style={{display:'flex',gap:6}}><button className="link-btn" data-pgall onClick={()=>{setSelCh(null);setPaper(null);}}>All</button><button className="link-btn" onClick={()=>{setSelCh([]);setPaper(null);}}>None</button></div></div>
-        <div className="filter-bar" data-pgchapters style={{margin:0}}>
-          {chapters.map(c=><span key={c.title} className={"fchip"+((!selCh||selCh.indexOf(c.title)>=0)?" active":"")} title={"p. "+c.from+(c.to>c.from?"–"+c.to:"")+" · "+c.n+" questions"} onClick={()=>toggleCh(c.title)}>{c.title} <span style={{opacity:.6,fontWeight:500}}>p.{c.from}{c.to>c.from?"–"+c.to:""}</span></span>)}
-        </div>
+      {bank&&chapters.length>0&&<div className="rc-toolbar" style={{marginBottom:6}}>
+        <span style={{fontSize:13,fontWeight:700}}>Lessons</span>
+        <select className="tt-sel" data-pglesfrom value={lesFrom} onChange={e=>pickLessons(+e.target.value,lesTo)} style={{maxWidth:280}}>
+          <option value={-1}>Whole book · all {chapters.length} lessons</option>
+          {chapters.map((c,i)=><option key={i} value={i}>{i+1}. {c.title} (p.{c.from}{c.to>c.from?"–"+c.to:""})</option>)}
+        </select>
+        {lesFrom>=0&&<span style={{fontSize:13,fontWeight:700}}>to</span>}
+        {lesFrom>=0&&<select className="tt-sel" data-pglesto value={lesTo} onChange={e=>pickLessons(lesFrom,+e.target.value)} style={{maxWidth:280}}>
+          {chapters.map((c,i)=>i>=lesFrom?<option key={i} value={i}>{i+1}. {c.title} (p.{c.from}{c.to>c.from?"–"+c.to:""})</option>:null)}
+        </select>}
+        <span style={{display:'inline-flex',alignItems:'center',gap:6,fontSize:13,fontWeight:700,marginLeft:4}}>pages
+          <input type="number" className="date-inp" data-pgfrom style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgFrom} onChange={e=>{setPgFrom(Math.max(1,+e.target.value||1));setPaper(null);}}/>–
+          <input type="number" className="date-inp" data-pgto style={{width:62,padding:'6px 8px'}} min={1} max={maxPage} value={pgTo} onChange={e=>{setPgTo(Math.min(maxPage,+e.target.value||maxPage));setPaper(null);}}/>
+          <span style={{color:'var(--muted)',fontWeight:500}}>of {maxPage}</span></span>
       </div>}
-      <p className="hint">{bank?scopeItems.length+" questions in the chosen lessons and pages. Ready-made PDF papers stay on each book's page in the Library.":(subjMode?"Subject bank for Class "+cls+" — plus any Alfatah book of that subject. Maths and Tables sums are freshly generated every time.":"Pick a book to begin.")}</p>
+      <p className="hint">{bank?scopeItems.length+" questions in "+(chosen.length===chapters.length?"the whole book":chosen.length+" lesson"+(chosen.length===1?"":"s")+" (pages "+pgFrom+"–"+pgTo+")")+". Ready-made PDF papers stay on each book's page in the Library.":(subjMode?"Subject bank for Class "+cls+" — plus any Alfatah book of that subject. Maths and Tables sums are freshly generated every time.":"Pick a book to begin.")}</p>
     </div>
 
     <div className="card">
