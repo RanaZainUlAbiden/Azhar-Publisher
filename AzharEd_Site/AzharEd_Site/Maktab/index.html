@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-f paper generator -->
+<!-- build: maktab-2026-09-02-g paper generator -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -1777,12 +1777,16 @@ function PaperGen({schoolName,openBook}){
   const scopeItems=bank?bank.items.filter(inScope):[];
   const hasBlank=q=>/____/.test(typeof q==="string"?q:(q&&q.text)||"");
   const pools=()=>{
-    const P={blank:[],mcq:[],match:[],short:[],long:[]};
+    const P={blank:[],blank2:[],mcq:[],match:[],short:[],long:[]};
     if(bank){
       scopeItems.forEach(q=>{
         const c=Object.assign({},q);
         if(q.k==="match"&&q.pairs) P.match.push(c);
-        else if(q.k==="mcq"){ P.mcq.push(c); if(hasBlank(q.text)) P.blank.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt}); else P.short.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt}); }
+        else if(q.k==="mcq"){ P.mcq.push(c);
+          if(hasBlank(q.text)) P.blank.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt,base:q.text});
+          else { P.short.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt,base:q.text});
+            /* books whose bank has no written blanks: turn the MCQ into "question ____" with a word bank */
+            if(q.answer&&String(q.answer).length<=30) P.blank2.push({text:String(q.text).replace(/[?؟:]\s*$/,"")+" ____",answer:q.answer,pg:q.pg,pt:q.pt,base:q.text}); } }
         else if(hasBlank(q.text)) P.blank.push(c);
         else P.short.push(c);
       });
@@ -1809,8 +1813,8 @@ function PaperGen({schoolName,openBook}){
     const P=pools(), sections=[], short_=[], seen={};   /* a question appears once on the whole paper */
     PG_TYPES.forEach(tp=>{
       const n=+counts[tp.k]||0; if(!n) return;
-      const pool=shuffle(P[tp.k].slice()); const items=[];
-      pool.forEach(q=>{ if(!seen[q.text]&&items.length<n){ seen[q.text]=1; items.push(q); } });
+      const pool=shuffle(P[tp.k].slice()).concat(tp.k==="blank"?shuffle(P.blank2.slice()):[]); const items=[];
+      pool.forEach(q=>{ const key=q.base||q.text; if(!seen[key]&&items.length<n){ seen[key]=1; items.push(q); } });
       if(!items.length) { short_.push(tp.label); return; }
       items.forEach(q=>{ if(q.k==="match"&&q.pairs){ q.left=q.pairs.map(p=>p[0]); q.right=shuffle(q.pairs.map(p=>p[1]).slice()); } });
       const each=+marks[tp.k]||1;
@@ -1872,7 +1876,7 @@ function PaperGen({schoolName,openBook}){
     setQbank(p=>[...p,{id:Date.now(),target,k:nk,text:v,answer:na.trim()}]); setNq(""); setNa(""); toast("Question added to "+(PG_TYPES.find(t2=>t2.k===nk)||{}).label); };
   const myQs=qbank.filter(q=>q.target===target);
   const total=PG_TYPES.reduce((a,tp)=>a+(+counts[tp.k]||0)*(+marks[tp.k]||0),0);
-  const avail=(()=>{ const P=(bank||subjMode)?pools():{blank:[],mcq:[],match:[],short:[],long:[]}; const o={}; PG_TYPES.forEach(tp=>{ const seen={}; P[tp.k].forEach(q=>{seen[q.text]=1;}); o[tp.k]=Object.keys(seen).length; }); return o; })();
+  const avail=(()=>{ const P=(bank||subjMode)?pools():{blank:[],blank2:[],mcq:[],match:[],short:[],long:[]}; const o={}; PG_TYPES.forEach(tp=>{ const seen={}; P[tp.k].concat(tp.k==="blank"?P.blank2:[]).forEach(q=>{seen[q.base||q.text]=1;}); o[tp.k]=Object.keys(seen).length; }); return o; })();
   const toggleCh=t2=>{ setPaper(null); setSelCh(cur=>{ const all=chapters.map(c=>c.title); const base=cur||all; const nxt=base.indexOf(t2)>=0?base.filter(x=>x!==t2):base.concat([t2]); return nxt.length===all.length?null:nxt; }); };
   return (
    <div>
