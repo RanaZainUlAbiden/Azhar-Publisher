@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-b accounts + photos at enrolment -->
+<!-- build: maktab-2026-09-02-c grading key on report card -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -1373,6 +1373,35 @@ function scaleText(sc){
   const s=sortScale(sc);
   return s.map((b,i)=>{ const hi=i===0?100:(+s[i-1].min||0)-1; return (b.label||"—")+" = "+(+b.min||0)+"–"+hi+"%"; }).join(" · ");
 }
+/* One grading-key editor, used by the Gradebook and the Report Card — same stored scale, so the two never disagree. */
+function GradeKeyEditor({gscale,setGscale,onClose}){
+  const setBand=(i,k,v)=>setGscale(gscale.map((b,idx)=>idx===i?{...b,[k]:k==="min"?Math.max(0,Math.min(100,+v||0)):v}:b));
+  const addBand=()=>{ const lows=sortScale(gscale); const last=lows[lows.length-1];
+    setGscale([...gscale,{min:Math.max(0,(+last.min||10)-10),label:""}]);
+    setTimeout(()=>{const els=document.querySelectorAll("[data-gband]");const l=els[els.length-1];l&&l.focus();},50); };
+  const removeBand=i=>{ if(gscale.length<=1){toast("Keep at least one grade","⚠️");return;} setGscale(gscale.filter((_,idx)=>idx!==i)); };
+  const resetScale=()=>{ setGscale(GRADE_DEFAULT); toast("Grading key reset","↩️"); };
+  return (
+    <div className="card no-print" style={{background:'var(--surface2)',margin:'6px 0 16px'}}>
+      <div className="card-flex"><h3 style={{fontSize:14,marginBottom:0}}>🎯 Grading key</h3>
+        {onClose && <button className="mini-btn ghost" onClick={onClose}>✕ Close</button>}</div>
+      <p className="hint" style={{marginTop:6,marginBottom:10}}>Your school's own grades and the percentage each one starts at. Used everywhere marks are graded — the gradebook, printed report cards and CSV exports.</p>
+      <table className="gtable" style={{maxWidth:430}}>
+        <thead><tr><th style={{width:120}}>Grade</th><th>From %</th><th className="rc-gut no-print"></th></tr></thead>
+        <tbody>
+          {gscale.map((b,i)=><tr key={i}>
+            <td><input className="tt-inp" data-gband style={{textAlign:'left',fontWeight:800}} placeholder="e.g. A+" value={b.label} onChange={e=>setBand(i,'label',e.target.value)}/></td>
+            <td><input className="tt-inp" type="number" min="0" max="100" style={{maxWidth:90}} value={b.min} onChange={e=>setBand(i,'min',e.target.value)}/></td>
+            <td className="rc-gut">{gscale.length>1 && <button className="rc-x" title="Remove this grade" onClick={()=>removeBand(i)}>−</button>}</td>
+          </tr>)}
+          <tr className="rc-add" onClick={addBand}><td colSpan={2}>＋&nbsp; Add a grade</td><td className="rc-gut"></td></tr>
+        </tbody>
+      </table>
+      <p className="hint" style={{marginTop:10}}><b>Now reads:</b> {scaleText(gscale)} · anything below the lowest band shows as “—”.</p>
+      <button className="mini-btn ghost" onClick={resetScale}>↩️ Reset to A / B / C / D</button>
+    </div>
+  );
+}
 const SUBJECT_POOL={
   early:["English","Urdu","Counting","General Knowledge","Rhymes","Art","Story Time"],
   primary:["English","Urdu","Maths","Islamiat","General Knowledge","Science","Social Studies","Computer","Nazra Quran","Art","P.E."]
@@ -1406,12 +1435,6 @@ function Gradebook({students,goReport}){
   const total=r=>sheet.subjects.reduce((a,s)=>a+(+r.m[s]||0),0);
   const pct=r=>sheet.subjects.length?Math.round(total(r)/(sheet.subjects.length*100)*100):0;
   const grade=p=>gradeFor(gscale,p);
-  const setBand=(i,k,v)=>setGscale(gscale.map((b,idx)=>idx===i?{...b,[k]:k==="min"?Math.max(0,Math.min(100,+v||0)):v}:b));
-  const addBand=()=>{ const lows=sortScale(gscale); const last=lows[lows.length-1];
-    setGscale([...gscale,{min:Math.max(0,(+last.min||10)-10),label:""}]);
-    setTimeout(()=>{const els=document.querySelectorAll("[data-gband]");const l=els[els.length-1];l&&l.focus();},50); };
-  const removeBand=i=>{ if(gscale.length<=1){toast("Keep at least one grade","⚠️");return;} setGscale(gscale.filter((_,idx)=>idx!==i)); };
-  const resetScale=()=>{ setGscale(GRADE_DEFAULT); toast("Grading key reset","↩️"); };
   const exportCSV=()=>downloadCSV("Gradebook_"+cls+"_"+sec+"_"+term.replace(/ /g,"_")+".csv",
     [["Student",...sheet.subjects,"Total","%","Grade","Position","Class Average"],...sheet.rows.map(r=>[r.name,...sheet.subjects.map(s=>r.m[s]||0),total(r),pct(r)+"%",grade(pct(r))[0],rankOf(r),classAvg+"%"])]);
   const classAvg=sheet.rows.length?Math.round(sheet.rows.reduce((a,r)=>a+pct(r),0)/sheet.rows.length):0;
@@ -1434,23 +1457,7 @@ function Gradebook({students,goReport}){
         {sheet.rows.length>0&&<span style={{fontSize:12,fontWeight:800,color:'var(--muted)',marginLeft:'auto'}}>{sheet.rows.length} students · avg {classAvg}% · 🏆 {sheet.rows.filter(r=>pct(r)>=80).length} · 📉 {sheet.rows.filter(r=>pct(r)>0&&pct(r)<50).length}</span>}
       </div>
 
-      {keyEdit && <div className="card" style={{background:'var(--surface2)',margin:'6px 0 16px'}}>
-        <h3 style={{fontSize:14}}>🎯 Grading key</h3>
-        <p className="hint" style={{marginTop:2,marginBottom:10}}>Your school's own grades and the percentage each one starts at. Used everywhere marks are graded — this gradebook, printed report cards and CSV exports.</p>
-        <table className="gtable" style={{maxWidth:430}}>
-          <thead><tr><th style={{width:120}}>Grade</th><th>From %</th><th className="rc-gut no-print"></th></tr></thead>
-          <tbody>
-            {gscale.map((b,i)=><tr key={i}>
-              <td><input className="tt-inp" data-gband style={{textAlign:'left',fontWeight:800}} placeholder="e.g. A+" value={b.label} onChange={e=>setBand(i,'label',e.target.value)}/></td>
-              <td><input className="tt-inp" type="number" min="0" max="100" style={{maxWidth:90}} value={b.min} onChange={e=>setBand(i,'min',e.target.value)}/></td>
-              <td className="rc-gut">{gscale.length>1 && <button className="rc-x" title="Remove this grade" onClick={()=>removeBand(i)}>−</button>}</td>
-            </tr>)}
-            <tr className="rc-add" onClick={addBand}><td colSpan={2}>＋&nbsp; Add a grade</td><td className="rc-gut"></td></tr>
-          </tbody>
-        </table>
-        <p className="hint" style={{marginTop:10}}><b>Now reads:</b> {scaleText(gscale)} · anything below the lowest band shows as “—”.</p>
-        <button className="mini-btn ghost" onClick={resetScale}>↩️ Reset to A / B / C / D</button>
-      </div>}
+      {keyEdit && <GradeKeyEditor gscale={gscale} setGscale={setGscale}/>}
       <details className="disc"><summary>＋ Add a student or subject</summary>
         <div className="disc-b">
         <div className="quick-add" style={{marginBottom:8}}>
@@ -1521,8 +1528,9 @@ function ReportCard({prefill,students,schoolName}){
     setTimeout(()=>{const els=document.querySelectorAll("[data-rcname]"); const last=els[els.length-1]; last&&last.focus();},50); };
   const removeSub=i=>setSubs(p=>p.length<=1?p:p.filter((_,idx)=>idx!==i));
   const setSkill=(i,v)=>setSkills(p=>p.map((s,idx)=>idx===i?[s[0],v]:s));
-  /* the school's grading key, set in the Gradebook — shared so cards match the sheet */
-  const gscale=LS.get("gradeScale",GRADE_DEFAULT);
+  /* the school's grading key — the same one the Gradebook uses, editable from either place */
+  const [gscale,setGscale]=useLS("gradeScale",GRADE_DEFAULT);
+  const [keyEdit,setKeyEdit]=useState(false);
   const grade=p=>gradeFor(gscale,p)[0];
   const totGot=subs.reduce((a,s)=>a+(+s.got||0),0), totMax=subs.reduce((a,s)=>a+(+s.total||0),0);
   const pct=totMax?Math.round(totGot/totMax*100):0;
@@ -1624,7 +1632,9 @@ function ReportCard({prefill,students,schoolName}){
           <tr className="rc-total"><td>Total</td><td className="c">{totMax}</td><td className="c">{totGot}</td><td className="c">{pct}% · {grade(pct)}</td><td className="rc-gut no-print"></td></tr>
         </tbody>
       </table>
-      <div className="rc-key">Grading key: {scaleText(gscale)}</div>
+      <div className="rc-key">Grading key: {scaleText(gscale)}
+        <button className="link-btn no-print" data-rckeyedit style={{marginLeft:8,fontSize:11}} onClick={()=>setKeyEdit(v=>!v)}>{keyEdit?"✕ close":"✎ edit key"}</button></div>
+      {keyEdit && <GradeKeyEditor gscale={gscale} setGscale={setGscale} onClose={()=>setKeyEdit(false)}/>}
       <div style={{fontSize:13,fontWeight:800,color:'#0f3460',margin:'4px 0 8px'}}>Skills &amp; Personal Development</div>
       <table className="rc-table">
         <thead><tr><th>Area</th><th className="c" style={{width:210}}>Rating</th></tr></thead>
