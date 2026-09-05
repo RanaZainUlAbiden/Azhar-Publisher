@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>MAKTAB مکتب — Azhar Publishers</title>
-<!-- build: maktab-2026-09-02-j chapters -->
+<!-- build: maktab-2026-09-05-a saturday -->
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
@@ -1543,7 +1543,9 @@ function ReportCard({prefill,students,schoolName}){
   const [remarks,setRemarks]=useState((saved&&saved.remarks)||"A cheerful and hardworking child, making steady progress and taking part enthusiastically in class activities.");
   useEffect(()=>{ setSaved({info,subs,skills,remarks}); },[info,subs,skills,remarks]);
   useEffect(()=>{ if(prefill){ const s=students.find(x=>x.name===prefill.student);
-    setInfo({...base.info,photo:(s&&s.photo)||null,father:s&&s.guardian?("Mr. "+s.guardian):"",roll:s?String(s.roll):""});
+    /* attendance comes straight from the register, the same as picking the student from the list */
+    const a=s?attFor(s.id):{present:0,total:0};
+    setInfo({...base.info,photo:(s&&s.photo)||null,father:s&&s.guardian?("Mr. "+s.guardian):"",roll:s?String(s.roll):"",present:a.total?String(a.present):"",total:a.total?String(a.total):""});
     setSubs(base.subs); } },[prefill]);
   const ratings=["Excellent","Very Good","Good","Satisfactory","Needs Support"];
   const upd=(k,v)=>setInfo(p=>({...p,[k]:v}));
@@ -1804,9 +1806,9 @@ function PaperGen({schoolName,openBook}){
         if(q.k==="match"&&q.pairs) P.match.push(c);
         else if(q.k==="mcq"){ P.mcq.push(c);
           if(hasBlank(q.text)) P.blank.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt,base:q.text});
-          else { P.short.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt,base:q.text});
+          else { P.short.push({text:q.text,answer:q.answer,pg:q.pg,pt:q.pt,base:q.text,derived:true});
             /* books whose bank has no written blanks: turn the MCQ into "question ____" with a word bank */
-            if(q.answer&&String(q.answer).length<=30) P.blank2.push({text:String(q.text).replace(/[?؟:]\s*$/,"")+" ____",answer:q.answer,pg:q.pg,pt:q.pt,base:q.text}); } }
+            if(q.answer&&String(q.answer).length<=30) P.blank2.push({text:String(q.text).replace(/[?؟:]\s*$/,"")+" ____",answer:q.answer,pg:q.pg,pt:q.pt,base:q.text,derived:true}); } }
         else if(hasBlank(q.text)) P.blank.push(c);
         else P.short.push(c);
       });
@@ -1831,10 +1833,14 @@ function PaperGen({schoolName,openBook}){
     if(!bank&&!subjMode){ toast("Pick a book first","ℹ️"); return; }
     if(bank&&!scopeItems.length){ toast("No questions in those lessons / pages — widen the range","⚠️"); return; }
     const P=pools(), sections=[], short_=[], seen={};   /* a question appears once on the whole paper */
+    /* pass 1: every section takes questions written for it; pass 2: shortfalls are filled from MCQs turned into blanks / short questions,
+       so a thin range never starves the MCQ section just because the blanks were built from the same MCQs */
+    const picked={}; const take=(k,pool)=>{ const n=+counts[k]||0; const items=picked[k]||(picked[k]=[]); shuffle(pool.slice()).forEach(q=>{ const key=q.base||q.text; if(!seen[key]&&items.length<n){ seen[key]=1; items.push(q); } }); };
+    PG_TYPES.forEach(tp=>{ if(+counts[tp.k]) take(tp.k,P[tp.k].filter(q=>!q.derived)); });
+    PG_TYPES.forEach(tp=>{ if(+counts[tp.k]) take(tp.k,(tp.k==="blank"?P.blank2:P[tp.k]).filter(q=>q.derived)); });
     PG_TYPES.forEach(tp=>{
       const n=+counts[tp.k]||0; if(!n) return;
-      const pool=shuffle(P[tp.k].slice()).concat(tp.k==="blank"?shuffle(P.blank2.slice()):[]); const items=[];
-      pool.forEach(q=>{ const key=q.base||q.text; if(!seen[key]&&items.length<n){ seen[key]=1; items.push(q); } });
+      const items=picked[tp.k]||[];
       if(!items.length) { short_.push(tp.label); return; }
       items.forEach(q=>{ if(q.k==="match"&&q.pairs){ q.left=q.pairs.map(p=>p[0]); q.right=shuffle(q.pairs.map(p=>p[1]).slice()); } });
       const each=+marks[tp.k]||1;
@@ -2186,8 +2192,8 @@ function Diary({schoolName}){
      ${entry.note?`<p style="font-size:12.5px;margin-top:14px"><b>Note for parents:</b> ${esc(entry.note)}</p>`:""}`);
   const waShare=()=>{
     if(!filled.length){toast("Write some homework first ✍️");return;}
-    const lines=filled.map(su=>"• "+su+": "+entry.rows[su]).join("\\n");
-    const msg="📔 *Homework — "+cls+" "+sec+"* ("+niceDate(date)+")\\n"+schoolName+"\\n\\n"+lines+(entry.note?"\\n\\n📌 "+entry.note:"");
+    const lines=filled.map(su=>"• "+su+": "+entry.rows[su]).join("\n");
+    const msg="📔 *Homework — "+cls+" "+sec+"* ("+niceDate(date)+")\n"+schoolName+"\n\n"+lines+(entry.note?"\n\n📌 "+entry.note:"");
     window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
   };
   return (
@@ -2272,7 +2278,7 @@ const DEMO_NOTICES = ["Parent–Teacher Meeting","Fee Due Reminder","New Term Be
 })();
 const FEE_HISTORY = [["Feb",312],["Mar",298],["Apr",335],["May",321],["Jun",348]];
 const TT_TIMES = ["8:30","9:15","10:00","11:15","12:00"];
-const TT_DAYS = ["Mon","Tue","Wed","Thu","Fri"];
+const TT_DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat"];
 const EY_SUBJECTS = ["English","Urdu","Counting","G. Knowledge","Rhymes","Art","Story","Free Play"];
 const PR_SUBJECTS = ["English","Urdu","Maths","Islamiat","G. Knowledge","Science","Social Studies","Computer","Nazra Quran","Art","P.E."];
 function genTimetable(cls){
